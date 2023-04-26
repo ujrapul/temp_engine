@@ -1,0 +1,4 @@
+TEMP_ENGINE
+
+For now make a build dir, and run "cmake .." inside of it and then run "make".
+I know absolutely awful...
