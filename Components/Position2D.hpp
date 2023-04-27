@@ -11,8 +11,8 @@ namespace Temp
   {
     struct Position2D
     {
-      std::array<float, MAX_ENTITIES> x;
-      std::array<float, MAX_ENTITIES> y;
+      float x;
+      float y;
       std::size_t size;
     };
 

@@ -10,14 +10,14 @@ namespace Temp
 {
   namespace EntityManager
   {
-    using EntityQueue = std::queue<Entity, std::array<Entity, MAX_ENTITIES>>;
+    using EntityQueue = std::queue<Entity>;
     using SignatureArray = std::array<Signature, MAX_ENTITIES>;
 
     struct Data
     {
-      EntityQueue availableEntities{};
-      SignatureArray signatures{};
-      uint32_t livingEntityCount{};
+      EntityQueue availableEntities;
+      SignatureArray signatures;
+      uint32_t livingEntityCount;
     };
 
     void CreateEntity(EntityQueue& availableEntities, uint32_t& livingEntityCount)
@@ -55,10 +55,10 @@ namespace Temp
 
     Signature GetSignature(SignatureArray& signatures, Entity entity)
     {
-		  assert(entity < MAX_ENTITIES && "Entity out of range.");
+      assert(entity < MAX_ENTITIES && "Entity out of range.");
 
-		  // Get this entity's signature from the array
-		  return signatures[entity];
+      // Get this entity's signature from the array
+      return signatures[entity];
     }
   }
 }

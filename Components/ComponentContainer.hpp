@@ -13,12 +13,12 @@ namespace Temp
 
       struct Data
       {
-        Position2D pos;
+        std::array<Position2D, MAX_ENTITIES> pos;
       };
 
       Math::Vec2 getPosition2D(Entity entity, const Data* data)
       {
-        return {data->pos.x[entity], data->pos.y[entity]};
+        return {data->pos[entity].x, data->pos[entity].y};
       }
     }
   }

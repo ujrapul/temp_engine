@@ -34,3 +34,6 @@
 # Folders
 build/
 .vscode/
+
+# Miscellaneous
+.DS_Store

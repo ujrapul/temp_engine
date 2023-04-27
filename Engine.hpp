@@ -1,20 +1,32 @@
 #include "Components/ComponentContainer.hpp"
-#include "bits/stdc++.h"
+#include "EntityManager.hpp"
+#include <iostream>
 
 namespace Temp
 {
   namespace Engine
   {
-    void Run()
+    void Update(Temp::Component::Container::Data* componentData,
+                Temp::EntityManager::Data* entityData)
     {
-      Temp::Component::Container::Data *componentData =
-          (Temp::Component::Container::Data *)malloc(sizeof(Temp::Component::Container::Data));
       std::cout << "Position: "
         << Temp::Component::Container::getPosition2D(MAX_ENTITIES/2, componentData).x
         << " "
         << Temp::Component::Container::getPosition2D(MAX_ENTITIES/2, componentData).y
+        << " "
+        << rand() % 999999
         << std::endl;
-      free(componentData);
+    }
+  
+    void Run()
+    {
+      Temp::Component::Container::Data componentData;
+      Temp::EntityManager::Data entityData;
+      
+      while (true)
+      {
+        Update(&componentData, &entityData);
+      }
     }
   }
 }
