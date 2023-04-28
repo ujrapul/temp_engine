@@ -19,14 +19,23 @@ namespace Temp
       SignatureArray signatures;
       uint32_t livingEntityCount;
     };
+    
+    void InitData(EntityQueue& availableEntities)
+    {
+      for (Entity e = 0; e < MAX_ENTITIES; ++e) {
+        availableEntities.push(e);
+      }
+    }
 
-    void CreateEntity(EntityQueue& availableEntities, uint32_t& livingEntityCount)
+    Entity CreateEntity(EntityQueue& availableEntities, uint32_t& livingEntityCount)
     {
       assert(livingEntityCount < MAX_ENTITIES && "Too many entities in existence.");
 
       Entity id = availableEntities.front();
       availableEntities.pop();
       ++livingEntityCount;
+      
+      return id;
     }
 
     void DestroyEntity(

@@ -6,19 +6,21 @@ namespace Temp
   {
     namespace Container
     {
-      enum class ComponentType
-      {
-        POSITION2D = 0,
-      };
-
       struct Data
       {
-        std::array<Position2D, MAX_ENTITIES> pos;
+        std::array<Math::Vec2, MAX_ENTITIES> pos;
       };
 
-      Math::Vec2 getPosition2D(Entity entity, const Data* data)
+      Math::Vec2 getPosition2D(Entity entity, const Data& data)
       {
-        return {data->pos[entity].x, data->pos[entity].y};
+        return data.pos[entity];
+      }
+      
+      void setPosition2D(Entity entity,
+                         std::array<Math::Vec2, MAX_ENTITIES>& positions,
+                         Math::Vec2 newPos)
+      {
+        positions[entity] = newPos;
       }
     }
   }

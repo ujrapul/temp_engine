@@ -8,6 +8,12 @@ namespace Temp
     {
       float x;
       float y;
+      
+      void operator=(const Vec2& other)
+      {
+        x = other.x;
+        y = other.y;
+      }
     };
 
     struct Vec3

@@ -5,9 +5,7 @@
 
 namespace Temp
 {
-  using ComponentType = std::uint8_t;
-
-  const ComponentType MAX_COMPONENTS = 32;
+  const std::uint8_t MAX_COMPONENTS = 32;
 
   // Used to track which components an entity has
   using Signature = std::bitset<MAX_COMPONENTS>;

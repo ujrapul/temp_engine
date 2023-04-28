@@ -11,6 +11,7 @@ set ( SRC
 )
 set ( HEADER
   "Components/Component.hpp"
+  "Components/ComponentType.hpp"
   "Components/ComponentContainer.hpp"
   "Components/DataManipulator.hpp"
   "Components/Position2D.hpp"
