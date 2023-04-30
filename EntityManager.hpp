@@ -15,9 +15,9 @@ namespace Temp
 
     struct Data
     {
-      EntityQueue availableEntities;
-      SignatureArray signatures;
-      uint32_t livingEntityCount;
+      EntityQueue availableEntities{};
+      SignatureArray signatures{};
+      uint32_t livingEntityCount{};
     };
     
     void InitData(EntityQueue& availableEntities)

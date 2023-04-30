@@ -1,4 +1,4 @@
-#include "Position2D.hpp"
+#include "ComponentData.hpp"
 
 namespace Temp
 {
@@ -8,19 +8,26 @@ namespace Temp
     {
       struct Data
       {
-        std::array<Math::Vec2, MAX_ENTITIES> pos;
+        Component::ArrayData<Math::Vec2> positions;
       };
 
-      Math::Vec2 getPosition2D(Entity entity, const Data& data)
+      Math::Vec2 getPosition2D(Entity entity,
+                               Component::ArrayData<Math::Vec2>& positions)
       {
-        return data.pos[entity];
+        return Component::Get(positions, entity);
       }
       
-      void setPosition2D(Entity entity,
-                         std::array<Math::Vec2, MAX_ENTITIES>& positions,
+      void setPosition2D(Component::ArrayData<Math::Vec2>& positions,
+                         Entity entity,
                          Math::Vec2 newPos)
       {
-        positions[entity] = newPos;
+        Component::Set(positions, entity, newPos);
+//        positions->entityToIndex[entity]
+      }
+      
+      void Init(Data* data)
+      {
+        Component::Init(data->positions);
       }
     }
   }

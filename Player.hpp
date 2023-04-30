@@ -8,7 +8,7 @@ namespace Temp
   {
     struct Data
     {
-      Entity entity;
+      Entity entity{};
     };
 
     Math::Vec2 getPosition(Entity entity)
