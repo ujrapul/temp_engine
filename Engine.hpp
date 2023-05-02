@@ -4,27 +4,71 @@
 #include <iostream>
 #include <chrono>
 
-// TODO: Add events for when entity is destroyed
-//       Function pointers should work for this
-//       Maybe change states to Enter, Run, Leave???
-
 namespace Temp
 {
-  namespace Scene
+  namespace Coordinator
   {
-    enum class State : uint8_t
-    {
-      CONSTRUCTION = 0,
-      RUNNING      = 1,
-      DESTRUCTION  = 2,
-    };
-    
     struct Data
     {
       EntityManager::Data entityData;
       Component::Container::Data componentData;
+    };
+    
+    Entity CreateEntity(Data& data)
+    {
+      return EntityManager::CreateEntity(data.entityData.availableEntities,
+                                         data.entityData.livingEntityCount);
+    }
+    
+    void DestroyEntity(Data& data, Entity entity)
+    {
+      Component::Container::EntityDestroyed(data.componentData, entity);
+      EntityManager::DestroyEntity(data.entityData.availableEntities,
+                                   data.entityData.livingEntityCount,
+                                   data.entityData.signatures,
+                                   entity);
+    }
+    
+    void Init(Data& data)
+    {
+      EntityManager::InitData(data.entityData.availableEntities);
+      Component::Container::Init(data.componentData);
+    }
+    
+    template<typename T>
+    void AddComponent(Data& data, Entity entity, T component, Component::Type type)
+    {
+      Signature sig = EntityManager::GetSignature(data.entityData.signatures, entity);
+      sig.set(static_cast<size_t>(type));
+      EntityManager::SetSignature(data.entityData.signatures,
+                                  entity,
+                                  sig);
+      Component::Container::setPosition2D(data.componentData.positions,
+                                          entity,
+                                          component);
+    }
+    
+    template<typename T>
+    void UpdateComponent(Data& data, Entity entity, T component, Component::Type type)
+    {
+      if (EntityManager::GetSignature(data.entityData.signatures, entity).test(static_cast<size_t>(type)))
+        Component::Container::Get<T>(data, entity) = component;
+    }
+  }
+  namespace Scene
+  {
+    enum class State : uint8_t
+    {
+      ENTER = 0,
+      RUN   = 1,
+      LEAVE = 2,
+    };
+    
+    struct Data
+    {
+      Coordinator::Data coordinator;
       std::array<Entity, MAX_ENTITIES> entities;
-      State state{State::CONSTRUCTION};
+      State state{State::ENTER};
       Data* nextScene{nullptr};
       void (*Construct)(Scene::Data*){nullptr};
       void (*Update)(Scene::Data*, float){nullptr};
@@ -33,26 +77,26 @@ namespace Temp
     
     namespace TestLevel
     {
-      size_t UpdatePositions(Component::ArrayData<Math::Vec2>& positions,
+      size_t UpdatePositions(Scene::Data* data,
                              float deltaTime,
                              size_t& index)
       {
         static float currTime = 0;
         currTime += deltaTime;
-        index %= positions.mapping.size;
+        index %= data->coordinator.componentData.positions.mapping.size;
         if (currTime < 0.0166666) {
           return 0;
         }
         currTime = 0;
 
-        Entity entity = positions.mapping.indexToEntity[index];
+        Entity entity = data->coordinator.componentData.positions.mapping.indexToEntity[index];
         system("clear");
         std::cout << "Entity: "
           << entity
           << " Position: "
-          << Component::Container::getPosition2D(entity, positions).x
+          << Component::Container::getPosition2D(entity, data->coordinator.componentData.positions).x
           << " "
-          << Component::Container::getPosition2D(entity, positions).y
+          << Component::Container::getPosition2D(entity, data->coordinator.componentData.positions).y
           << std::endl;
         ++index;
         
@@ -62,17 +106,9 @@ namespace Temp
       void Construct1(Scene::Data* data)
       {
         for (auto& entity : data->entities) {
-          entity = EntityManager::CreateEntity(data->entityData.availableEntities,
-                                               data->entityData.livingEntityCount);
-          Signature sig;
+          entity = Coordinator::CreateEntity(data->coordinator);
           if (entity % 3 == 0) {
-            sig.set(static_cast<size_t>(Component::Type::POSITION2D));
-            EntityManager::SetSignature(data->entityData.signatures,
-                                        entity,
-                                        sig);
-            Component::Container::setPosition2D(data->componentData.positions,
-                                                entity,
-                                                {rand() % 999 / 1000.f, rand() % 999 / 1000.f});
+            Coordinator::AddComponent(data->coordinator, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f}, Component::Type::POSITION2D);
           }
         }
       }
@@ -80,17 +116,9 @@ namespace Temp
       void Construct2(Scene::Data* data)
       {
         for (auto& entity : data->entities) {
-          entity = EntityManager::CreateEntity(data->entityData.availableEntities,
-                                               data->entityData.livingEntityCount);
-          Signature sig;
+          entity = Coordinator::CreateEntity(data->coordinator);
           if (entity % 5 == 0) {
-            sig.set(static_cast<size_t>(Component::Type::POSITION2D));
-            EntityManager::SetSignature(data->entityData.signatures,
-                                        entity,
-                                        sig);
-            Component::Container::setPosition2D(data->componentData.positions,
-                                                entity,
-                                                {rand() % 999 / 1000.f, rand() % 999 / 1000.f});
+            Coordinator::AddComponent(data->coordinator, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f}, Component::Type::POSITION2D);
           }
         }
       }
@@ -98,29 +126,23 @@ namespace Temp
       void Update1(Scene::Data* data, float deltaTime)
       {
         static size_t index = 0;
-        if (UpdatePositions(data->componentData.positions, deltaTime, index) >= data->componentData.positions.mapping.size) {
-          data->state = State::DESTRUCTION;
+        if (UpdatePositions(data, deltaTime, index) >= data->coordinator.componentData.positions.mapping.size) {
+          data->state = State::LEAVE;
         }
       }
       
       void Update2(Scene::Data* data, float deltaTime)
       {
         static size_t index = 0;
-        if (UpdatePositions(data->componentData.positions, deltaTime, index) >= data->componentData.positions.mapping.size) {
-          data->state = State::DESTRUCTION;
+        if (UpdatePositions(data, deltaTime, index) >= data->coordinator.componentData.positions.mapping.size) {
+          data->state = State::LEAVE;
         }
       }
       
       void Destruct(Scene::Data* data)
       {
         for (auto& entity : data->entities) {
-          if (EntityManager::GetSignature(data->entityData.signatures, entity).test(static_cast<size_t>(Component::Type::POSITION2D))) {
-            Component::Remove(data->componentData.positions, entity);
-          }
-          EntityManager::DestroyEntity(data->entityData.availableEntities,
-                                       data->entityData.livingEntityCount,
-                                       data->entityData.signatures,
-                                       entity);
+          Coordinator::DestroyEntity(data->coordinator, entity);
           entity = 0;
         }
       }
@@ -128,8 +150,7 @@ namespace Temp
       Data* Create1()
       {
         Data* scene = new Data();
-        EntityManager::InitData(scene->entityData.availableEntities);
-        Component::Container::Init(scene->componentData);
+        Coordinator::Init(scene->coordinator);
         scene->Construct = Construct1;
         scene->Update = Update1;
         scene->Destruct = Destruct;
@@ -139,8 +160,7 @@ namespace Temp
       Data* Create2()
       {
         Data* scene = new Data();
-        EntityManager::InitData(scene->entityData.availableEntities);
-        Component::Container::Init(scene->componentData);
+        Coordinator::Init(scene->coordinator);
         scene->Construct = Construct2;
         scene->Update = Update2;
         scene->Destruct = Destruct;
@@ -173,21 +193,21 @@ namespace Temp
         auto start = std::chrono::high_resolution_clock::now();
         
         switch (currentScene->state) {
-          case Scene::State::CONSTRUCTION:
+          case Scene::State::ENTER:
             if (currentScene->Construct)
               currentScene->Construct(currentScene);
-            currentScene->state = Scene::State::RUNNING;
+            currentScene->state = Scene::State::RUN;
             break;
-          case Scene::State::RUNNING:
+          case Scene::State::RUN:
             if (currentScene->Update)
               currentScene->Update(currentScene, deltaTime);
             break;
-          case Scene::State::DESTRUCTION:
+          case Scene::State::LEAVE:
             if (currentScene->Destruct)
               currentScene->Destruct(currentScene);
-            currentScene->state = Scene::State::CONSTRUCTION;
+            currentScene->state = Scene::State::ENTER;
             currentScene = currentScene->nextScene;
-            currentScene->state = Scene::State::CONSTRUCTION;
+            currentScene->state = Scene::State::ENTER;
             break;
           default:
             break;

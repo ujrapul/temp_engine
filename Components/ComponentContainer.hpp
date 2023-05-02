@@ -1,4 +1,5 @@
 #include "ComponentData.hpp"
+#include "ComponentType.hpp"
 
 namespace Temp
 {
@@ -28,6 +29,23 @@ namespace Temp
       void Init(Data& data)
       {
         Component::Init(data.positions);
+      }
+      
+      void EntityDestroyed(Data& data, Entity entity)
+      {
+        Component::EntityDestroyed(data.positions, entity);
+      }
+      
+      template<typename T>
+      T& Get(Data& data, Entity entity, Type type)
+      {
+        switch (type)
+        {
+          case Type::POSITION2D:
+            return Component::Get(data.positions, entity);
+          default:
+            break;
+        }
       }
     }
   }

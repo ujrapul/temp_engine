@@ -88,5 +88,13 @@ namespace Temp
 
       return data.array[data.mapping.entityToIndex[entity]];
     }
+    
+    template<typename T>
+    void EntityDestroyed(ArrayData<T>& data, Entity entity)
+    {
+      if (data.mapping.entityToIndex[entity] < MAX_ENTITIES) {
+        Remove<T>(data, entity);
+      }
+    }
   }
 }
