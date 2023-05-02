@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Entity.hpp"
-#include "Math.hpp"
+#include "Engine/Entity.hpp"
+#include "Engine/Math.hpp"
 #include <array>
 #include <cassert>
 

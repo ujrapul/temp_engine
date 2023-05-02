@@ -1,3 +1,4 @@
+#include "Engine.hpp"
 #include "Scene.hpp"
 #include <chrono>
 
@@ -5,20 +6,8 @@ namespace Temp
 {
   namespace Engine
   {
-    struct Data
+    void Run(Engine::Data& engine)
     {
-      std::vector<Scene::Data*> scenes;
-    };
-    
-    void Run()
-    {
-      Engine::Data engine;
-      Scene::Data* scene1 = Scene::TestLevel::Create1();
-      Scene::Data* scene2 = Scene::TestLevel::Create2();
-      scene1->nextScene = scene2;
-      scene2->nextScene = scene1;
-      engine.scenes.push_back(scene1);
-      engine.scenes.push_back(scene2);
       Scene::Data* currentScene = engine.scenes.front();
       
       float deltaTime = 0;
@@ -50,9 +39,14 @@ namespace Temp
         auto stop = std::chrono::high_resolution_clock::now();
         deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(stop - start).count();
       }
-      
-      delete scene1;
-      delete scene2;
+    }
+    
+    void Destroy(Engine::Data& engine)
+    {
+      for (Scene::Data* scene : engine.scenes) {
+        delete scene;
+      }
+      engine.scenes.clear();
     }
   }
 }

@@ -14,26 +14,9 @@ namespace Temp
       Component::Container::Data componentData;
     };
     
-    Entity CreateEntity(Data& data)
-    {
-      return EntityManager::CreateEntity(data.entityData.availableEntities,
-                                         data.entityData.livingEntityCount);
-    }
-    
-    void DestroyEntity(Data& data, Entity entity)
-    {
-      Component::Container::EntityDestroyed(data.componentData, entity);
-      EntityManager::DestroyEntity(data.entityData.availableEntities,
-                                   data.entityData.livingEntityCount,
-                                   data.entityData.signatures,
-                                   entity);
-    }
-    
-    void Init(Data& data)
-    {
-      EntityManager::InitData(data.entityData.availableEntities);
-      Component::Container::Init(data.componentData);
-    }
+    Entity CreateEntity(Data& data);
+    void DestroyEntity(Data& data, Entity entity);
+    void Init(Data& data);
     
     template<typename T>
     void AddComponent(Data& data, Entity entity, T component, Component::Type type)

@@ -1,25 +1,11 @@
-#pragma once
-
+#include "EntityManager.hpp"
 #include "Entity.hpp"
-#include "Components/Component.hpp"
-#include <queue>
-#include <array>
 #include <cassert>
 
 namespace Temp
 {
   namespace EntityManager
   {
-    using EntityQueue = std::queue<Entity>;
-    using SignatureArray = std::array<Signature, MAX_ENTITIES>;
-
-    struct Data
-    {
-      EntityQueue availableEntities{};
-      SignatureArray signatures{};
-      uint32_t livingEntityCount{};
-    };
-    
     void InitData(EntityQueue& availableEntities)
     {
       for (Entity e = 0; e < MAX_ENTITIES; ++e) {

@@ -1,33 +1,16 @@
 #pragma once
 
-#include "Coordinator.hpp"
-#include <iostream>
+#include "Engine/Scene.hpp"
 
-namespace Temp
+namespace Game
 {
   namespace Scene
   {
-    enum class State : uint8_t
-    {
-      ENTER = 0,
-      RUN   = 1,
-      LEAVE = 2,
-    };
-    
-    struct Data
-    {
-      Coordinator::Data coordinator;
-      std::array<Entity, MAX_ENTITIES> entities;
-      State state{State::ENTER};
-      Data* nextScene{nullptr};
-      void (*Construct)(Scene::Data*){nullptr};
-      void (*Update)(Scene::Data*, float){nullptr};
-      void (*Destruct)(Scene::Data*){nullptr};
-    };
-    
     namespace TestLevel
     {
-      size_t UpdatePositions(Scene::Data* data,
+      using namespace Temp;
+      
+      size_t UpdatePositions(Temp::Scene::Data* data,
                              float deltaTime,
                              size_t& index)
       {
@@ -53,7 +36,7 @@ namespace Temp
         return index;
       }
       
-      void Construct1(Scene::Data* data)
+      void Construct1(Temp::Scene::Data* data)
       {
         for (auto& entity : data->entities) {
           entity = Coordinator::CreateEntity(data->coordinator);
@@ -63,7 +46,7 @@ namespace Temp
         }
       }
       
-      void Construct2(Scene::Data* data)
+      void Construct2(Temp::Scene::Data* data)
       {
         for (auto& entity : data->entities) {
           entity = Coordinator::CreateEntity(data->coordinator);
@@ -73,23 +56,23 @@ namespace Temp
         }
       }
       
-      void Update1(Scene::Data* data, float deltaTime)
+      void Update1(Temp::Scene::Data* data, float deltaTime)
       {
         static size_t index = 0;
         if (UpdatePositions(data, deltaTime, index) >= data->coordinator.componentData.positions.mapping.size) {
-          data->state = State::LEAVE;
+          data->state = Temp::Scene::State::LEAVE;
         }
       }
       
-      void Update2(Scene::Data* data, float deltaTime)
+      void Update2(Temp::Scene::Data* data, float deltaTime)
       {
         static size_t index = 0;
         if (UpdatePositions(data, deltaTime, index) >= data->coordinator.componentData.positions.mapping.size) {
-          data->state = State::LEAVE;
+          data->state = Temp::Scene::State::LEAVE;
         }
       }
       
-      void Destruct(Scene::Data* data)
+      void Destruct(Temp::Scene::Data* data)
       {
         for (auto& entity : data->entities) {
           Coordinator::DestroyEntity(data->coordinator, entity);
@@ -97,9 +80,9 @@ namespace Temp
         }
       }
       
-      Data* Create1()
+      Temp::Scene::Data* Create1()
       {
-        Data* scene = new Data();
+        Temp::Scene::Data* scene = new Temp::Scene::Data();
         Coordinator::Init(scene->coordinator);
         scene->Construct = Construct1;
         scene->Update = Update1;
@@ -107,9 +90,9 @@ namespace Temp
         return scene;
       }
       
-      Data* Create2()
+      Temp::Scene::Data* Create2()
       {
-        Data* scene = new Data();
+        Temp::Scene::Data* scene = new Temp::Scene::Data();
         Coordinator::Init(scene->coordinator);
         scene->Construct = Construct2;
         scene->Update = Update2;

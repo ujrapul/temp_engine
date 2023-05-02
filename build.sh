@@ -13,7 +13,9 @@ fi
     Linux*)     cmake ..;
                 make;;
     Darwin*)    cmake -G Xcode ..; # Mac
-                xcodebuild -scheme tempEngine build;;
+                xcodebuild -scheme TempEngine build;
+                xcodebuild -scheme TestGame build;
+                xcodebuild -scheme TestGame2 build;;
     CYGWIN*)    cmake ..;;
     MINGW*)     cmake ..;;
     *)          cmake ..
