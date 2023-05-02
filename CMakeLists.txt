@@ -23,4 +23,11 @@ set ( HEADER
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${SRC})
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${HEADER})
 
-add_executable(tempEngine ${SRC} ${HEADER})
+set(TARGET_NAME tempEngine)
+
+add_executable(${TARGET_NAME} ${SRC} ${HEADER})
+
+target_compile_options(${TARGET_NAME} PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+)

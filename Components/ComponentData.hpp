@@ -15,7 +15,7 @@ namespace Temp
       std::array<Entity, MAX_ENTITIES> indexToEntity;
       // Value = Data Index | Index = Entity
       std::array<std::size_t, MAX_ENTITIES> entityToIndex;
-      std::size_t size;
+      std::size_t size{};
     };
     
     template<typename T>
@@ -57,7 +57,7 @@ namespace Temp
     template<typename T>
     void Remove(ArrayData<T>& data, Entity entity)
     {
-      assert(data.mapping.mEntityToIndexMap.find(entity) != data.mapping.mEntityToIndexMap.end() && "Removing non-existent component.");
+      assert(entity < MAX_ENTITIES && "Removing non-existent component.");
 
       size_t indexOfRemovedEntity = data.mapping.entityToIndex[entity];
       size_t indexOfLastElement = data.mapping.size - 1;

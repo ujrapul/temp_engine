@@ -25,9 +25,9 @@ namespace Temp
 //        positions->entityToIndex[entity]
       }
       
-      void Init(Data* data)
+      void Init(Data& data)
       {
-        Component::Init(data->positions);
+        Component::Init(data.positions);
       }
     }
   }
