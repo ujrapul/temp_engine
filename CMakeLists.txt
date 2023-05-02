@@ -14,11 +14,13 @@ set ( HEADER
   "Components/ComponentType.hpp"
   "Components/ComponentContainer.hpp"
   "Components/ComponentData.hpp"
+  "Coordinator.hpp"
   "Engine.hpp"
   "Entity.hpp"
   "EntityManager.hpp"
   "Math.hpp"
   "Player.hpp"
+  "Scene.hpp"
 )
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${SRC})
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${HEADER})
