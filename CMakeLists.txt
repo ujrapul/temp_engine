@@ -23,12 +23,14 @@ set ( ENGINE_HEADER
   "src/Engine/Math.hpp"
   "src/Engine/Player.hpp"
   "src/Engine/Scene.hpp"
+  src/Engine/Input.hpp
 )
 set ( ENGINE_SRC
   "src/Engine/Engine.cpp"
   "src/Engine/EntityManager.cpp"
   "src/Engine/Coordinator.cpp"
   "src/Engine/Components/ComponentContainer.cpp"
+  src/Engine/Input.cpp
 )
 set ( TEST_GAME_HEADER
   "src/TestGame/TestLevel.hpp"
@@ -57,7 +59,6 @@ add_executable(${TARGET_TEST_GAME} ${TEST_GAME_SRC} ${TEST_GAME_HEADER})
 add_executable(${TARGET_TEST_GAME_2} ${TEST_GAME_2_SRC} ${TEST_GAME_2_HEADER})
 
 set_target_properties(${TARGET_ENGINE} PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(${TARGET_ENGINE} PROPERTIES PUBLIC_HEADER ${ENGINE_HEADER})
 
 include_directories(src src/Engine src/Engine/Components src/TestGame src/TestGame2)
 
