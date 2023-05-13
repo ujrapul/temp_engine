@@ -2,11 +2,17 @@
 
 #include "TestLevel.hpp"
 #include "Engine/Engine.hpp"
+#include "Engine/Input.hpp"
 
 namespace Game
 {
   namespace Entry
   {
+    void Exit()
+    {
+      exit(0);
+    }
+    
     void Run()
     {
       using namespace Temp;
@@ -19,6 +25,9 @@ namespace Game
       engine.scenes.push_back(scene1);
       engine.scenes.push_back(scene2);
       
+      engine.keyEventData = new Input::KeyEventData();
+      engine.keyEventData->keyEvents[12].push_back(Exit);
+
       Temp::Engine::Run(engine);
       
       Temp::Engine::Destroy(engine);

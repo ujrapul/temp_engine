@@ -65,6 +65,13 @@ include_directories(src src/Engine src/Engine/Components src/TestGame src/TestGa
 target_link_libraries(${TARGET_TEST_GAME} ${TARGET_ENGINE})
 target_link_libraries(${TARGET_TEST_GAME_2} ${TARGET_ENGINE})
 
+if(APPLE)
+  target_link_libraries(${TARGET_ENGINE} PRIVATE
+  "-framework CoreFoundation"
+  "-framework CoreGraphics"
+  )
+endif()
+
 target_compile_options(${TARGET_TEST_GAME} PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>

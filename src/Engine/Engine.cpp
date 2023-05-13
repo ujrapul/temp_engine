@@ -1,14 +1,19 @@
 #include "Engine.hpp"
 #include "Scene.hpp"
+#include "Input.hpp"
 #include <chrono>
+#include <thread>
 
 namespace Temp
 {
   namespace Engine
-  {
+  {    
     void Run(Engine::Data& engine)
     {
-      Scene::Data* currentScene = engine.scenes.front();
+      Scene::Data* currentScene = engine.scenes.front();      
+      std::thread inputThread(Input::Handle, *engine.keyEventData);
+      
+      inputThread.detach();
       
       float deltaTime = 0;
       while (true)
@@ -47,6 +52,7 @@ namespace Temp
         delete scene;
       }
       engine.scenes.clear();
+      delete engine.keyEventData;
     }
   }
 }

@@ -2,14 +2,22 @@
 
 #include "TestLevel.hpp"
 #include "Engine/Engine.hpp"
+#include "Engine/Input.hpp"
 
 namespace Game
 {
   namespace Entry
   {
+    void Exit()
+    {
+      exit(0);
+    }
+    
     void Run()
     {
-      Temp::Engine::Data engine;
+      using namespace Temp;
+      
+      Engine::Data engine;
       Temp::Scene::Data* scene1 = Scene::TestLevel::Create1();
       Temp::Scene::Data* scene2 = Scene::TestLevel::Create2();
       scene1->nextScene = scene2;
@@ -17,6 +25,9 @@ namespace Game
       engine.scenes.push_back(scene1);
       engine.scenes.push_back(scene2);
       
+      engine.keyEventData = new Input::KeyEventData();
+      engine.keyEventData->keyEvents[12].push_back(Exit);
+
       Temp::Engine::Run(engine);
       
       Temp::Engine::Destroy(engine);

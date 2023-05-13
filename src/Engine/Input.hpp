@@ -1,16 +1,29 @@
 #pragma once
 
+#ifdef __APPLE__
 #include <CoreGraphics/CGEvent.h>
+#endif
+
+#include <string>
+#include <array>
+#include <vector>
 
 namespace Temp
 {
   namespace Input
   {
-    CGEventRef OnKeystroke(
-        CGEventTapProxy proxy,
-        CGEventType type,
-        CGEventRef event,
-        void *data
-    );
+    struct KeyEventData
+    {
+      std::array<std::vector<void (*)()>, 128> keyEvents;
+    };
+
+#ifdef __APPLE__
+    // The following method converts the key code returned by each keypress as
+    // a human readable key code in const char format.
+    std::string convertKeyCode(int keyCode, bool shift, bool caps);
+    CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon);
+#endif
+
+    void Handle(KeyEventData data);
   }
 }
