@@ -7,6 +7,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <mutex>
 
 namespace Temp
 {
@@ -15,6 +16,7 @@ namespace Temp
     struct KeyEventData
     {
       std::array<std::vector<void (*)()>, 128> keyEvents;
+      std::mutex lock;
     };
 
 #ifdef __APPLE__

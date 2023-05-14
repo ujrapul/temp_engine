@@ -10,8 +10,8 @@ namespace Temp
     void Run(Engine::Data& engine)
     {
       Scene::Data* currentScene = engine.scenes.front();      
-      std::thread inputThread(Input::Handle, std::ref(engine.keyEventData));
       
+      std::thread inputThread(Input::Handle, std::ref(engine.keyEventData));
       inputThread.detach();
       
       float deltaTime = 0;

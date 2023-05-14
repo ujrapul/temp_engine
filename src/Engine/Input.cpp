@@ -3,6 +3,8 @@
 
 namespace
 {
+  std::mutex inputLock;
+
 #ifdef __APPLE__
   CGEventFlags lastFlags = 0;
 
@@ -42,6 +44,7 @@ namespace Temp
 {
   namespace Input
   {
+    // USING AS REFERENCE
     // The following method converts the key code returned by each keypress as
     // a human readable key code in const char format.
     std::string convertKeyCode(int keyCode, bool shift, bool caps)
@@ -223,6 +226,7 @@ namespace Temp
     
     void Handle(KeyEventData& data)
     {
+      std::scoped_lock<std::mutex> lock(data.lock);
       MacInputHandle(data);
     }
     
