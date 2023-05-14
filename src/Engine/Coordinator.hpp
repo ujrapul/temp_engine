@@ -17,6 +17,7 @@ namespace Temp
     Entity CreateEntity(Data& data);
     void DestroyEntity(Data& data, Entity entity);
     void Init(Data& data);
+    void Destruct(Data& data);
     
     template<typename T>
     void AddComponent(Data& data, Entity entity, T component, Component::Type type)
@@ -26,9 +27,10 @@ namespace Temp
       EntityManager::SetSignature(data.entityData.signatures,
                                   entity,
                                   sig);
-      Component::Container::setPosition2D(data.componentData.positions,
-                                          entity,
-                                          component);
+      Component::Container::Set(data.componentData,
+                                entity,
+                                component,
+                                static_cast<uint8_t>(Component::Type::POSITION2D));
     }
     
     template<typename T>

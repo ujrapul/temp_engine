@@ -27,5 +27,10 @@ namespace Temp
       EntityManager::InitData(data.entityData.availableEntities);
       Component::Container::Init(data.componentData);
     }
+    
+    void Destruct(Data& data)
+    {
+      Component::Container::Destruct(data.componentData);
+    }
   }
 }

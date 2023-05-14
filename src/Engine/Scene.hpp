@@ -24,5 +24,21 @@ namespace Temp
       void (*Update)(Scene::Data*, float){nullptr};
       void (*Destruct)(Scene::Data*){nullptr};
     };
+    
+    void Destruct(Data& data);
+    
+    template<Component::Type T>
+    Entity GetEntityUsingIndex(Data& data, size_t index)
+    {
+      return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
+        (data.coordinator.componentData.components[static_cast<uint8_t>(T)])->mapping.indexToEntity[index];
+    }
+    
+    template<Component::Type T>
+    size_t GetComponentSize(Data& data)
+    {
+      return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
+      (data.coordinator.componentData.components[static_cast<uint8_t>(T)])->mapping.size;
+    }
   }
 }

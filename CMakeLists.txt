@@ -33,6 +33,7 @@ set ( ENGINE_SRC
   src/Engine/EntityManager.cpp
   src/Engine/Coordinator.cpp
   src/Engine/Components/ComponentContainer.cpp
+  src/Engine/Scene.cpp
   src/Engine/Input.cpp
 )
 set ( TEST_GAME_HEADER

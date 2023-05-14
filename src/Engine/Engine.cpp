@@ -48,6 +48,7 @@ namespace Temp
     void Destroy(Engine::Data& engine)
     {
       for (Scene::Data* scene : engine.scenes) {
+        Scene::Destruct(*scene);
         delete scene;
       }
       engine.scenes.clear();

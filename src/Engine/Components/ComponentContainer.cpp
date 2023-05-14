@@ -1,32 +1,37 @@
 #include "ComponentContainer.hpp"
 
+
 namespace Temp
 {
   namespace Component
   {
     namespace Container
     {
-      Math::Vec2 getPosition2D(Entity entity,
-                               Component::ArrayData<Math::Vec2>& positions)
+      namespace
       {
-        return Component::Get(positions, entity);
+        template<typename T>
+        ArrayData<T>* GetComponentArray(Data& data, uint8_t type)
+        {
+          return static_cast<Temp::Component::ArrayData<T>*>(data.components[type]);
+        }
       }
-      
-      void setPosition2D(Component::ArrayData<Math::Vec2>& positions,
-                         Entity entity,
-                         Math::Vec2 newPos)
-      {
-        Component::Set(positions, entity, newPos);
-      }
-      
+
       void Init(Data& data)
       {
-        Component::Init(data.positions);
+        Init<MapToComponentDataType<Type::POSITION2D>>(data, static_cast<uint8_t>(Type::POSITION2D));
+      }
+      
+      void Destruct(Data& data)
+      {
+        delete GetComponentArray<MapToComponentDataType<Type::POSITION2D>>
+          (data, static_cast<uint8_t>(Type::POSITION2D));
       }
       
       void EntityDestroyed(Data& data, Entity entity)
       {
-        Component::EntityDestroyed(data.positions, entity);
+        Component::EntityDestroyed
+          (*GetComponentArray<Math::Vec2>(data, static_cast<uint8_t>(Type::POSITION2D)),
+           entity);
       }
     }
   }

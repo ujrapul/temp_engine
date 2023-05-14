@@ -15,20 +15,24 @@ namespace Game
       {
         static float currTime = 0;
         currTime += deltaTime;
-        index %= data->coordinator.componentData.positions.mapping.size;
+        index %= Temp::Scene::GetComponentSize<Component::Type::POSITION2D>(*data);
         if (currTime < 0.0166666) {
           return 0;
         }
         currTime = 0;
         
-        Entity entity = data->coordinator.componentData.positions.mapping.indexToEntity[index];
+        Entity entity = Temp::Scene::GetEntityUsingIndex<Component::Type::POSITION2D>(*data, index);
         system("clear");
         std::cout << "Entity: "
         << entity
         << " Position: "
-        << Component::Container::getPosition2D(entity, data->coordinator.componentData.positions).x
+        << Component::Container::Get<Math::Vec2>(data->coordinator.componentData,
+                                                 entity,
+                                                 Component::Type::POSITION2D).x
         << " "
-        << Component::Container::getPosition2D(entity, data->coordinator.componentData.positions).y
+        << Component::Container::Get<Math::Vec2>(data->coordinator.componentData,
+                                                 entity,
+                                                 Component::Type::POSITION2D).y
         << std::endl;
         ++index;
         
@@ -58,7 +62,7 @@ namespace Game
       void Update1(Temp::Scene::Data* data, float deltaTime)
       {
         static size_t index = 0;
-        if (UpdatePositions(data, deltaTime, index) >= data->coordinator.componentData.positions.mapping.size) {
+        if (UpdatePositions(data, deltaTime, index) >= Temp::Scene::GetComponentSize<Component::Type::POSITION2D>(*data)) {
           data->state = Temp::Scene::State::LEAVE;
         }
       }
@@ -66,7 +70,7 @@ namespace Game
       void Update2(Temp::Scene::Data* data, float deltaTime)
       {
         static size_t index = 0;
-        if (UpdatePositions(data, deltaTime, index) >= data->coordinator.componentData.positions.mapping.size) {
+        if (UpdatePositions(data, deltaTime, index) >= Temp::Scene::GetComponentSize<Component::Type::POSITION2D>(*data)) {
           data->state = Temp::Scene::State::LEAVE;
         }
       }
