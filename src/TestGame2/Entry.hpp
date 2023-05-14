@@ -25,8 +25,10 @@ namespace Game
       engine.scenes.push_back(scene1);
       engine.scenes.push_back(scene2);
       
-      engine.keyEventData = new Input::KeyEventData();
-      engine.keyEventData->keyEvents[12].push_back(Exit);
+      // Testing Add and Remove works
+      Input::AddCallback(Exit, engine.keyEventData, 12);
+      Input::RemoveCallback(Exit, engine.keyEventData, 12);
+      Input::AddCallback(Exit, engine.keyEventData, 12);
 
       Temp::Engine::Run(engine);
       

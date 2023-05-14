@@ -1,6 +1,5 @@
 #include "Engine.hpp"
 #include "Scene.hpp"
-#include "Input.hpp"
 #include <chrono>
 #include <thread>
 
@@ -11,7 +10,7 @@ namespace Temp
     void Run(Engine::Data& engine)
     {
       Scene::Data* currentScene = engine.scenes.front();      
-      std::thread inputThread(Input::Handle, *engine.keyEventData);
+      std::thread inputThread(Input::Handle, std::ref(engine.keyEventData));
       
       inputThread.detach();
       
@@ -52,7 +51,6 @@ namespace Temp
         delete scene;
       }
       engine.scenes.clear();
-      delete engine.keyEventData;
     }
   }
 }

@@ -6,13 +6,14 @@ namespace
 #ifdef __APPLE__
   CGEventFlags lastFlags = 0;
 
-  void MacInputHandle(Temp::Input::KeyEventData data) {
+  void MacInputHandle(Temp::Input::KeyEventData& data)
+  {
     // Create an event tap to retrieve keypresses.
     CGEventMask eventMask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged);
     CFMachPortRef eventTap = CGEventTapCreate(kCGSessionEventTap,
                                               kCGHeadInsertEventTap,
                                               kCGEventTapOptionDefault,
-                                              eventMask, Temp::Input::CGEventCallback, &data);
+                                              eventMask, Temp::Input::CGEventCallback, std::addressof(data));
     
     // Exit the program if unable to create the event tap.
     if (!eventTap) {
@@ -43,7 +44,8 @@ namespace Temp
   {
     // The following method converts the key code returned by each keypress as
     // a human readable key code in const char format.
-    std::string convertKeyCode(int keyCode, bool shift, bool caps) {
+    std::string convertKeyCode(int keyCode, bool shift, bool caps)
+    {
       switch ((int) keyCode) {
         case 0:   return shift || caps ? "A" : "a";
         case 1:   return shift || caps ? "S" : "s";
@@ -162,7 +164,8 @@ namespace Temp
       return "[unknown]";
     }
     
-    CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
+    CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *data)
+    {
       if (type != kCGEventKeyDown && type != kCGEventFlagsChanged) {
         return event;
       }
@@ -212,14 +215,33 @@ namespace Temp
       bool shift = flags & kCGEventFlagMaskShift;
       bool caps = flags & kCGEventFlagMaskAlphaShift;
       
-      std::cout << "Input received: " << convertKeyCode(keyCode, shift, caps) << std::endl;
-      MacActivateCallBack(keyCode, static_cast<KeyEventData*>(refcon));
+//      std::cout << "Input received: " << convertKeyCode(keyCode, shift, caps) << std::endl;
+      MacActivateCallBack(keyCode, static_cast<KeyEventData*>(data));
       
       return event;
     }
     
-    void Handle(KeyEventData data) {
+    void Handle(KeyEventData& data)
+    {
       MacInputHandle(data);
+    }
+    
+    void AddCallback(void (*FnPtr)(), KeyEventData& data, int keyCode)
+    {
+      std::vector<void (*)()>& keyEvents = data.keyEvents[keyCode];
+      if (std::find(keyEvents.begin(), keyEvents.end(), FnPtr) != keyEvents.end()) {
+        return;
+      }
+      keyEvents.push_back(FnPtr);
+    }
+    
+    void RemoveCallback(void (*FnPtr)(), KeyEventData& data, int keyCode)
+    {
+      std::vector<void (*)()>& keyEvents = data.keyEvents[keyCode];
+      auto iterator = std::find(keyEvents.begin(), keyEvents.end(), FnPtr);
+      if (iterator != keyEvents.end()) {
+        keyEvents.erase(iterator);
+      }
     }
   }
 }
