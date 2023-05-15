@@ -4,7 +4,7 @@
 
 namespace
 {
-  const int BOARD_WIDTH = 5;
+  const int BOARD_WIDTH = 50;
 }
 
 namespace Game

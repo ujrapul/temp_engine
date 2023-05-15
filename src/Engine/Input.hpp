@@ -15,7 +15,7 @@ namespace Temp
   {
     struct KeyEventData
     {
-      std::array<std::vector<void (*)()>, 128> keyEvents;
+      std::array<std::vector<void (*)(int)>, 128> keyEvents;
       std::mutex lock;
     };
 
@@ -28,7 +28,7 @@ namespace Temp
 
     void Handle(KeyEventData& data);
     
-    void AddCallback(void (*Callback)(), KeyEventData& data, int keyCode);
-    void RemoveCallback(void (*Callback)(), KeyEventData& data, int keyCode);
+    void AddCallback(void (*Callback)(int), KeyEventData& data, int keyCode);
+    void RemoveCallback(void (*Callback)(int), KeyEventData& data, int keyCode);
   }
 }

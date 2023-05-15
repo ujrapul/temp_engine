@@ -34,7 +34,7 @@ namespace
   void MacActivateCallBack(int keyCode, Temp::Input::KeyEventData* data)
   {
     for (auto fn : data->keyEvents[keyCode]) {
-      fn();
+      fn(keyCode);
     }
   }
 #endif
@@ -230,18 +230,18 @@ namespace Temp
       MacInputHandle(data);
     }
     
-    void AddCallback(void (*FnPtr)(), KeyEventData& data, int keyCode)
+    void AddCallback(void (*FnPtr)(int), KeyEventData& data, int keyCode)
     {
-      std::vector<void (*)()>& keyEvents = data.keyEvents[keyCode];
+      std::vector<void (*)(int)>& keyEvents = data.keyEvents[keyCode];
       if (std::find(keyEvents.begin(), keyEvents.end(), FnPtr) != keyEvents.end()) {
         return;
       }
       keyEvents.push_back(FnPtr);
     }
     
-    void RemoveCallback(void (*FnPtr)(), KeyEventData& data, int keyCode)
+    void RemoveCallback(void (*FnPtr)(int), KeyEventData& data, int keyCode)
     {
-      std::vector<void (*)()>& keyEvents = data.keyEvents[keyCode];
+      std::vector<void (*)(int)>& keyEvents = data.keyEvents[keyCode];
       auto iterator = std::find(keyEvents.begin(), keyEvents.end(), FnPtr);
       if (iterator != keyEvents.end()) {
         keyEvents.erase(iterator);
