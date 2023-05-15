@@ -27,18 +27,18 @@ namespace Temp
     
     void Destruct(Data& data);
     
-    template<Component::Type T>
+    template<uint8_t T>
     Entity GetEntityUsingIndex(Data& data, size_t index)
     {
       return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
-        (data.coordinator.componentData.components[static_cast<uint8_t>(T)])->mapping.indexToEntity[index];
+        (data.coordinator.componentData.components[T])->mapping.indexToEntity[index];
     }
     
-    template<Component::Type T>
+    template<uint8_t T>
     size_t GetComponentSize(Data& data)
     {
       return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
-      (data.coordinator.componentData.components[static_cast<uint8_t>(T)])->mapping.size;
+        (data.coordinator.componentData.components[T])->mapping.size;
     }
   }
 }

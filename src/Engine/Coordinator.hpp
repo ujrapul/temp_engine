@@ -19,24 +19,23 @@ namespace Temp
     void Init(Data& data);
     void Destruct(Data& data);
     
-    template<typename T>
-    void AddComponent(Data& data, Entity entity, T component, Component::Type type)
+    template<uint8_t T, typename Out>
+    void AddComponent(Data& data, Entity entity, Out component)
     {
       Signature sig = EntityManager::GetSignature(data.entityData.signatures, entity);
-      sig.set(static_cast<size_t>(type));
+      sig.set(T);
       EntityManager::SetSignature(data.entityData.signatures,
                                   entity,
                                   sig);
-      Component::Container::Set(data.componentData,
-                                entity,
-                                component,
-                                static_cast<uint8_t>(Component::Type::POSITION2D));
+      Component::Container::Set<T, Out>(data.componentData,
+                                        entity,
+                                        component);
     }
     
     template<typename T>
-    void UpdateComponent(Data& data, Entity entity, T component, Component::Type type)
+    void UpdateComponent(Data& data, Entity entity, T component, uint8_t type)
     {
-      if (EntityManager::GetSignature(data.entityData.signatures, entity).test(static_cast<size_t>(type)))
+      if (EntityManager::GetSignature(data.entityData.signatures, entity).test(type))
         Component::Container::Get<T>(data, entity) = component;
     }
   }

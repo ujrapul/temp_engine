@@ -4,16 +4,17 @@ namespace Temp
 {
   namespace Component
   {
-    enum class Type : std::uint8_t
+    namespace Type
     {
-      POSITION2D = 0,
-      MAX = 1,
-    };
+      const uint8_t POSITION2D = 0;
+      const uint8_t MAX = 1;
+    }
     
-    template <Type> struct MapToComponentDataType_t;
+    template <uint8_t> struct MapToComponentDataType_t;
     template <> struct MapToComponentDataType_t<Type::POSITION2D> { using type = Math::Vec2; };
+    template <> struct MapToComponentDataType_t<Type::MAX> { using type = nullptr_t; };
     
-    template <Type T>
+    template <uint8_t T>
     using MapToComponentDataType = typename MapToComponentDataType_t<T>::type;
   }
 }

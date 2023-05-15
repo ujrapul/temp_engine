@@ -4,31 +4,35 @@
 
 namespace
 {
-  const int BOARD_WIDTH = 10;
+  const int BOARD_WIDTH = 5;
 }
 
 namespace Game
 {
   namespace Component
   {
-    enum class Type : uint8_t
+    namespace Type
     {
-      VALUE = static_cast<uint8_t>(Temp::Component::Type::MAX),
-      MAX = 255,
-    };
+      const uint8_t VALUE = Temp::Component::Type::MAX;
+      const uint8_t MAX = 255;
+    }
     
-    template <Type> struct MapToComponentDataType_t;
+    template <uint8_t> struct MapToComponentDataType_t;
     template <> struct MapToComponentDataType_t<Type::VALUE> { using type = int; };
     
-    template <Type T>
+    template <uint8_t T>
     using MapToComponentDataType = typename MapToComponentDataType_t<T>::type;
-
+    
     namespace Container
     {
       void Init(Temp::Component::Container::Data& data)
       {
-        Temp::Component::Container::Init<MapToComponentDataType<Type::VALUE>>
-          (data, static_cast<uint8_t>(Type::VALUE));
+        Temp::Component::Container::Init<Type::VALUE, MapToComponentDataType<Type::VALUE>>(data);
+      }
+      
+      void Destruct(Temp::Component::Container::Data& data)
+      {
+        delete Temp::Component::Container::GetComponentArray<Type::VALUE, MapToComponentDataType<Type::VALUE>>(data);
       }
     }
   }
@@ -64,17 +68,17 @@ namespace Game
         system("clear");
 
         for (const auto& entity : data->entities) {
-          std::cout << "Entity: "
-          << entity
-          << " Position: "
-          << Temp::Component::Container::Get<Math::Vec2>(data->coordinator.componentData,
-                                                         entity,
-                                                         Temp::Component::Type::POSITION2D).x
-          << " "
-          << Temp::Component::Container::Get<Math::Vec2>(data->coordinator.componentData,
-                                                         entity,
-                                                         Temp::Component::Type::POSITION2D).y
-          << std::endl;
+          Math::Vec2 pos = Temp::Component::Container::Get<Temp::Component::Type::POSITION2D, Temp::Component::MapToComponentDataType<Temp::Component::Type::POSITION2D>>
+            (data->coordinator.componentData, entity);
+          std::cout << Temp::Component::Container::Get<Game::Component::Type::VALUE, Component::MapToComponentDataType<Game::Component::Type::VALUE>>
+            (data->coordinator.componentData, entity)
+                    << " ";
+          if (pos.y == BOARD_WIDTH - 1) {
+            std::cout << std::endl;
+            if (pos.x == BOARD_WIDTH - 1) {
+              break;
+            }
+          }
         }
       }
       
@@ -83,15 +87,20 @@ namespace Game
         int count = 0;
         int row = 0;
         int column = 0;
+        srand(static_cast<uint>(time(NULL)));
         for (auto& entity : data->entities) {
           if (count >= BOARD_WIDTH * BOARD_WIDTH) {
             return;
           }
           entity = Temp::Coordinator::CreateEntity(data->coordinator);
-          Temp::Coordinator::AddComponent(data->coordinator,
-                                          entity,
-                                          Math::Vec2{(float)row, (float)column},
-                                          Temp::Component::Type::POSITION2D);
+          Temp::Coordinator::AddComponent<Temp::Component::Type::POSITION2D, Temp::Component::MapToComponentDataType<Temp::Component::Type::POSITION2D>>
+            (data->coordinator,
+             entity,
+             Math::Vec2{(float)row, (float)column});
+          Temp::Coordinator::AddComponent<Component::Type::VALUE, Component::MapToComponentDataType<Component::Type::VALUE>>
+            (data->coordinator,
+             entity,
+             rand() % 10);
           
           column = ++column % BOARD_WIDTH;
           row = column == 0 ? row + 1 : row;
@@ -110,6 +119,7 @@ namespace Game
           Temp::Coordinator::DestroyEntity(data->coordinator, entity);
           entity = 0;
         }
+        Component::Container::Destruct(data->coordinator.componentData);
       }
       
       Temp::Scene::Data* Create()

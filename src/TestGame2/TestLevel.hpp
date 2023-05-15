@@ -25,16 +25,14 @@ namespace Game
         Entity entity = Temp::Scene::GetEntityUsingIndex<Component::Type::POSITION2D>(*data, index);
         system("clear");
         std::cout << "Entity: "
-        << entity
-        << " Position: "
-        << Component::Container::Get<Math::Vec2>(data->coordinator.componentData,
-                                                 entity,
-                                                 Component::Type::POSITION2D).x
-        << " "
-        << Component::Container::Get<Math::Vec2>(data->coordinator.componentData,
-                                                 entity,
-                                                 Component::Type::POSITION2D).y
-        << std::endl;
+          << entity
+          << " Position: "
+          << Component::Container::Get<static_cast<uint8_t>(Component::Type::POSITION2D)>
+            (data->coordinator.componentData, entity).x
+          << " "
+          << Component::Container::Get<static_cast<uint8_t>(Component::Type::POSITION2D)>
+            (data->coordinator.componentData, entity).y
+          << std::endl;
         ++index;
         
         return index;
