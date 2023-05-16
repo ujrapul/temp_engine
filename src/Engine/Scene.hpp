@@ -16,8 +16,8 @@ namespace Temp
     
     struct Data
     {
-      Coordinator::Data coordinator;
-      std::array<Entity, MAX_ENTITIES> entities;
+      Coordinator::Data coordinator{};
+      std::array<Entity, MAX_ENTITIES> entities{};
       State state{State::ENTER};
       Data* nextScene{nullptr};
       void (*Construct)(Scene::Data*){nullptr};
@@ -25,7 +25,11 @@ namespace Temp
       void (*Destruct)(Scene::Data*){nullptr};
     };
     
-    void Destruct(Data& data);
+    template<uint8_t T>
+    Component::MapToComponentDataType<T>& Get(Data& data, Entity entity)
+    {
+      return Component::Container::Get<T>(data.coordinator.componentData, entity);
+    }
     
     template<uint8_t T>
     Entity GetEntityUsingIndex(Data& data, size_t index)
@@ -40,5 +44,16 @@ namespace Temp
       return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
         (data.coordinator.componentData.components[T])->mapping.size;
     }
+    
+    template<uint8_t T>
+    void AddComponent(Data& data, Entity entity, Component::MapToComponentDataType<T> component)
+    {
+      Coordinator::AddComponent<T>(data.coordinator, entity, component);
+    }
+    
+    void Destruct(Data& data);
+    Entity CreateEntity(Data& data);
+    void DestroyEntity(Data& data, Entity entity);
+    Math::Vec2& GetPosition(Data& data, Entity entity);
   }
 }

@@ -13,33 +13,48 @@ namespace Game
       const uint8_t VALUE             = Temp::Component::Type::MAX;
       const uint8_t COLLECTED_VALUE   = Temp::Component::Type::MAX + 1;
       const uint8_t SCORE             = Temp::Component::Type::MAX + 2;
-      const uint8_t MAX               = 255;
     }
+  }
+}
+
+namespace Temp
+{
+  namespace Component
+  {
+    using namespace Game::Component::Type;
     
-    template <uint8_t> struct MapToComponentDataType_t;
-    template <> struct MapToComponentDataType_t<Type::VALUE> { using type = char; };
-    template <> struct MapToComponentDataType_t<Type::COLLECTED_VALUE> {
-      using type = std::vector<MapToComponentDataType_t<Type::VALUE>::type>;
+    template <> struct MapToComponentDataType_t<VALUE> { using type = char; };
+    template <> struct MapToComponentDataType_t<COLLECTED_VALUE> {
+      using type = std::vector<MapToComponentDataType_t<VALUE>::type>;
     };
-    template <> struct MapToComponentDataType_t<Type::SCORE> { using type = int; };
-    
-    template <uint8_t T>
-    using MapToComponentDataType = typename MapToComponentDataType_t<T>::type;
-    
+    template <> struct MapToComponentDataType_t<SCORE> { using type = int; };
+  }
+}
+
+namespace Game
+{
+  namespace Component
+  {
     namespace Container
     {
       void Init(Temp::Component::Container::Data& data)
       {
-        Temp::Component::Container::Init<Type::VALUE, MapToComponentDataType<Type::VALUE>>(data);
-        Temp::Component::Container::Init<Type::COLLECTED_VALUE, MapToComponentDataType<Type::COLLECTED_VALUE>>(data);
-        Temp::Component::Container::Init<Type::SCORE, MapToComponentDataType<Type::SCORE>>(data);
+        Temp::Component::Container::Init<Type::VALUE>(data);
+        Temp::Component::Container::Init<Type::COLLECTED_VALUE>(data);
+        Temp::Component::Container::Init<Type::SCORE>(data);
       }
       
       void Destruct(Temp::Component::Container::Data& data)
       {
-        delete Temp::Component::Container::GetComponentArray<Type::VALUE, MapToComponentDataType<Type::VALUE>>(data);
-        delete Temp::Component::Container::GetComponentArray<Type::COLLECTED_VALUE, MapToComponentDataType<Type::COLLECTED_VALUE>>(data);
-        delete Temp::Component::Container::GetComponentArray<Type::SCORE, MapToComponentDataType<Type::SCORE>>(data);
+        delete Temp::Component::Container::GetComponentArray<Type::VALUE>(data);
+        delete Temp::Component::Container::GetComponentArray<Type::COLLECTED_VALUE>(data);
+        delete Temp::Component::Container::GetComponentArray<Type::SCORE>(data);
+      }
+      
+      template<uint8_t T>
+      Temp::Component::MapToComponentDataType<T>& Get(Temp::Component::Container::Data& data, Temp::Entity entity)
+      {
+        return Temp::Component::Container::Get<T>(data, entity);
       }
     }
   }
@@ -51,6 +66,12 @@ namespace Game
       Temp::Coordinator::Init(data);
       Component::Container::Init(data.componentData);
     }
+    
+    void Destruct(Temp::Coordinator::Data& data)
+    {
+      Temp::Coordinator::Destruct(data);
+      Component::Container::Destruct(data.componentData);
+    }
   }
 }
 
@@ -58,6 +79,16 @@ namespace Game
 {
   namespace Scene
   {
+    char& GetValue(Temp::Scene::Data& data, Temp::Entity entity)
+    {
+      return Temp::Scene::Get<Game::Component::Type::VALUE>(data, entity);
+    }
+    
+    std::vector<char>& GetCollectedValue(Temp::Scene::Data& data, Temp::Entity entity)
+    {
+      return Temp::Scene::Get<Game::Component::Type::COLLECTED_VALUE>(data, entity);
+    }
+    
     namespace Player
     {
       struct Data
@@ -67,14 +98,12 @@ namespace Game
       
       void addScore(Temp::Entity player, Temp::Scene::Data* data, int value)
       {
-        Temp::Component::Container::Get<Game::Component::Type::SCORE, Component::MapToComponentDataType<Game::Component::Type::SCORE>>
-          (data->coordinator.componentData, player) += value;
+        Temp::Scene::Get<Game::Component::Type::SCORE>(*data, player) += value;
       }
       
       int getScore(Temp::Entity player, Temp::Scene::Data* data)
       {
-        return Temp::Component::Container::Get<Game::Component::Type::SCORE, Component::MapToComponentDataType<Game::Component::Type::SCORE>>
-          (data->coordinator.componentData, player);
+        return Temp::Scene::Get<Game::Component::Type::SCORE>(*data, player);
       }
     }
     
@@ -117,10 +146,8 @@ namespace Game
       void UpdateNumbers(Temp::Scene::Data* sceneData, Entity player, int currentValue)
       {
         for (const auto& entity : sceneData->entities) {
-          Math::Vec2 pos = Temp::Component::Container::Get<Temp::Component::Type::POSITION2D, Temp::Component::MapToComponentDataType<Temp::Component::Type::POSITION2D>>
-            (sceneData->coordinator.componentData, entity);
-          char& value = Temp::Component::Container::Get<Game::Component::Type::VALUE, Component::MapToComponentDataType<Game::Component::Type::VALUE>>
-            (sceneData->coordinator.componentData, entity);
+          Math::Vec2 pos = GetPosition(*sceneData, entity);
+          char& value = GetValue(*sceneData, entity);
           if (value - '0' == currentValue) {
             value = '-';
             Player::addScore(player, sceneData, 1);
@@ -148,10 +175,8 @@ namespace Game
 
         std::cout << std::endl;
         for (const auto& entity : data->entities) {
-          Math::Vec2 pos = Temp::Component::Container::Get<Temp::Component::Type::POSITION2D, Temp::Component::MapToComponentDataType<Temp::Component::Type::POSITION2D>>
-            (data->coordinator.componentData, entity);
-          std::cout << Temp::Component::Container::Get<Game::Component::Type::VALUE, Component::MapToComponentDataType<Game::Component::Type::VALUE>>
-            (data->coordinator.componentData, entity)
+          Math::Vec2 pos = GetPosition(*data, entity);
+          std::cout << GetValue(*data, entity)
                     << " ";
           if (pos.y == BOARD_WIDTH - 1) {
             std::cout << std::endl;
@@ -163,15 +188,13 @@ namespace Game
         
         std::scoped_lock<std::mutex>(gameData.mutex);
         std::cout << "Player 1's numbers: ";
-        for (auto num : Temp::Component::Container::Get<Component::Type::COLLECTED_VALUE, Component::MapToComponentDataType<Component::Type::COLLECTED_VALUE>>
-             (data->coordinator.componentData, gameData.players[0].entity)) {
+        for (auto num : GetCollectedValue(*data, gameData.players[0].entity)) {
           std::cout << num << " ";
         }
         std::cout << std::endl;
         
         std::cout << "Player 2's numbers: ";
-        for (auto num : Temp::Component::Container::Get<Component::Type::COLLECTED_VALUE, Component::MapToComponentDataType<Component::Type::COLLECTED_VALUE>>
-             (data->coordinator.componentData, gameData.players[1].entity)) {
+        for (auto num : GetCollectedValue(*data, gameData.players[1].entity)) {
           std::cout << num << " ";
         }
         std::cout << std::endl << std::endl;
@@ -207,14 +230,10 @@ namespace Game
         gameData.acceptInput = true;
         if (gameData.currentNumber >= 0 && gameData.numbersUsed.find(gameData.currentNumber) == gameData.numbersUsed.end()) {
           if (gameData.player1Turn) {
-            Temp::Component::Container::Get<Component::Type::COLLECTED_VALUE, Component::MapToComponentDataType<Component::Type::COLLECTED_VALUE>>
-              (data->coordinator.componentData,
-               gameData.players[0].entity).push_back(gameData.currentNumber + '0');
+            GetCollectedValue(*data, gameData.players[0].entity).push_back(gameData.currentNumber + '0');
             UpdateNumbers(data, gameData.players[0].entity, gameData.currentNumber);
           } else {
-            Temp::Component::Container::Get<Component::Type::COLLECTED_VALUE, Component::MapToComponentDataType<Component::Type::COLLECTED_VALUE>>
-              (data->coordinator.componentData,
-               gameData.players[1].entity).push_back(gameData.currentNumber + '0');
+            GetCollectedValue(*data, gameData.players[1].entity).push_back(gameData.currentNumber + '0');
             UpdateNumbers(data, gameData.players[1].entity, gameData.currentNumber);
           }
           --gameData.numbersLeft;
@@ -227,6 +246,8 @@ namespace Game
       
       void Construct(Temp::Scene::Data* data)
       {
+        Coordinator::Init(data->coordinator);
+
         int count = 0;
         int row = 0;
         int column = 0;
@@ -235,42 +256,26 @@ namespace Game
           if (count >= BOARD_WIDTH * BOARD_WIDTH) {
             break;
           }
-          entity = Temp::Coordinator::CreateEntity(data->coordinator);
-          Temp::Coordinator::AddComponent<Temp::Component::Type::POSITION2D, Temp::Component::MapToComponentDataType<Temp::Component::Type::POSITION2D>>
-            (data->coordinator,
-             entity,
-             Math::Vec2{(float)row, (float)column});
-          Temp::Coordinator::AddComponent<Component::Type::VALUE, Component::MapToComponentDataType<Component::Type::VALUE>>
-            (data->coordinator,
-             entity,
-             '0' + rand() % 10);
+          entity = Temp::Scene::CreateEntity(*data);
+          Temp::Scene::AddComponent<Temp::Component::Type::POSITION2D>
+            (*data, entity, Math::Vec2{(float)row, (float)column});
+          Temp::Scene::AddComponent<Component::Type::VALUE>
+            (*data, entity, '0' + rand() % 10);
           
           column = ++column % BOARD_WIDTH;
           row = column == 0 ? row + 1 : row;
           ++count;
         }
-0        Entity Player1 = count++;
-        data->entities[Player1] = Temp::Coordinator::CreateEntity(data->coordinator);
-        Temp::Coordinator::AddComponent<Component::Type::COLLECTED_VALUE, Component::MapToComponentDataType<Component::Type::COLLECTED_VALUE>>
-          (data->coordinator,
-           Player1,
-           {});
-        Temp::Coordinator::AddComponent<Component::Type::SCORE, Component::MapToComponentDataType<Component::Type::SCORE>>
-          (data->coordinator,
-           Player1,
-           {});
+        Entity Player1 = count++;
+        data->entities[Player1] = Temp::Scene::CreateEntity(*data);
+        Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(*data, Player1, {});
+        Temp::Scene::AddComponent<Component::Type::SCORE>(*data, Player1, {});
         gameData.players[0].entity = Player1;
         
         Entity Player2 = count++;
-        data->entities[Player2] = Temp::Coordinator::CreateEntity(data->coordinator);
-        Temp::Coordinator::AddComponent<Component::Type::COLLECTED_VALUE, Component::MapToComponentDataType<Component::Type::COLLECTED_VALUE>>
-          (data->coordinator,
-           Player2,
-           {});
-        Temp::Coordinator::AddComponent<Component::Type::SCORE, Component::MapToComponentDataType<Component::Type::SCORE>>
-          (data->coordinator,
-           Player2,
-           {});
+        data->entities[Player2] = Temp::Scene::CreateEntity(*data);
+        Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(*data, Player2, {});
+        Temp::Scene::AddComponent<Component::Type::SCORE>(*data, Player2, {});
         gameData.players[1].entity = Player2;
       }
       
@@ -282,16 +287,15 @@ namespace Game
       void Destruct(Temp::Scene::Data* data)
       {
         for (auto& entity : data->entities) {
-          Temp::Coordinator::DestroyEntity(data->coordinator, entity);
+          Temp::Scene::DestroyEntity(*data, entity);
           entity = 0;
         }
-        Component::Container::Destruct(data->coordinator.componentData);
+        Coordinator::Destruct(data->coordinator);
       }
       
       Temp::Scene::Data* Create(Temp::Input::KeyEventData& keyEventData)
       {
         Temp::Scene::Data* scene = new Temp::Scene::Data();
-        Coordinator::Init(scene->coordinator);
         scene->Construct = Construct;
         scene->Update = Update;
         scene->Destruct = Destruct;

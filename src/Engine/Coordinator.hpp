@@ -18,18 +18,19 @@ namespace Temp
     void DestroyEntity(Data& data, Entity entity);
     void Init(Data& data);
     void Destruct(Data& data);
+    Math::Vec2& GetPosition(Data& data, Entity entity);
     
-    template<uint8_t T, typename Out>
-    void AddComponent(Data& data, Entity entity, Out component)
+    template<uint8_t T>
+    void AddComponent(Data& data, Entity entity, Component::MapToComponentDataType<T> component)
     {
       Signature sig = EntityManager::GetSignature(data.entityData.signatures, entity);
       sig.set(T);
       EntityManager::SetSignature(data.entityData.signatures,
                                   entity,
                                   sig);
-      Component::Container::Set<T, Out>(data.componentData,
-                                        entity,
-                                        component);
+      Component::Container::Set<T>(data.componentData,
+                                   entity,
+                                   component);
     }
     
     template<typename T>

@@ -6,5 +6,5 @@ namespace Temp
 {
   using Entity = std::uint32_t;
 
-  const Entity MAX_ENTITIES = 100000;
+  const Entity MAX_ENTITIES = 5000;
 }

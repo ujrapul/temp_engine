@@ -16,42 +16,42 @@ namespace Temp
         std::array<void*, MAX> components;
       };
       
-      template<uint8_t T, typename Out>
+      template<uint8_t T>
       void Init(Data& data)
       {
-        data.components[T] = new ArrayData<Out>();
+        data.components[T] = new ArrayData<MapToComponentDataType<T>>();
         Temp::Component::Init
-          (*static_cast<Temp::Component::ArrayData<Out>*>(data.components[T]));
+          (*static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>>*>(data.components[T]));
       }
       
-      template<uint8_t T, typename Out>
-      ArrayData<Out>* GetComponentArray(Data& data)
+      template<uint8_t T>
+      ArrayData<MapToComponentDataType<T>>* GetComponentArray(Data& data)
       {
-        return static_cast<Temp::Component::ArrayData<Out>*>(data.components[T]);
+        return static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>>*>(data.components[T]);
       }
-
-      void Init(Data& data);
-      void Destruct(Data& data);
-      void EntityDestroyed(Data& data, Entity entity);
       
-      template<uint8_t T, typename Out>
-      Out& Get(Data& data, Entity entity)
+      template<uint8_t T>
+      MapToComponentDataType<T>& Get(Data& data, Entity entity)
       {
         // This mess is only needed to make sure we don't need to reference the type twice
         // in the function (once for enum and another for assigned type)
         return Component::Get
-          (*static_cast<Component::ArrayData<Out>* >(data.components[T]),
+          (*static_cast<Component::ArrayData<MapToComponentDataType<T>>* >(data.components[T]),
           entity);
       }
       
-      template<uint8_t T, typename Out>
-      void Set(Data& data, Entity entity, const Out& component)
+      template<uint8_t T>
+      void Set(Data& data, Entity entity, const MapToComponentDataType<T>& component)
       {
         Component::Set
-          (*static_cast<Component::ArrayData<Out>* >(data.components[T]),
+          (*static_cast<Component::ArrayData<MapToComponentDataType<T>>* >(data.components[T]),
            entity,
            component);
       }
+      
+      void Init(Data& data);
+      void Destruct(Data& data);
+      void EntityDestroyed(Data& data, Entity entity);
     }
   }
 }

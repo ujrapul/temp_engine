@@ -9,19 +9,17 @@ namespace Temp
     {
       void Init(Data& data)
       {
-        Init<Type::POSITION2D, MapToComponentDataType<Type::POSITION2D>>(data);
+        Init<Type::POSITION2D>(data);
       }
       
       void Destruct(Data& data)
       {
-        delete GetComponentArray<Type::POSITION2D, MapToComponentDataType<Type::POSITION2D>>(data);
+        delete GetComponentArray<Type::POSITION2D>(data);
       }
       
       void EntityDestroyed(Data& data, Entity entity)
       {
-        Component::EntityDestroyed
-          (*GetComponentArray<Type::POSITION2D, MapToComponentDataType<Type::POSITION2D>>(data),
-           entity);
+        Component::EntityDestroyed(*GetComponentArray<Type::POSITION2D>(data), entity);
       }
     }
   }
