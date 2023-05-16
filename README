@@ -1,4 +1,6 @@
-TEMP_ENGINE
+# TEMP_ENGINE
 
-For now make a build dir, and run "cmake .." inside of it and then run "make".
-I know absolutely awful...
+## Build
+
+Run build script to generate project files and build project
+(Currently only works for Mac)
