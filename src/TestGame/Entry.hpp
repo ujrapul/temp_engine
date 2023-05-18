@@ -8,7 +8,7 @@ namespace Game
 {
   namespace Entry
   {
-    void Exit()
+    void Exit(int /*keyCode*/)
     {
       exit(0);
     }

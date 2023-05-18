@@ -27,11 +27,9 @@ namespace Game
         std::cout << "Entity: "
           << entity
           << " Position: "
-          << Component::Container::Get<static_cast<uint8_t>(Component::Type::POSITION2D)>
-            (data->coordinator.componentData, entity).x
+          << Temp::Scene::Get<Component::Type::POSITION2D>(*data, entity).x
           << " "
-          << Component::Container::Get<static_cast<uint8_t>(Component::Type::POSITION2D)>
-            (data->coordinator.componentData, entity).y
+          << Temp::Scene::Get<Component::Type::POSITION2D>(*data, entity).y
           << std::endl;
         ++index;
         
@@ -43,7 +41,7 @@ namespace Game
         for (auto& entity : data->entities) {
           entity = Coordinator::CreateEntity(data->coordinator);
           if (entity % 3 == 0) {
-            Coordinator::AddComponent(data->coordinator, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f}, Component::Type::POSITION2D);
+            Temp::Scene::AddComponent<Component::Type::POSITION2D>(*data, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f});
           }
         }
       }
@@ -53,7 +51,7 @@ namespace Game
         for (auto& entity : data->entities) {
           entity = Coordinator::CreateEntity(data->coordinator);
           if (entity % 5 == 0) {
-            Coordinator::AddComponent(data->coordinator, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f}, Component::Type::POSITION2D);
+            Temp::Scene::AddComponent<Component::Type::POSITION2D>(*data, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f});
           }
         }
       }

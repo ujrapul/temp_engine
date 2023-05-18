@@ -42,7 +42,7 @@ namespace Game
         for (auto& entity : data->entities) {
           entity = Coordinator::CreateEntity(data->coordinator);
           if (entity % 3 == 0) {
-            Coordinator::AddComponent(data->coordinator, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f}, Component::Type::POSITION2D);
+            Temp::Scene::AddComponent<Component::Type::POSITION2D>(*data, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f});
           }
         }
       }
@@ -52,7 +52,7 @@ namespace Game
         for (auto& entity : data->entities) {
           entity = Coordinator::CreateEntity(data->coordinator);
           if (entity % 5 == 0) {
-            Coordinator::AddComponent(data->coordinator, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f}, Component::Type::POSITION2D);
+            Temp::Scene::AddComponent<Component::Type::POSITION2D>(*data, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f});
           }
         }
       }
