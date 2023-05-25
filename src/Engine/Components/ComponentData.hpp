@@ -26,7 +26,7 @@ namespace Temp
     };
     
     template<typename T>
-    void Init(ArrayData<T>& data)
+    constexpr void Init(ArrayData<T>& data)
     {
       for (Entity e = 0; e < MAX_ENTITIES; ++e) {
         data.mapping.indexToEntity[e] = __SIZE_MAX__;
@@ -35,7 +35,7 @@ namespace Temp
     }
 
     template<typename T>
-    void Set(
+    constexpr void Set(
       ArrayData<T>& data,
       Entity entity,
       const T& component)
@@ -55,7 +55,7 @@ namespace Temp
     }
 
     template<typename T>
-    void Remove(ArrayData<T>& data, Entity entity)
+    constexpr void Remove(ArrayData<T>& data, Entity entity)
     {
       assert(entity < MAX_ENTITIES && "Removing non-existent component.");
 
@@ -74,7 +74,7 @@ namespace Temp
     }
 
     template<typename T>
-    const T& Get(const ArrayData<T>& data, Entity entity)
+    [[nodiscard]] constexpr const T& Get(const ArrayData<T>& data, Entity entity)
     {
       assert(entity < MAX_ENTITIES && "Retrieving non-existent component.");
 
@@ -82,7 +82,7 @@ namespace Temp
     }
     
     template<typename T>
-    T& Get(ArrayData<T>& data, Entity entity)
+    [[nodiscard]] constexpr T& Get(ArrayData<T>& data, Entity entity)
     {
       assert(entity < MAX_ENTITIES && "Retrieving non-existent component.");
 
@@ -90,7 +90,7 @@ namespace Temp
     }
     
     template<typename T>
-    void EntityDestroyed(ArrayData<T>& data, Entity entity)
+    constexpr void EntityDestroyed(ArrayData<T>& data, Entity entity)
     {
       if (data.mapping.entityToIndex[entity] < MAX_ENTITIES) {
         Remove<T>(data, entity);

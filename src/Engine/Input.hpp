@@ -29,7 +29,7 @@ namespace Temp
     CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void* data);
 #endif
     
-    KeyEventData Construct();
+    [[nodiscard]] KeyEventData Construct();
     void Destruct(KeyEventData& data);
 
     void HandleThread(KeyEventData& data);

@@ -13,7 +13,7 @@ namespace Temp
       Entity entity{};
     };
 
-    Math::Vec2 getPosition(Entity entity)
+    [[nodiscard]] Math::Vec2 getPosition(Entity entity)
     {
       return {};
     }

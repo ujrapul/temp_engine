@@ -20,13 +20,13 @@ namespace Temp
     };
     
     void InitData(EntityQueue& availableEntities);
-    Entity CreateEntity(EntityQueue& availableEntities, uint32_t& livingEntityCount);
+    [[nodiscard]] Entity CreateEntity(EntityQueue& availableEntities, uint32_t& livingEntityCount);
     void DestroyEntity(
       EntityQueue& availableEntities,
       uint32_t& livingEntityCount,
       SignatureArray& signatures,
       Entity entity);
     void SetSignature(SignatureArray& signatures, Entity entity, Signature signature);
-    Signature GetSignature(SignatureArray& signatures, Entity entity);
+    [[nodiscard]] Signature GetSignature(SignatureArray& signatures, Entity entity);
   }
 }

@@ -6,8 +6,8 @@ namespace Temp
   {
     namespace Type
     {
-      const uint8_t POSITION2D = 0;
-      const uint8_t MAX = 1;
+      constexpr uint8_t POSITION2D = 0;
+      constexpr uint8_t MAX = 1;
     }
     
     template <uint8_t> struct MapToComponentDataType_t;

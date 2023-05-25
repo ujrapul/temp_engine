@@ -14,14 +14,14 @@ namespace Temp
       Component::Container::Data componentData;
     };
     
-    Entity CreateEntity(Data& data);
+    [[nodiscard]] Entity CreateEntity(Data& data);
     void DestroyEntity(Data& data, Entity entity);
     void Init(Data& data);
     void Destruct(Data& data);
-    Math::Vec2& GetPosition(Data& data, Entity entity);
+    [[nodiscard]] Math::Vec2& GetPosition(Data& data, Entity entity);
     
     template<uint8_t T>
-    void AddComponent(Data& data, Entity entity, Component::MapToComponentDataType<T> component)
+    constexpr void AddComponent(Data& data, Entity entity, Component::MapToComponentDataType<T> component)
     {
       Signature sig = EntityManager::GetSignature(data.entityData.signatures, entity);
       sig.set(T);
@@ -34,7 +34,7 @@ namespace Temp
     }
     
     template<typename T>
-    void UpdateComponent(Data& data, Entity entity, T component, uint8_t type)
+    constexpr void UpdateComponent(Data& data, Entity entity, T component, uint8_t type)
     {
       if (EntityManager::GetSignature(data.entityData.signatures, entity).test(type))
         Component::Container::Get<T>(data, entity) = component;

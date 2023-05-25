@@ -10,9 +10,9 @@ namespace Game
   {
     namespace Type
     {
-      const uint8_t VALUE             = Temp::Component::Type::MAX;
-      const uint8_t COLLECTED_VALUE   = Temp::Component::Type::MAX + 1;
-      const uint8_t SCORE             = Temp::Component::Type::MAX + 2;
+      constexpr uint8_t VALUE             = Temp::Component::Type::MAX;
+      constexpr uint8_t COLLECTED_VALUE   = Temp::Component::Type::MAX + 1;
+      constexpr uint8_t SCORE             = Temp::Component::Type::MAX + 2;
     }
   }
 }

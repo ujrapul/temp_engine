@@ -6,7 +6,7 @@ namespace
 #ifdef __APPLE__
   CGEventFlags lastFlags = 0;
 
-  void MacInputHandle(Temp::Input::KeyEventData& data)
+  constexpr void MacInputHandle(Temp::Input::KeyEventData& data)
   {
     // Create an event tap to retrieve keypresses.
     CGEventMask eventMask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged);
@@ -31,7 +31,7 @@ namespace
 
 #endif
   
-  void ActivateCallBack(int keyCode, Temp::Input::KeyEventData* data)
+  constexpr void ActivateCallBack(int keyCode, Temp::Input::KeyEventData* data)
   {
     for (auto fn : data->keyEvents[keyCode]) {
       fn(keyCode);

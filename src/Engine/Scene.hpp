@@ -26,27 +26,27 @@ namespace Temp
     };
     
     template<uint8_t T>
-    Component::MapToComponentDataType<T>& Get(Data& data, Entity entity)
+    [[nodiscard]] constexpr Component::MapToComponentDataType<T>& Get(Data& data, Entity entity)
     {
       return Component::Container::Get<T>(data.coordinator.componentData, entity);
     }
     
     template<uint8_t T>
-    Entity GetEntityUsingIndex(Data& data, size_t index)
+    [[nodiscard]] constexpr Entity GetEntityUsingIndex(Data& data, size_t index)
     {
       return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
         (data.coordinator.componentData.components[T])->mapping.indexToEntity[index];
     }
     
     template<uint8_t T>
-    size_t GetComponentSize(Data& data)
+    [[nodiscard]] constexpr size_t GetComponentSize(Data& data)
     {
       return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
         (data.coordinator.componentData.components[T])->mapping.size;
     }
     
     template<uint8_t T>
-    void AddComponent(Data& data, Entity entity, Component::MapToComponentDataType<T> component)
+    constexpr void AddComponent(Data& data, Entity entity, Component::MapToComponentDataType<T> component)
     {
       Coordinator::AddComponent<T>(data.coordinator, entity, component);
     }
