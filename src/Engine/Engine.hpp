@@ -20,5 +20,6 @@ namespace Temp
     
     void Run(Engine::Data& engine);
     void Destroy(Engine::Data& engine);
+    Engine::Data Construct();
   }
 }

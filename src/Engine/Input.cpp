@@ -3,8 +3,6 @@
 
 namespace
 {
-  std::mutex inputLock;
-
 #ifdef __APPLE__
   CGEventFlags lastFlags = 0;
 
@@ -30,20 +28,44 @@ namespace
     
     CFRunLoopRun();
   }
+
+#endif
   
-  void MacActivateCallBack(int keyCode, Temp::Input::KeyEventData* data)
+  void ActivateCallBack(int keyCode, Temp::Input::KeyEventData* data)
   {
     for (auto fn : data->keyEvents[keyCode]) {
       fn(keyCode);
     }
   }
-#endif
 }
 
 namespace Temp
 {
   namespace Input
   {
+    struct KeyQueue
+    {
+      std::queue<int> queue;
+      std::mutex lock;
+    };
+    
+    void PushKeyQueue(int keyCode, Temp::Input::KeyEventData* data)
+    {
+      std::scoped_lock<std::mutex> lock(data->keyQueue->lock);
+      data->keyQueue->queue.push(keyCode);
+    }
+    
+    int PopKeyQueue(Temp::Input::KeyEventData* data)
+    {
+      std::scoped_lock<std::mutex> lock(data->keyQueue->lock);
+      if (data->keyQueue->queue.size() == 0) {
+        return -1;
+      }
+      int keyCode = data->keyQueue->queue.front();
+      data->keyQueue->queue.pop();
+      return keyCode;
+    }
+    
     // USING AS REFERENCE
     // The following method converts the key code returned by each keypress as
     // a human readable key code in const char format.
@@ -167,6 +189,7 @@ namespace Temp
       return "[unknown]";
     }
     
+#ifdef __APPLE__
     CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *data)
     {
       if (type != kCGEventKeyDown && type != kCGEventFlagsChanged) {
@@ -219,15 +242,38 @@ namespace Temp
       bool caps = flags & kCGEventFlagMaskAlphaShift;
       
 //      std::cout << "Input received: " << convertKeyCode(keyCode, shift, caps) << std::endl;
-      MacActivateCallBack(keyCode, static_cast<KeyEventData*>(data));
+//      MacActivateCallBack(keyCode, static_cast<KeyEventData*>(data));
+      PushKeyQueue(keyCode, static_cast<KeyEventData*>(data));
       
       return event;
     }
+#endif
     
-    void Handle(KeyEventData& data)
+    KeyEventData Construct()
     {
-      std::scoped_lock<std::mutex> lock(data.lock);
+      KeyEventData out;
+      out.keyQueue = new KeyQueue();
+      return out;
+    }
+    
+    void Destruct(KeyEventData& data)
+    {
+      delete data.keyQueue;
+    }
+    
+    void HandleThread(KeyEventData& data)
+    {
+#ifdef __APPLE__
       MacInputHandle(data);
+#endif
+    }
+    
+    void Process(KeyEventData& data)
+    {
+      int keyCode = PopKeyQueue(&data);
+      if (keyCode != -1) {
+        ActivateCallBack(keyCode, &data);
+      }
     }
     
     void AddCallback(void (*FnPtr)(int), KeyEventData& data, int keyCode)

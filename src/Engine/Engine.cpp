@@ -11,7 +11,7 @@ namespace Temp
     {
       Scene::Data* currentScene = engine.scenes.front();      
       
-      std::thread inputThread(Input::Handle, std::ref(engine.keyEventData));
+      std::thread inputThread(Input::HandleThread, std::ref(engine.keyEventData));
       inputThread.detach();
       
       float deltaTime = 0;
@@ -39,6 +39,8 @@ namespace Temp
           default:
             break;
         }
+        
+        Input::Process(engine.keyEventData);
 
         auto stop = std::chrono::high_resolution_clock::now();
         deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(stop - start).count();
@@ -52,6 +54,13 @@ namespace Temp
         delete scene;
       }
       engine.scenes.clear();
+    }
+    
+    Engine::Data Construct()
+    {
+      Engine::Data out;
+      out.keyEventData = std::move(Input::Construct());
+      return out;
     }
   }
 }

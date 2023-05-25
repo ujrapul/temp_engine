@@ -120,7 +120,6 @@ namespace Game
         int numbersLeft{10};
         bool player1Turn{true};
         bool acceptInput{true};
-        std::mutex mutex;
       };
       
       // TODO: Currently a global but we'll hide this in .cpp file later
@@ -130,7 +129,6 @@ namespace Game
       
       void inputCallback(int keyCode)
       {
-        std::scoped_lock<std::mutex>(gameData.mutex);
         if (!gameData.acceptInput)
           return;
         
@@ -186,7 +184,6 @@ namespace Game
           }
         }
         
-        std::scoped_lock<std::mutex>(gameData.mutex);
         std::cout << "Player 1's numbers: ";
         for (auto num : GetCollectedValue(*data, gameData.players[0].entity)) {
           std::cout << num << " ";

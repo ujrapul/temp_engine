@@ -8,15 +8,18 @@
 #include <array>
 #include <vector>
 #include <mutex>
+#include <queue>
 
 namespace Temp
 {
   namespace Input
   {
+    struct KeyQueue;
+    
     struct KeyEventData
     {
       std::array<std::vector<void (*)(int)>, 128> keyEvents;
-      std::mutex lock;
+      KeyQueue* keyQueue;
     };
 
 #ifdef __APPLE__
@@ -25,8 +28,12 @@ namespace Temp
     std::string convertKeyCode(int keyCode, bool shift, bool caps);
     CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void* data);
 #endif
+    
+    KeyEventData Construct();
+    void Destruct(KeyEventData& data);
 
-    void Handle(KeyEventData& data);
+    void HandleThread(KeyEventData& data);
+    void Process(KeyEventData& data);
     
     void AddCallback(void (*Callback)(int), KeyEventData& data, int keyCode);
     void RemoveCallback(void (*Callback)(int), KeyEventData& data, int keyCode);

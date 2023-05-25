@@ -17,7 +17,7 @@ namespace Game
     {
       using namespace Temp;
       
-      Engine::Data engine;
+      Engine::Data engine = Engine::Construct();
       Temp::Scene::Data* scene1 = Scene::GameLevel::Create(engine.keyEventData);
 //      Temp::Scene::Data* scene2 = Scene::GameLevel::Create2();
 //      scene1->nextScene = scene2;
