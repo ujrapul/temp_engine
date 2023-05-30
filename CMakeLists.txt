@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.26.0)
 project(TEMP_ENGINE)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -12,6 +12,10 @@ set ( TEST_GAME_2_SRC
   src/TestGame2/main.cpp
 )
 set ( NUMBER_GAME_SRC
+  src/NumberGame/Components/ComponentContainer.cpp
+  src/NumberGame/Coordinator.cpp
+  src/NumberGame/Scene.cpp
+  src/NumberGame/GameLevel.cpp
   src/NumberGame/main.cpp
 )
 set ( ENGINE_HEADER
@@ -47,6 +51,10 @@ set ( TEST_GAME_2_HEADER
 set ( NUMBER_GAME_HEADER
   src/NumberGame/GameLevel.hpp
   src/NumberGame/Entry.hpp
+  src/NumberGame/Coordinator.hpp
+  src/NumberGame/Scene.hpp
+  src/NumberGame/Components/ComponentType.hpp
+  src/NumberGame/Components/ComponentContainer.hpp
 )
 
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_HEADER})
@@ -73,7 +81,7 @@ add_executable(${TARGET_NUMBER_GAME} ${NUMBER_GAME_SRC} ${NUMBER_GAME_HEADER})
 
 set_target_properties(${TARGET_ENGINE} PROPERTIES LINKER_LANGUAGE CXX)
 
-include_directories(src src/Engine src/Engine/Components src/TestGame src/TestGame2 src/NumberGame)
+include_directories(src src/Engine src/Engine/Components src/TestGame src/TestGame2 src/NumberGame src/NumberGame/Components)
 
 target_link_libraries(${TARGET_TEST_GAME} ${TARGET_ENGINE})
 target_link_libraries(${TARGET_TEST_GAME_2} ${TARGET_ENGINE})
