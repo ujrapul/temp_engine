@@ -23,7 +23,7 @@ namespace Game::Scene::GameLevel
     
     constexpr int BOARD_WIDTH = 50;
     
-    void inputCallback(int keyCode)
+    void inputCallback(Temp::Input::KeyboardCode keyCode)
     {
       if (!gameData.acceptInput)
         return;
@@ -55,13 +55,13 @@ namespace Game::Scene::GameLevel
       }
     }
     
-    void PrintBoard(Temp::Scene::Data* data, float deltaTime)
+    bool PrintBoard(Temp::Scene::Data* data, float deltaTime)
     {
       static float currTime = 0;
       currTime += deltaTime;
       //        index %= data->coordinator.componentData.positions.mapping.size;
       if (currTime < 0.0166666f) {
-        return;
+        return false;
       }
       currTime = 0;
       
@@ -112,7 +112,7 @@ namespace Game::Scene::GameLevel
         } else {
           std::cout << "PLAYERS TIED!" << std::endl;
         }
-        exit(0);
+        return true;
       }
       
       if (gameData.player1Turn) {
@@ -135,6 +135,8 @@ namespace Game::Scene::GameLevel
         gameData.numbersUnused[gameData.currentNumber] = -1;
         gameData.currentNumber = -1;
       }
+
+      return false;
     }
     
     void Construct(Temp::Scene::Data* data)
@@ -155,7 +157,8 @@ namespace Game::Scene::GameLevel
         Temp::Scene::AddComponent<Component::Type::VALUE>
         (*data, entity, '0' + rand() % 10);
         
-        column = ++column % BOARD_WIDTH;
+        ++column;
+        column %= BOARD_WIDTH;
         row = column == 0 ? row + 1 : row;
         ++count;
       }
@@ -174,7 +177,9 @@ namespace Game::Scene::GameLevel
     
     void Update(Temp::Scene::Data* data, float deltaTime)
     {
-      PrintBoard(data, deltaTime);
+      if (PrintBoard(data, deltaTime)) {
+        data->state = Temp::Scene::State::LEAVE;
+      }
     }
     
     void Destruct(Temp::Scene::Data* data)
@@ -194,13 +199,16 @@ namespace Game::Scene::GameLevel
     scene->Update = Update;
     scene->Destruct = Destruct;
     
-    for (int keyCode = 18; keyCode <= 23; ++keyCode) {
-      Temp::Input::AddCallback(inputCallback, keyEventData, keyCode);
-    }
-    Temp::Input::AddCallback(inputCallback, keyEventData, 25);
-    Temp::Input::AddCallback(inputCallback, keyEventData, 26);
-    Temp::Input::AddCallback(inputCallback, keyEventData, 28);
-    Temp::Input::AddCallback(inputCallback, keyEventData, 29); //0
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_0);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_1);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_2);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_3);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_4);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_5);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_6);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_7);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_8);
+    Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_9);
     return scene;
   }
 }

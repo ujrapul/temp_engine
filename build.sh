@@ -10,7 +10,7 @@ fi
   cd build
   unameOut="$(uname -s)"
   case "${unameOut}" in
-    Linux*)     cmake ..;
+    Linux*)     cmake -DCMAKE_BUILD_TYPE=Debug ..;
                 make;;
     Darwin*)    cmake -G Xcode ..; # Mac
                 xcodebuild -scheme TempEngine build;

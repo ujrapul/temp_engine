@@ -4,6 +4,7 @@
 #include "Engine/Math.hpp"
 #include <array>
 #include <cassert>
+#include <climits>
 
 namespace Temp
 {
@@ -29,8 +30,8 @@ namespace Temp
     constexpr void Init(ArrayData<T>& data)
     {
       for (Entity e = 0; e < MAX_ENTITIES; ++e) {
-        data.mapping.indexToEntity[e] = __SIZE_MAX__;
-        data.mapping.entityToIndex[e] = __SIZE_MAX__;
+        data.mapping.indexToEntity[e] = UINT_MAX;
+        data.mapping.entityToIndex[e] = SIZE_MAX;
       }
     }
 
@@ -46,7 +47,7 @@ namespace Temp
         data.array[entity] = component;
       } else {
         // Put new entry at end and update the maps
-        size_t newIndex = data.mapping.size;
+        std::size_t newIndex = data.mapping.size;
         data.mapping.entityToIndex[entity] = newIndex;
         data.mapping.indexToEntity[newIndex] = entity;
         data.array[newIndex] = component;
@@ -59,16 +60,16 @@ namespace Temp
     {
       assert(entity < MAX_ENTITIES && "Removing non-existent component.");
 
-      size_t indexOfRemovedEntity = data.mapping.entityToIndex[entity];
-      size_t indexOfLastElement = data.mapping.size - 1;
+      std::size_t indexOfRemovedEntity = data.mapping.entityToIndex[entity];
+      std::size_t indexOfLastElement = data.mapping.size - 1;
       data.array[indexOfRemovedEntity] = data.array[indexOfLastElement];
       
       Entity entityOfLastElement = data.mapping.indexToEntity[indexOfLastElement];
       data.mapping.entityToIndex[entityOfLastElement] = indexOfRemovedEntity;
       data.mapping.indexToEntity[indexOfRemovedEntity] = entityOfLastElement;
       
-      data.mapping.entityToIndex[entity] = __SIZE_MAX__;
-      data.mapping.indexToEntity[indexOfLastElement] = __SIZE_MAX__;
+      data.mapping.entityToIndex[entity] = SIZE_MAX;
+      data.mapping.indexToEntity[indexOfLastElement] = UINT_MAX;
       
       --data.mapping.size;
     }

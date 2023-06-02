@@ -8,7 +8,7 @@ namespace Game
 {
   namespace Entry
   {
-    void Exit(int /*keyCode*/)
+    void Exit(Temp::Input::KeyboardCode /*keyCode*/)
     {
       exit(0);
     }
@@ -26,9 +26,9 @@ namespace Game
 //      engine.scenes.push_back(scene2);
       
       // Testing Add and Remove works
-      Input::AddCallback(Exit, engine.keyEventData, 12);
-      Input::RemoveCallback(Exit, engine.keyEventData, 12);
-      Input::AddCallback(Exit, engine.keyEventData, 12);
+      Input::AddCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);
+      Input::RemoveCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);
+      Input::AddCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);
 
       Temp::Engine::Run(engine);
       

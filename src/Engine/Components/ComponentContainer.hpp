@@ -23,6 +23,12 @@ namespace Temp
         Temp::Component::Init
           (*static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>>*>(data.components[T]));
       }
+
+      template<uint8_t T>
+      constexpr void Destruct(Data& data)
+      {
+        delete static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>>*>(data.components[T]);
+      }
       
       template<uint8_t T>
       [[nodiscard]] constexpr ArrayData<MapToComponentDataType<T>>* GetComponentArray(Data& data)

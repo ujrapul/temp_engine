@@ -14,7 +14,7 @@ namespace Temp
       
       void Destruct(Data& data)
       {
-        delete GetComponentArray<Type::POSITION2D>(data);
+        Destruct<Type::POSITION2D>(data);
       }
       
       void EntityDestroyed(Data& data, Entity entity)

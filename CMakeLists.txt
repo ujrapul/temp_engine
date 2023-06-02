@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.26.0)
 project(TEMP_ENGINE)
 
+# Find the OpenGL package
+find_package(OpenGL REQUIRED)
+find_package(X11 REQUIRED)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -23,6 +27,8 @@ set ( ENGINE_HEADER
   src/Engine/Components/ComponentType.hpp
   src/Engine/Components/ComponentContainer.hpp
   src/Engine/Components/ComponentData.hpp
+  src/Engine/Render/glad/gl.h
+  src/Engine/Render/glad/khrplatform.h
   src/Engine/Coordinator.hpp
   src/Engine/Engine.hpp
   src/Engine/Entity.hpp
@@ -32,14 +38,33 @@ set ( ENGINE_HEADER
   src/Engine/Scene.hpp
   src/Engine/Input.hpp
 )
+if (WIN32)
+  list (APPEND ENGINE_HEADER
+    src/Engine/Render/glad/wgl.h
+  )
+elseif (UNIX)
+  list (APPEND ENGINE_HEADER
+    src/Engine/Render/glad/glx.h
+  )
+endif()
 set ( ENGINE_SRC
   src/Engine/Engine.cpp
   src/Engine/EntityManager.cpp
   src/Engine/Coordinator.cpp
   src/Engine/Components/ComponentContainer.cpp
+  src/Engine/Render/glad/gl.c
   src/Engine/Scene.cpp
   src/Engine/Input.cpp
 )
+if (WIN32)
+  list (APPEND ENGINE_HEADER
+    src/Engine/Render/glad/wgl.c
+  )
+elseif (UNIX)
+  list (APPEND ENGINE_HEADER
+    src/Engine/Render/glad/glx.c
+  )
+endif()
 set ( TEST_GAME_HEADER
   src/TestGame/TestLevel.hpp
   src/TestGame/Entry.hpp
@@ -81,8 +106,23 @@ add_executable(${TARGET_NUMBER_GAME} ${NUMBER_GAME_SRC} ${NUMBER_GAME_HEADER})
 
 set_target_properties(${TARGET_ENGINE} PROPERTIES LINKER_LANGUAGE CXX)
 
-include_directories(src src/Engine src/Engine/Components src/TestGame src/TestGame2 src/NumberGame src/NumberGame/Components)
+include_directories(
+  src
+  src/Engine
+  src/Engine/Components
+  src/Engine/Render
+  src/Engine/Render/glad
+  src/TestGame
+  src/TestGame2
+  src/NumberGame
+  src/NumberGame/Components
+  ${OPENGL_INCLUDE_DIRS}
+)
 
+target_link_libraries(${TARGET_ENGINE} PRIVATE ${OPENGL_LIBRARIES})
+if(UNIX)
+  target_link_libraries(${TARGET_ENGINE} PRIVATE X11)
+endif()
 target_link_libraries(${TARGET_TEST_GAME} ${TARGET_ENGINE})
 target_link_libraries(${TARGET_TEST_GAME_2} ${TARGET_ENGINE})
 target_link_libraries(${TARGET_NUMBER_GAME} ${TARGET_ENGINE})
