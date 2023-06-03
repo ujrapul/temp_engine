@@ -29,6 +29,7 @@ set ( ENGINE_HEADER
   src/Engine/Components/ComponentData.hpp
   src/Engine/Render/glad/gl.h
   src/Engine/Render/glad/khrplatform.h
+  src/Engine/Render/OpenGL/X11Render.hpp
   src/Engine/Coordinator.hpp
   src/Engine/Engine.hpp
   src/Engine/Entity.hpp
@@ -53,6 +54,7 @@ set ( ENGINE_SRC
   src/Engine/Coordinator.cpp
   src/Engine/Components/ComponentContainer.cpp
   src/Engine/Render/glad/gl.c
+  src/Engine/Render/OpenGL/X11Render.cpp
   src/Engine/Scene.cpp
   src/Engine/Input.cpp
 )
@@ -112,6 +114,7 @@ include_directories(
   src/Engine/Components
   src/Engine/Render
   src/Engine/Render/glad
+  src/Engine/Render/OpenGL
   src/TestGame
   src/TestGame2
   src/NumberGame

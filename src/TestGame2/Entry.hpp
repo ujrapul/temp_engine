@@ -30,7 +30,7 @@ namespace Game
       Input::RemoveCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);
       Input::AddCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);
 
-      Temp::Engine::Run(engine);
+      Temp::Engine::Run(engine, "TestGame2");
       
       Temp::Engine::Destroy(engine);
     }

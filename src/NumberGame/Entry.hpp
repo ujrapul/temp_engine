@@ -8,16 +8,18 @@ namespace Game
 {
   namespace Entry
   {
+    Temp::Engine::Data engine{};
+
     void Exit(Temp::Input::KeyboardCode /*keyCode*/)
     {
-      exit(0);
+      Temp::Engine::Quit(engine);
     }
     
-    void Run()
+    void Run(const char* windowName)
     {
       using namespace Temp;
       
-      Engine::Data engine = Engine::Construct();
+      engine = Engine::Construct();
       Temp::Scene::Data* scene1 = Scene::GameLevel::Create(engine.keyEventData);
 //      Temp::Scene::Data* scene2 = Scene::GameLevel::Create2();
 //      scene1->nextScene = scene2;
@@ -30,7 +32,7 @@ namespace Game
       Input::RemoveCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);
       Input::AddCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);
 
-      Temp::Engine::Run(engine);
+      Temp::Engine::Run(engine, windowName);
       
       Temp::Engine::Destroy(engine);
     }

@@ -2,6 +2,6 @@
 
 int main()
 {
-  Game::Entry::Run();
+  Game::Entry::Run("NumberGame");
   return 0;
 }
