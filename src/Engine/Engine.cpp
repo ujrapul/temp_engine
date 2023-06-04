@@ -31,7 +31,7 @@ namespace Temp::Engine
         break;
       case Scene::State::RUN:
         // if (currentScene->Update)
-        //   currentScene->Update(currentScene, deltaTime);
+        //   currentScene->Update(currentScene, 0.01f/*deltaTime*/);
         break;
       case Scene::State::LEAVE:
         if (currentScene->Destruct)

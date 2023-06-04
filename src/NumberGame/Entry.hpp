@@ -18,6 +18,8 @@ namespace Game
     void Run(const char* windowName)
     {
       using namespace Temp;
+
+      Math::UnitTests::Run();
       
       engine = Engine::Construct();
       Temp::Scene::Data* scene1 = Scene::GameLevel::Create(engine.keyEventData);

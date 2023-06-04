@@ -121,13 +121,13 @@ namespace Temp::Render
       glDeleteShader(vertexShader);
       glDeleteShader(fragmentShader);
 
-      // Define the rectangle vertices
+      // Define the square vertices
       float vertices[] = {
           // Positions
-          0.5f, 0.5f, 0.0f,   // Top Right
-          0.5f, -0.5f, 0.0f,  // Bottom Right
-          -0.5f, -0.5f, 0.0f, // Bottom Left
-          -0.5f, 0.5f, 0.0f   // Top Left
+          -0.5f, 0.5f, 0.0f, // Top Left
+          0.5f, 0.5f, 0.0f,  // Top Right
+          0.5f, -0.5f, 0.0f, // Bottom Right
+          -0.5f, -0.5f, 0.0f // Bottom Left
       };
 
       // Define the indices
@@ -196,7 +196,7 @@ namespace Temp::Render
       glDeleteProgram(shaderProgram);
     }
 
-    void CreateDisplay(const char* windowName)
+    void CreateDisplay(const char *windowName)
     {
       // Open the X11 display
       display = XOpenDisplay(NULL);
@@ -281,7 +281,7 @@ namespace Temp::Render
 
   }
 
-  void Initialize(const char* windowName)
+  void Initialize(const char *windowName)
   {
     CreateDisplay(windowName);
     renderThread = std::thread(RenderThread);

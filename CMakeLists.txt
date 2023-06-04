@@ -8,6 +8,7 @@ find_package(X11 REQUIRED)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
 
 set ( TEST_GAME_SRC
   src/TestGame/main.cpp
@@ -51,6 +52,7 @@ endif()
 set ( ENGINE_SRC
   src/Engine/Engine.cpp
   src/Engine/EntityManager.cpp
+  src/Engine/Math.cpp
   src/Engine/Coordinator.cpp
   src/Engine/Components/ComponentContainer.cpp
   src/Engine/Render/glad/gl.c
