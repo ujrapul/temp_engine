@@ -630,20 +630,34 @@ namespace Temp::Math
   float Mat4::determinant() const
   {
     // float a11 = rows[0].x, a12 = rows[0].y, a13 = rows[0].z, a14 = rows[0].w;
-    float a21 = rows[1].x, a22 = rows[1].y, a23 = rows[1].z, a24 = rows[1].w;
-    float a31 = rows[2].x, a32 = rows[2].y, a33 = rows[2].z, a34 = rows[2].w;
-    float a41 = rows[3].x, a42 = rows[3].y, a43 = rows[3].z, a44 = rows[3].w;
+    // float a21 = rows[1].x, a22 = rows[1].y, a23 = rows[1].z, a24 = rows[1].w;
+    // float a31 = rows[2].x, a32 = rows[2].y, a33 = rows[2].z, a34 = rows[2].w;
+    // float a41 = rows[3].x, a42 = rows[3].y, a43 = rows[3].z, a44 = rows[3].w;
 
-    float det1 = (a22 * (a33 * a44 - a34 * a43) - a23 * (a32 * a44 - a34 * a42) + a24 * (a32 * a43 - a33 * a42));
-    float det2 = (a21 * (a33 * a44 - a34 * a43) - a23 * (a31 * a44 - a34 * a41) + a24 * (a31 * a43 - a33 * a41));
-    float det3 = (a21 * (a32 * a44 - a34 * a42) - a22 * (a31 * a44 - a34 * a41) + a24 * (a31 * a42 - a32 * a41));
-    float det4 = (a21 * (a32 * a43 - a33 * a42) - a22 * (a31 * a43 - a33 * a41) + a23 * (a31 * a42 - a32 * a41));
+    __m128 a3332 = _mm_set_ps(rows[2].y, rows[2].y, rows[2].z, rows[2].z);
+    __m128 a4443 = _mm_set_ps(rows[3].z, rows[3].w, rows[3].w, rows[3].w);
+    __m128 a3433 = _mm_set_ps(rows[2].z, rows[2].w, rows[2].w, rows[2].w);
+    __m128 a4342 = _mm_set_ps(rows[3].y, rows[3].y, rows[3].z, rows[3].z);
+    __m128 a3231 = _mm_set_ps(rows[2].x, rows[2].x, rows[2].x, rows[2].y);
+    __m128 a4241 = _mm_set_ps(rows[3].x, rows[3].x, rows[3].x, rows[3].y);
 
-    __m128 xmm0 = _mm_mul_ps(rows[0].simdData, _mm_set_ps(det4, det3, det2, det1));
+    __m128 detM0 = _mm_sub_ps(_mm_mul_ps(a3332, a4443), _mm_mul_ps(a3433, a4342));
+    __m128 detM1 = _mm_set_ps(rows[1].x, rows[1].x, rows[1].x, rows[1].y);
+    __m128 detM10 = _mm_mul_ps(detM0, detM1);
+
+    __m128 detM02 = _mm_sub_ps(_mm_mul_ps(a3231, a4443), _mm_mul_ps(a3433, a4241));
+    __m128 detM2 = _mm_set_ps(rows[1].y, rows[1].y, rows[1].z, rows[1].z);
+    __m128 detM20 = _mm_mul_ps(detM02, detM2);
+
+    __m128 detM03 = _mm_sub_ps(_mm_mul_ps(a3231, a4342), _mm_mul_ps(a3332, a4241));
+    __m128 detM3 = _mm_set_ps(rows[1].z, rows[1].w, rows[1].w, rows[1].w);
+    __m128 detM30 = _mm_mul_ps(detM03, detM3);
+
+    __m128 detM40 = _mm_add_ps(_mm_sub_ps(detM10, detM20), detM30);
+
+    __m128 xmm0 = _mm_mul_ps(rows[0].simdData, detM40);
 
     __m128 det = _mm_hadd_ps(_mm_hsub_ps(xmm0, xmm0), _mm_hsub_ps(xmm0, xmm0));
-
-    // float det = xmm0[0] - xmm0[1] + xmm0[2] - xmm0[3];
 
     // float det =
     //     a11 * (a22 * (a33 * a44 - a34 * a43) - a23 * (a32 * a44 - a34 * a42) + a24 * (a32 * a43 - a33 * a42)) -
@@ -651,7 +665,9 @@ namespace Temp::Math
     //     a13 * (a21 * (a32 * a44 - a34 * a42) - a22 * (a31 * a44 - a34 * a41) + a24 * (a31 * a42 - a32 * a41)) -
     //     a14 * (a21 * (a32 * a43 - a33 * a42) - a22 * (a31 * a43 - a33 * a41) + a23 * (a31 * a42 - a32 * a41));
 
-    return det[0];
+    float result;
+    _mm_store_ss(&result, det);
+    return result;
   }
 
   // Matrix inverse
