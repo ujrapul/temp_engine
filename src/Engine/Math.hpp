@@ -22,9 +22,9 @@ namespace Temp::Math
       __m128 simdData;
     };
 
-    inline Vec2() : x(0.0f), y(0.0f) {}
-    inline Vec2(float x, float y) : x(x), y(y) {}
-    inline Vec2(__m128 data) : simdData(data) {}
+    constexpr Vec2() : x(0.0f), y(0.0f) {}
+    constexpr Vec2(float x, float y) : x(x), y(y) {}
+    constexpr Vec2(__m128 data) : simdData(data) {}
 
     inline Vec2 operator+(const Vec2 &other) const
     {
@@ -50,49 +50,49 @@ namespace Temp::Math
     }
 
     // Vector-float addition
-    inline Vec2 operator+(float scalar) const
+    constexpr Vec2 operator+(float scalar) const
     {
       return {x + scalar, y + scalar};
     }
 
     // Vector-float subtraction
-    inline Vec2 operator-(float scalar) const
+    constexpr Vec2 operator-(float scalar) const
     {
       return {x - scalar, y - scalar};
     }
 
     // Vector-float multiplication
-    inline Vec2 operator*(float scalar) const
+    constexpr Vec2 operator*(float scalar) const
     {
       return {x * scalar, y * scalar};
     }
 
     // Vector-float division
-    inline Vec2 operator/(float scalar) const
+    constexpr Vec2 operator/(float scalar) const
     {
       return {x / scalar, y / scalar};
     }
 
     // Dot product of two vectors
-    inline float dot(const Vec2 &other) const
+    constexpr float dot(const Vec2 &other) const
     {
       return x * other.x + y * other.y;
     }
 
     // Magnitude (length) of the vector
-    inline float magnitude() const
+    constexpr float magnitude() const
     {
       return std::sqrt(dot(*this));
     }
 
     // Squared magnitude (length) of the vector
-    inline float magnitude2() const
+    constexpr float magnitude2() const
     {
       return dot(*this);
     }
 
     // Normalize the vector
-    inline Vec2 normalize() const
+    constexpr Vec2 normalize() const
     {
       float mag = magnitude();
       float invMagnitude = 1.0f / (mag + (mag == 0.0f));
@@ -114,9 +114,9 @@ namespace Temp::Math
     };
 
     // 3D vector struct
-    inline Vec3() : x(0.0f), y(0.0f), z(0.0f) {}
-    inline Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
-    inline Vec3(__m128 data) : simdData(data) {}
+    constexpr Vec3() : x(0.0f), y(0.0f), z(0.0f) {}
+    constexpr Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
+    constexpr Vec3(__m128 data) : simdData(data) {}
 
     // Vector-vector addition
     inline Vec3 operator+(const Vec3 &other) const
@@ -143,37 +143,37 @@ namespace Temp::Math
     }
 
     // Vector-float addition
-    inline Vec3 operator+(float scalar) const
+    constexpr Vec3 operator+(float scalar) const
     {
       return {x + scalar, y + scalar, z + scalar};
     }
 
     // Vector-float subtraction
-    inline Vec3 operator-(float scalar) const
+    constexpr Vec3 operator-(float scalar) const
     {
       return {x - scalar, y - scalar, z - scalar};
     }
 
     // Vector-float multiplication
-    inline Vec3 operator*(float scalar) const
+    constexpr Vec3 operator*(float scalar) const
     {
       return {x * scalar, y * scalar, z * scalar};
     }
 
     // Vector-float division
-    inline Vec3 operator/(float scalar) const
+    constexpr Vec3 operator/(float scalar) const
     {
       return {x / scalar, y / scalar, z / scalar};
     }
 
     // Dot product of two vectors
-    inline float dot(const Vec3 &other) const
+    constexpr float dot(const Vec3 &other) const
     {
       return x * other.x + y * other.y + z * other.z;
     }
 
     // Cross product of two vectors
-    inline Vec3 cross(const Vec3 &other) const
+    constexpr Vec3 cross(const Vec3 &other) const
     {
       return {
           (y * other.z) - (z * other.y),
@@ -182,19 +182,19 @@ namespace Temp::Math
     }
 
     // Magnitude (length) of the vector
-    inline float magnitude() const
+    constexpr float magnitude() const
     {
       return std::sqrt(dot(*this));
     }
 
     // Squared magnitude (length) of the vector
-    inline float magnitude2() const
+    constexpr float magnitude2() const
     {
       return dot(*this);
     }
 
     // Normalize the vector
-    inline Vec3 normalize() const
+    constexpr Vec3 normalize() const
     {
       float mag = magnitude();
       float invMagnitude = 1.0f / (mag + (mag == 0.0f));
@@ -217,9 +217,9 @@ namespace Temp::Math
     };
 
     // 4D vector struct
-    Vec4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
-    Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
-    Vec4(__m128 data) : simdData(data) {}
+    constexpr Vec4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
+    constexpr Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+    constexpr Vec4(__m128 data) : simdData(data) {}
 
     // Vector-vector addition
     inline Vec4 operator+(const Vec4 &other) const
@@ -273,6 +273,11 @@ namespace Temp::Math
       return _mm_div_ps(simdData, scalarData);
     }
 
+    constexpr float &operator[](int i)
+    {
+      return simdData[i];
+    }
+
     // Dot product of two vectors
     inline float dot(const Vec4 &other) const
     {
@@ -303,13 +308,13 @@ namespace Temp::Math
     Vec2 rows[2];
 
     // 2x2 matrix struct
-    inline Mat2()
+    constexpr Mat2()
     {
       rows[0] = Vec2(1.0f, 0.0f);
       rows[1] = Vec2(0.0f, 1.0f);
     }
 
-    inline Mat2(const Vec2 &col1, const Vec2 &col2)
+    constexpr Mat2(const Vec2 &col1, const Vec2 &col2)
     {
       rows[0] = col1;
       rows[1] = col2;
@@ -374,13 +379,13 @@ namespace Temp::Math
     }
 
     // Matrix transposition
-    inline Mat2 transpose() const
+    constexpr Mat2 transpose() const
     {
       return {Vec2(rows[0].x, rows[1].x), Vec2(rows[0].y, rows[1].y)};
     }
 
     // Matrix determinant
-    inline float determinant() const
+    constexpr float determinant() const
     {
       // __m128 a = rows[0].simdData;
       // __m128 b = rows[1].simdData;
@@ -411,14 +416,14 @@ namespace Temp::Math
     Vec3 rows[3];
 
     // 3x3 matrix struct
-    inline Mat3()
+    constexpr Mat3()
     {
       rows[0] = Vec3(1.0f, 0.0f, 0.0f);
       rows[1] = Vec3(0.0f, 1.0f, 0.0f);
       rows[2] = Vec3(0.0f, 0.0f, 1.0f);
     }
 
-    inline Mat3(const Vec3 &col1, const Vec3 &col2, const Vec3 &col3)
+    constexpr Mat3(const Vec3 &col1, const Vec3 &col2, const Vec3 &col3)
     {
       rows[0] = col1;
       rows[1] = col2;
@@ -493,7 +498,7 @@ namespace Temp::Math
     }
 
     // Matrix transposition
-    inline Mat3 transpose() const
+    constexpr Mat3 transpose() const
     {
       return {{rows[0].x, rows[1].x, rows[2].x},
               {rows[0].y, rows[1].y, rows[2].y},
@@ -541,7 +546,7 @@ namespace Temp::Math
       return result;
     }
 
-    inline void print(const Mat3 &mat3)
+    constexpr void print(const Mat3 &mat3)
     {
       for (int i = 0; i < 3; ++i)
       {
@@ -555,7 +560,7 @@ namespace Temp::Math
     Vec4 rows[4];
 
     // 4x4 matrix struct
-    inline Mat4()
+    constexpr Mat4()
     {
       rows[0] = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
       rows[1] = Vec4(0.0f, 1.0f, 0.0f, 0.0f);
@@ -563,7 +568,7 @@ namespace Temp::Math
       rows[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
-    inline Mat4(const Vec4 &col1, const Vec4 &col2, const Vec4 &col3, const Vec4 &col4)
+    constexpr Mat4(const Vec4 &col1, const Vec4 &col2, const Vec4 &col3, const Vec4 &col4)
     {
       rows[0] = col1;
       rows[1] = col2;
@@ -661,8 +666,13 @@ namespace Temp::Math
       return _mm_hadd_ps(xy, zw);
     }
 
+    constexpr Vec4 &operator[](int i)
+    {
+      return rows[i];
+    }
+
     // Matrix transposition
-    inline Mat4 transpose() const
+    constexpr Mat4 transpose() const
     {
       return {{rows[0].x, rows[1].x, rows[2].x, rows[3].x},
               {rows[0].y, rows[1].y, rows[2].y, rows[3].y},
@@ -671,7 +681,7 @@ namespace Temp::Math
     }
 
     // Matrix determinant
-    inline float determinant() const
+    constexpr float determinant() const
     {
       float a11 = rows[0].x, a12 = rows[0].y, a13 = rows[0].z, a14 = rows[0].w;
       float a21 = rows[1].x, a22 = rows[1].y, a23 = rows[1].z, a24 = rows[1].w;
@@ -814,34 +824,87 @@ namespace Temp::Math
       return adjugate * invDet;
     }
 
-    inline void translate(const Vec3 &translation)
+    constexpr void translate(const Vec3 &translation)
     {
       rows[0].w += translation.x;
       rows[1].w += translation.y;
       rows[2].w += translation.z;
     }
 
-    inline void scale(const Vec3 &scale)
+    constexpr void scale(const Vec3 &scale)
     {
       rows[0].x *= scale.x;
       rows[1].y *= scale.y;
       rows[2].z *= scale.z;
     }
 
-    // inline void rotateX(float angle)
-    // {
-    // }
+    constexpr void rotateX(float angle)
+    {
+      float cosAngle = cosf(angle);
+      float sinAngle = sinf(angle);
 
-    // inline void rotateY(float angle)
-    // {
-    // }
+      rows[1][1] = cosAngle;
+      rows[1][2] = -sinAngle;
+      rows[2][1] = sinAngle;
+      rows[2][2] = cosAngle;
+    }
 
-    // inline void rotateZ(float angle)
-    // {
-    // }
+    constexpr void rotateY(float angle)
+    {
+      float cosAngle = cosf(angle);
+      float sinAngle = sinf(angle);
 
-    // static Mat4 perspective(float fov, float aspectRatio, float near, float far);
-    // static Mat4 orthographic(float left, float right, float bottom, float top, float near, float far);
+      rows[0][0] = cosAngle;
+      rows[0][2] = sinAngle;
+      rows[2][0] = -sinAngle;
+      rows[2][2] = cosAngle;
+    }
+
+    constexpr void rotateZ(float angle)
+    {
+      float cosAngle = cosf(angle);
+      float sinAngle = sinf(angle);
+
+      rows[0][0] = cosAngle;
+      rows[0][1] = -sinAngle;
+      rows[1][0] = sinAngle;
+      rows[1][1] = cosAngle;
+    }
+
+    static constexpr Mat4 perspective(float fov, float aspectRatio, float near, float far)
+    {
+      Mat4 result;
+
+      float tanHalfFOV = tanf(fov / 2.0f);
+      float range = near - far;
+
+      result[0][0] = 1.0f / (aspectRatio * tanHalfFOV);
+      result[1][1] = 1.0f / tanHalfFOV;
+      result[2][2] = (-near - far) / range;
+      result[2][3] = 2.0f * far * near / range;
+      result[3][2] = 1.0f;
+
+      return result;
+    }
+
+    static constexpr Mat4 orthographic(float left, float right, float bottom, float top, float near, float far)
+    {
+      Mat4 result;
+
+      float width = right - left;
+      float height = top - bottom;
+      float depth = far - near;
+
+      result[0][0] = 2.0f / width;
+      result[1][1] = 2.0f / height;
+      result[2][2] = -2.0f / depth;
+      result[3][0] = -(right + left) / width;
+      result[3][1] = -(top + bottom) / height;
+      result[3][2] = -(far + near) / depth;
+      result[3][3] = 1.0f;
+
+      return result;
+    }
   };
 
   namespace UnitTests
