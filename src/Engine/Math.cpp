@@ -17,13 +17,13 @@ namespace Temp::Math
     }
 
     // Function to compare Vec3 objects
-    bool vec3Equals(const Vec3 &v1, const Vec3 &v2)
+    bool vec3Equals(const Vec3f &v1, const Vec3f &v2)
     {
       return floatEquals(v1.x, v2.x) && floatEquals(v1.y, v2.y) && floatEquals(v1.z, v2.z);
     }
 
     // Function to compare Vec4 objects
-    bool vec4Equals(const Vec4 &v1, const Vec4 &v2)
+    bool vec4Equals(const Vec4f &v1, const Vec4f &v2)
     {
       return floatEquals(v1.x, v2.x) && floatEquals(v1.y, v2.y) && floatEquals(v1.z, v2.z) && floatEquals(v1.w, v2.w);
     }
@@ -85,8 +85,8 @@ namespace Temp::Math
       assert(vec2Equals(v2a.normalize(), {0.5547f, 0.832f}));
 
       // Test Vec3 operations
-      Vec3 v3a(2.0f, 3.0f, 4.0f);
-      Vec3 v3b(4.0f, 5.0f, 6.0f);
+      Vec3f v3a(2.0f, 3.0f, 4.0f);
+      Vec3f v3b(4.0f, 5.0f, 6.0f);
 
       // Addition
       Vec3 v3add = v3a + v3b;
@@ -305,15 +305,15 @@ namespace Temp::Math
 
       // Test matrix inverse
       Mat4 mInverse4 = m4a.inverse();
-      assert(mat4Equals(mInverse4, {Vec4(0, 0, 0, 0),
-                                    Vec4(0, 0, 0, 0),
-                                    Vec4(0, 0, 0, 0),
-                                    Vec4(0, 0, 0, 0)}));
+      assert(mat4Equals(mInverse4, {Vec4f(0, 0, 0, 0),
+                                    Vec4f(0, 0, 0, 0),
+                                    Vec4f(0, 0, 0, 0),
+                                    Vec4f(0, 0, 0, 0)}));
       Mat4 mInverse42 = m4c.inverse();
-      assert(mat4Equals(mInverse42, {Vec4(-0.23809523809523809478f, -0.19047619047619047692f, -0.33333333333333333472f, 0.38095238095238095362f),
-                                     Vec4(0.031746031746031746008f, -0.09126984126984126981f, 0.027777777777777777841f, 0.015873015873015872959f),
-                                     Vec4(-0.49206349206349206618f, 1.0396825396825396868f, 1.9444444444444444526f, -1.746031746031746039f),
-                                     Vec4(0.60317460317460317664, -0.73412698412698413022, -1.4722222222222222284, 1.3015873015873015928f)}));
+      assert(mat4Equals(mInverse42, {Vec4f(-0.23809523809523809478f, -0.19047619047619047692f, -0.33333333333333333472f, 0.38095238095238095362f),
+                                     Vec4f(0.031746031746031746008f, -0.09126984126984126981f, 0.027777777777777777841f, 0.015873015873015872959f),
+                                     Vec4f(-0.49206349206349206618f, 1.0396825396825396868f, 1.9444444444444444526f, -1.746031746031746039f),
+                                     Vec4f(0.60317460317460317664, -0.73412698412698413022, -1.4722222222222222284, 1.3015873015873015928f)}));
 
       std::cout << "All unit tests passed!\n";
     }

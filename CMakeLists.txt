@@ -39,6 +39,8 @@ set ( ENGINE_HEADER
   src/Engine/Player.hpp
   src/Engine/Scene.hpp
   src/Engine/Input.hpp
+  src/Engine/ImageLoader.hpp
+  src/Engine/stb_image.h
 )
 if (WIN32)
   list (APPEND ENGINE_HEADER
@@ -59,6 +61,7 @@ set ( ENGINE_SRC
   src/Engine/Render/OpenGL/X11Render.cpp
   src/Engine/Scene.cpp
   src/Engine/Input.cpp
+  src/Engine/stb_image.cpp
 )
 if (WIN32)
   list (APPEND ENGINE_HEADER

@@ -10,6 +10,8 @@
 
 namespace Temp::Math
 {
+  constexpr float PI = 3.141592653589793238f;
+
   struct Vec2
   {
     union
@@ -19,6 +21,7 @@ namespace Temp::Math
         float x;
         float y;
       };
+      float *data;
       __m128 simdData;
     };
 
@@ -100,22 +103,24 @@ namespace Temp::Math
     }
   };
 
+  template <typename T>
   struct Vec3
   {
     union
     {
       struct
       {
-        float x;
-        float y;
-        float z;
+        T x;
+        T y;
+        T z;
       };
+      T *data;
       __m128 simdData;
     };
 
     // 3D vector struct
     constexpr Vec3() : x(0.0f), y(0.0f), z(0.0f) {}
-    constexpr Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
+    constexpr Vec3(T x, T y, T z) : x(x), y(y), z(z) {}
     constexpr Vec3(__m128 data) : simdData(data) {}
 
     // Vector-vector addition
@@ -143,27 +148,32 @@ namespace Temp::Math
     }
 
     // Vector-float addition
-    constexpr Vec3 operator+(float scalar) const
+    constexpr Vec3 operator+(T scalar) const
     {
       return {x + scalar, y + scalar, z + scalar};
     }
 
     // Vector-float subtraction
-    constexpr Vec3 operator-(float scalar) const
+    constexpr Vec3 operator-(T scalar) const
     {
       return {x - scalar, y - scalar, z - scalar};
     }
 
     // Vector-float multiplication
-    constexpr Vec3 operator*(float scalar) const
+    constexpr Vec3 operator*(T scalar) const
     {
       return {x * scalar, y * scalar, z * scalar};
     }
 
     // Vector-float division
-    constexpr Vec3 operator/(float scalar) const
+    constexpr Vec3 operator/(T scalar) const
     {
       return {x / scalar, y / scalar, z / scalar};
+    }
+
+    constexpr float &operator[](int i)
+    {
+      return simdData[i];
     }
 
     // Dot product of two vectors
@@ -202,23 +212,28 @@ namespace Temp::Math
     }
   };
 
+  using Vec3f = Vec3<float>;
+  using Vec3i = Vec3<unsigned char>;
+
+  template <typename T>
   struct Vec4
   {
     union
     {
       struct
       {
-        float x;
-        float y;
-        float z;
-        float w;
+        T x;
+        T y;
+        T z;
+        T w;
       };
+      T *data;
       __m128 simdData;
     };
 
     // 4D vector struct
     constexpr Vec4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
-    constexpr Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+    constexpr Vec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
     constexpr Vec4(__m128 data) : simdData(data) {}
 
     // Vector-vector addition
@@ -246,28 +261,28 @@ namespace Temp::Math
     }
 
     // Vector-float addition
-    inline Vec4 operator+(float scalar) const
+    inline Vec4 operator+(T scalar) const
     {
       __m128 scalarData = _mm_set1_ps(scalar);
       return _mm_add_ps(simdData, scalarData);
     }
 
     // Vector-float subtraction
-    inline Vec4 operator-(float scalar) const
+    inline Vec4 operator-(T scalar) const
     {
       __m128 scalarData = _mm_set1_ps(scalar);
       return _mm_sub_ps(simdData, scalarData);
     }
 
     // Vector-float multiplication
-    inline Vec4 operator*(float scalar) const
+    inline Vec4 operator*(T scalar) const
     {
       __m128 scalarData = _mm_set1_ps(scalar);
       return _mm_mul_ps(simdData, scalarData);
     }
 
     // Vector-float division
-    inline Vec4 operator/(float scalar) const
+    inline Vec4 operator/(T scalar) const
     {
       __m128 scalarData = _mm_set1_ps(scalar);
       return _mm_div_ps(simdData, scalarData);
@@ -303,22 +318,16 @@ namespace Temp::Math
     }
   };
 
+  using Vec4f = Vec4<float>;
+  using Vec4i = Vec4<unsigned char>;
+
   struct Mat2
   {
     Vec2 rows[2];
 
     // 2x2 matrix struct
-    constexpr Mat2()
-    {
-      rows[0] = Vec2(1.0f, 0.0f);
-      rows[1] = Vec2(0.0f, 1.0f);
-    }
-
-    constexpr Mat2(const Vec2 &col1, const Vec2 &col2)
-    {
-      rows[0] = col1;
-      rows[1] = col2;
-    }
+    constexpr Mat2() : rows{{1.0f, 0.0f}, {0.0f, 1.0f}} {}
+    constexpr Mat2(const Vec2 &col1, const Vec2 &col2) : rows{col1, col2} {}
 
     // Matrix-matrix addition
     inline Mat2 operator+(const Mat2 &other) const
@@ -413,22 +422,11 @@ namespace Temp::Math
   // 3x3 matrix struct
   struct Mat3
   {
-    Vec3 rows[3];
+    Vec3f rows[3];
 
     // 3x3 matrix struct
-    constexpr Mat3()
-    {
-      rows[0] = Vec3(1.0f, 0.0f, 0.0f);
-      rows[1] = Vec3(0.0f, 1.0f, 0.0f);
-      rows[2] = Vec3(0.0f, 0.0f, 1.0f);
-    }
-
-    constexpr Mat3(const Vec3 &col1, const Vec3 &col2, const Vec3 &col3)
-    {
-      rows[0] = col1;
-      rows[1] = col2;
-      rows[2] = col3;
-    }
+    constexpr Mat3() : rows{{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} {}
+    constexpr Mat3(const Vec3f &col1, const Vec3f &col2, const Vec3f &col3) : rows{col1, col2, col3} {}
 
     // Matrix-matrix addition
     inline Mat3 operator+(const Mat3 &other) const
@@ -478,7 +476,7 @@ namespace Temp::Math
     }
 
     // Matrix-vector multiplication
-    inline Vec3 operator*(const Vec3 &vec) const
+    inline Vec3f operator*(const Vec3f &vec) const
     {
       // Load the vector into SIMD register
       __m128 vecSimd = vec.simdData;
@@ -557,24 +555,11 @@ namespace Temp::Math
 
   struct Mat4
   {
-    Vec4 rows[4];
+    Vec4f rows[4];
 
     // 4x4 matrix struct
-    constexpr Mat4()
-    {
-      rows[0] = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
-      rows[1] = Vec4(0.0f, 1.0f, 0.0f, 0.0f);
-      rows[2] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
-      rows[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    }
-
-    constexpr Mat4(const Vec4 &col1, const Vec4 &col2, const Vec4 &col3, const Vec4 &col4)
-    {
-      rows[0] = col1;
-      rows[1] = col2;
-      rows[2] = col3;
-      rows[3] = col4;
-    }
+    constexpr Mat4() : rows{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}} {}
+    constexpr Mat4(const Vec4f &col1, const Vec4f &col2, const Vec4f &col3, const Vec4f &col4) : rows{col1, col2, col3, col4} {}
 
     // Matrix-matrix addition
     inline Mat4 operator+(const Mat4 &other) const
@@ -595,7 +580,7 @@ namespace Temp::Math
     }
 
     // Matrix-matrix multiplication using SIMD
-    inline Mat4 operator*(const Mat4 &mat) const
+    constexpr Mat4 operator*(const Mat4 &mat) const
     {
       Mat4 result;
 
@@ -651,9 +636,9 @@ namespace Temp::Math
     }
 
     // Matrix-vector multiplication
-    inline Vec4 operator*(const Vec4 &vec) const
+    inline Vec4f operator*(const Vec4f &vec) const
     {
-      Vec4 result;
+      Vec4f result;
 
       __m128 dot0 = _mm_mul_ps(rows[0].simdData, vec.simdData);
       __m128 dot1 = _mm_mul_ps(rows[1].simdData, vec.simdData);
@@ -666,7 +651,7 @@ namespace Temp::Math
       return _mm_hadd_ps(xy, zw);
     }
 
-    constexpr Vec4 &operator[](int i)
+    constexpr Vec4f &operator[](int i)
     {
       return rows[i];
     }
@@ -824,51 +809,68 @@ namespace Temp::Math
       return adjugate * invDet;
     }
 
-    constexpr void translate(const Vec3 &translation)
+    constexpr Mat4 translate(const Vec3f &translation)
     {
-      rows[0].w += translation.x;
-      rows[1].w += translation.y;
-      rows[2].w += translation.z;
+      Mat4 translateMatrix;
+      translateMatrix[0].w = translation.x;
+      translateMatrix[1].w = translation.y;
+      translateMatrix[2].w = translation.z;
+
+      return *this * translateMatrix;
     }
 
-    constexpr void scale(const Vec3 &scale)
+    constexpr Mat4 scale(const Vec3f &scale)
     {
-      rows[0].x *= scale.x;
-      rows[1].y *= scale.y;
-      rows[2].z *= scale.z;
+      Mat4 scaleMatrix;
+      scaleMatrix[0].x = scale.x;
+      scaleMatrix[1].y = scale.y;
+      scaleMatrix[2].z = scale.z;
+
+      return *this * scaleMatrix;
     }
 
-    constexpr void rotateX(float angle)
+    // Rotations take radians!
+
+    constexpr Mat4 rotateX(float angle)
     {
       float cosAngle = cosf(angle);
       float sinAngle = sinf(angle);
 
-      rows[1][1] = cosAngle;
-      rows[1][2] = -sinAngle;
-      rows[2][1] = sinAngle;
-      rows[2][2] = cosAngle;
+      Mat4 rotationMatrix;
+      rotationMatrix[1][1] = cosAngle;
+      rotationMatrix[1][2] = -sinAngle;
+      rotationMatrix[2][1] = sinAngle;
+      rotationMatrix[2][2] = cosAngle;
+
+      return *this * rotationMatrix;
     }
 
-    constexpr void rotateY(float angle)
+    constexpr Mat4 rotateY(float angle)
     {
       float cosAngle = cosf(angle);
       float sinAngle = sinf(angle);
 
-      rows[0][0] = cosAngle;
-      rows[0][2] = sinAngle;
-      rows[2][0] = -sinAngle;
-      rows[2][2] = cosAngle;
+      Mat4 rotationMatrix;
+      rotationMatrix[0][0] = cosAngle;
+      rotationMatrix[0][2] = sinAngle;
+      rotationMatrix[2][0] = -sinAngle;
+      rotationMatrix[2][2] = cosAngle;
+
+      return *this * rotationMatrix;
     }
 
-    constexpr void rotateZ(float angle)
+    constexpr Mat4 rotateZ(float angle)
     {
       float cosAngle = cosf(angle);
       float sinAngle = sinf(angle);
 
-      rows[0][0] = cosAngle;
-      rows[0][1] = -sinAngle;
-      rows[1][0] = sinAngle;
-      rows[1][1] = cosAngle;
+      Mat4 rotationMatrix;
+      rotationMatrix[0][0] = cosAngle;
+      rotationMatrix[0][1] = -sinAngle;
+      rotationMatrix[1][0] = sinAngle;
+      rotationMatrix[1][1] = cosAngle;
+
+      return *this * rotationMatrix;
     }
 
     static constexpr Mat4 perspective(float fov, float aspectRatio, float near, float far)
@@ -906,6 +908,11 @@ namespace Temp::Math
       return result;
     }
   };
+
+  constexpr float ToRadians(float degrees)
+  {
+    return degrees * PI / 180.f;
+  }
 
   namespace UnitTests
   {

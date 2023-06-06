@@ -1,5 +1,7 @@
 #include "X11Render.hpp"
 #include "Input.hpp"
+#include "ImageLoader.hpp"
+#include "stb_image.h"
 #include "../glad/gl.h"
 #include <chrono>
 #include <thread>
@@ -17,30 +19,40 @@ namespace Temp::Render
   {
     // Vertex shader source code
     const char *vertexShaderSource = R"(
-    #version 330 core
-    layout (location = 0) in vec3 aPos;
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
 
-    void main()
-    {
-        gl_Position = vec4(aPos, 1.0);
-    }
+out vec2 TexCoord;
+  
+uniform mat4 transform;
+
+void main()
+{
+    gl_Position = transform * vec4(aPos, 1.0f);
+    TexCoord = vec2(aTexCoord.x, aTexCoord.y);
+}
 )";
 
     // Fragment shader source code
     const char *fragmentShaderSource = R"(
     #version 330 core
-    out vec4 FragColor;
+out vec4 FragColor;
 
-    void main()
-    {
-        // Calculate the rainbow color based on the fragment's position
-        vec3 rainbowColor;
-        rainbowColor.x = (gl_FragCoord.x / 640);  // Vary the color based on the fragment's x position
-        rainbowColor.y = (gl_FragCoord.y / 480);  // Vary the color based on the fragment's y position
-        rainbowColor.z = 0.5;                       // Set the blue component to a fixed value
+in vec3 ourColor;
+in vec2 TexCoord;
 
-        FragColor = vec4(rainbowColor, 1.0);
-    }
+// texture samplers
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+
+void main()
+{
+	// linearly interpolate between both textures (80% container, 20% awesomeface)
+	//FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
+  FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
+}
 )";
 
     float deltaTime{};
@@ -123,11 +135,11 @@ namespace Temp::Render
 
       // Define the square vertices
       float vertices[] = {
-          // Positions
-          -0.5f, 0.5f, 0.0f, // Top Left
-          0.5f, 0.5f, 0.0f,  // Top Right
-          0.5f, -0.5f, 0.0f, // Bottom Right
-          -0.5f, -0.5f, 0.0f // Bottom Left
+          // positions          // colors           // texture coords
+          0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top right
+          0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+          -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+          -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f   // top left
       };
 
       // Define the indices
@@ -154,8 +166,15 @@ namespace Temp::Render
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
       // Specify vertex attributes
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+      // position attribute
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
       glEnableVertexAttribArray(0);
+      // color attribute
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+      glEnableVertexAttribArray(1);
+      // texture coord attribute
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+      glEnableVertexAttribArray(2);
 
       // Unbind VAO and VBO
       glBindVertexArray(0);
@@ -166,6 +185,68 @@ namespace Temp::Render
       glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
       glEnable(GL_DEPTH_TEST);
 
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+      // load and create a texture
+      // -------------------------
+      unsigned int texture1, texture2;
+      // texture 1
+      // ---------
+      glGenTextures(1, &texture1);
+      glBindTexture(GL_TEXTURE_2D, texture1);
+      // set the texture wrapping parameters
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      // set texture filtering parameters
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      // load image, create texture and generate mipmaps
+      int width, height, nrChannels;
+      stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+      // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+      unsigned char *data = stbi_load("src/Engine/Images/container.jpg", &width, &height, &nrChannels, 0);
+      if (data)
+      {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+      }
+      else
+      {
+        std::cout << "Failed to load texture" << std::endl;
+      }
+      stbi_image_free(data);
+      // texture 2
+      // ---------
+      glGenTextures(1, &texture2);
+      glBindTexture(GL_TEXTURE_2D, texture2);
+      // set the texture wrapping parameters
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set texture wrapping to GL_REPEAT (default wrapping method)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      // set texture filtering parameters
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      // load image, create texture and generate mipmaps
+      data = stbi_load("src/Engine/Images/awesomeface.png", &width, &height, &nrChannels, 0);
+      if (data)
+      {
+        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+      }
+      else
+      {
+        std::cout << "Failed to load texture" << std::endl;
+      }
+      stbi_image_free(data);
+
+      // Needs to be called to set variables in the shader!
+      glUseProgram(shaderProgram);
+      glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+      glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
+
+      float time = 0;
+
       // Main rendering loop
       while (!quit)
       {
@@ -173,17 +254,33 @@ namespace Temp::Render
         deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(stop - start).count();
         start = stop;
 
+        time += deltaTime;
+
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Perform your OpenGL rendering here
+        // Bind and activate textures
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
+        // create transformations
+        Math::Mat4 transform; // make sure to initialize matrix to identity matrix first
+        transform = transform.translate(Math::Vec3f(0.5f, -0.5f, 0.0f));
+        transform = transform.rotateZ(time);
+        transform = transform * Math::Mat4::perspective(Math::ToRadians(90.f), 1.33333333333, 0.1, 2000);
 
         // Use the shader program
         glUseProgram(shaderProgram);
 
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_TRUE, &transform.rows[0][0]);
+
         // Bind the VAO and draw the triangle
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        // glBindVertexArray(0);
 
         glXSwapBuffers(display, window);
 
@@ -193,6 +290,7 @@ namespace Temp::Render
       // Clean up resources
       glDeleteVertexArrays(1, &VAO);
       glDeleteBuffers(1, &VBO);
+      glDeleteBuffers(1, &EBO);
       glDeleteProgram(shaderProgram);
     }
 
