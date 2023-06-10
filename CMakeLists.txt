@@ -28,18 +28,22 @@ set ( ENGINE_HEADER
   src/Engine/Components/ComponentType.hpp
   src/Engine/Components/ComponentContainer.hpp
   src/Engine/Components/ComponentData.hpp
+  src/Engine/Render/Utils.hpp
   src/Engine/Render/glad/gl.h
   src/Engine/Render/glad/khrplatform.h
   src/Engine/Render/OpenGL/X11Render.hpp
+  src/Engine/Render/OpenGL/OpenGLWrapper.hpp
   src/Engine/Coordinator.hpp
   src/Engine/Engine.hpp
   src/Engine/Entity.hpp
   src/Engine/EntityManager.hpp
+  src/Engine/FontLoader.hpp
   src/Engine/Math.hpp
   src/Engine/Player.hpp
   src/Engine/Scene.hpp
   src/Engine/Input.hpp
   src/Engine/ImageLoader.hpp
+  # TODO: When you become more knowledgable try writing your own image loading system
   src/Engine/stb_image.h
 )
 if (WIN32)
@@ -61,6 +65,7 @@ set ( ENGINE_SRC
   src/Engine/Render/OpenGL/X11Render.cpp
   src/Engine/Scene.cpp
   src/Engine/Input.cpp
+  # TODO: When you become more knowledgable try writing your own image loading system
   src/Engine/stb_image.cpp
 )
 if (WIN32)
@@ -131,6 +136,12 @@ target_link_libraries(${TARGET_ENGINE} PRIVATE ${OPENGL_LIBRARIES})
 if(UNIX)
   target_link_libraries(${TARGET_ENGINE} PRIVATE X11)
 endif()
+
+# TODO: When you become more knowledgable try writing your own font loading system
+add_subdirectory(src/Engine/Dependencies/freetype)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Dependencies/freetype/include)
+target_link_libraries(${TARGET_ENGINE} PRIVATE freetype)
+
 target_link_libraries(${TARGET_TEST_GAME} ${TARGET_ENGINE})
 target_link_libraries(${TARGET_TEST_GAME_2} ${TARGET_ENGINE})
 target_link_libraries(${TARGET_NUMBER_GAME} ${TARGET_ENGINE})

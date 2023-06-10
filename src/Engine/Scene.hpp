@@ -54,6 +54,6 @@ namespace Temp
     void Destruct(Data& data);
     Entity CreateEntity(Data& data);
     void DestroyEntity(Data& data, Entity entity);
-    Math::Vec2& GetPosition(Data& data, Entity entity);
+    Math::Vec2f& GetPosition(Data& data, Entity entity);
   }
 }

@@ -6,7 +6,9 @@ if [ "$1" = "clean" ]; then
 fi
 
 {
+  git submodule update --init --recursive
   mkdir build
+  cp -rf src/Engine/Fonts build
   cd build
   unameOut="$(uname -s)"
   case "${unameOut}" in

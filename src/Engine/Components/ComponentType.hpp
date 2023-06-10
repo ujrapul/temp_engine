@@ -11,7 +11,7 @@ namespace Temp
     }
     
     template <uint8_t> struct MapToComponentDataType_t;
-    template <> struct MapToComponentDataType_t<Type::POSITION2D> { using type = Math::Vec2; };
+    template <> struct MapToComponentDataType_t<Type::POSITION2D> { using type = Math::Vec2f; };
     
     template <uint8_t T>
     using MapToComponentDataType = typename MapToComponentDataType_t<T>::type;

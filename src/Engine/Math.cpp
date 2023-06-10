@@ -11,7 +11,7 @@ namespace Temp::Math
     }
 
     // Function to compare Vec2 objects
-    bool vec2Equals(const Vec2 &v1, const Vec2 &v2)
+    bool vec2Equals(const Vec2f &v1, const Vec2f &v2)
     {
       return floatEquals(v1.x, v2.x) && floatEquals(v1.y, v2.y);
     }

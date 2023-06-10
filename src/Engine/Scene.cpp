@@ -19,7 +19,7 @@ namespace Temp
       Coordinator::DestroyEntity(data.coordinator, entity);
     }
     
-    Math::Vec2& GetPosition(Data& data, Entity entity)
+    Math::Vec2f& GetPosition(Data& data, Entity entity)
     {
       return Coordinator::GetPosition(data.coordinator, entity);
     }

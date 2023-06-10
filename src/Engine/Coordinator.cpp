@@ -33,7 +33,7 @@ namespace Temp
       Component::Container::Destruct(data.componentData);
     }
     
-    Math::Vec2& GetPosition(Data& data, Entity entity)
+    Math::Vec2f& GetPosition(Data& data, Entity entity)
     {
       return Component::Container::Get<Component::Type::POSITION2D>(data.componentData, entity);
     }

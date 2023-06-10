@@ -44,7 +44,7 @@ namespace Game::Scene::GameLevel
     {
       for (const auto &entity : sceneData->entities)
       {
-        Math::Vec2 pos = GetPosition(*sceneData, entity);
+        Math::Vec2f pos = GetPosition(*sceneData, entity);
         char &value = GetValue(*sceneData, entity);
         if (value - '0' == currentValue)
         {
@@ -78,7 +78,7 @@ namespace Game::Scene::GameLevel
       std::cout << std::endl;
       for (const auto &entity : data->entities)
       {
-        Math::Vec2 pos = GetPosition(*data, entity);
+        Math::Vec2f pos = GetPosition(*data, entity);
         std::cout << GetValue(*data, entity)
                   << " ";
         if (pos.y == BOARD_WIDTH - 1)

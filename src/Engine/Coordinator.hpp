@@ -18,7 +18,7 @@ namespace Temp
     void DestroyEntity(Data& data, Entity entity);
     void Init(Data& data);
     void Destruct(Data& data);
-    [[nodiscard]] Math::Vec2& GetPosition(Data& data, Entity entity);
+    [[nodiscard]] Math::Vec2f& GetPosition(Data& data, Entity entity);
     
     template<uint8_t T>
     constexpr void AddComponent(Data& data, Entity entity, Component::MapToComponentDataType<T> component)

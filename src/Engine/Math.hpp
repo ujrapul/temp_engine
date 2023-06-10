@@ -12,21 +12,22 @@ namespace Temp::Math
 {
   constexpr float PI = 3.141592653589793238f;
 
+  template <typename T>
   struct Vec2
   {
     union
     {
       struct
       {
-        float x;
-        float y;
+        T x;
+        T y;
       };
       float *data;
       __m128 simdData;
     };
 
     constexpr Vec2() : x(0.0f), y(0.0f) {}
-    constexpr Vec2(float x, float y) : x(x), y(y) {}
+    constexpr Vec2(T x, T y) : x(x), y(y) {}
     constexpr Vec2(__m128 data) : simdData(data) {}
 
     inline Vec2 operator+(const Vec2 &other) const
@@ -53,25 +54,25 @@ namespace Temp::Math
     }
 
     // Vector-float addition
-    constexpr Vec2 operator+(float scalar) const
+    constexpr Vec2 operator+(T scalar) const
     {
       return {x + scalar, y + scalar};
     }
 
     // Vector-float subtraction
-    constexpr Vec2 operator-(float scalar) const
+    constexpr Vec2 operator-(T scalar) const
     {
       return {x - scalar, y - scalar};
     }
 
     // Vector-float multiplication
-    constexpr Vec2 operator*(float scalar) const
+    constexpr Vec2 operator*(T scalar) const
     {
       return {x * scalar, y * scalar};
     }
 
     // Vector-float division
-    constexpr Vec2 operator/(float scalar) const
+    constexpr Vec2 operator/(T scalar) const
     {
       return {x / scalar, y / scalar};
     }
@@ -102,6 +103,10 @@ namespace Temp::Math
       return {x * invMagnitude, y * invMagnitude};
     }
   };
+
+  using Vec2f  = Vec2<float>;
+  using Vec2ui = Vec2<unsigned int>;
+  using Vec2i = Vec2<int>;
 
   template <typename T>
   struct Vec3
@@ -323,11 +328,11 @@ namespace Temp::Math
 
   struct Mat2
   {
-    Vec2 rows[2];
+    Vec2f rows[2];
 
     // 2x2 matrix struct
     constexpr Mat2() : rows{{1.0f, 0.0f}, {0.0f, 1.0f}} {}
-    constexpr Mat2(const Vec2 &col1, const Vec2 &col2) : rows{col1, col2} {}
+    constexpr Mat2(const Vec2f &col1, const Vec2f &col2) : rows{col1, col2} {}
 
     // Matrix-matrix addition
     inline Mat2 operator+(const Mat2 &other) const
@@ -381,7 +386,7 @@ namespace Temp::Math
     }
 
     // Matrix-vector multiplication
-    inline Vec2 operator*(const Vec2 &vec) const
+    inline Vec2f operator*(const Vec2f &vec) const
     {
       // Vector based dot product
       return _mm_add_ps(_mm_mul_ps(vec.simdData, rows[0].simdData), _mm_mul_ps(vec.simdData, rows[1].simdData));
@@ -390,7 +395,7 @@ namespace Temp::Math
     // Matrix transposition
     constexpr Mat2 transpose() const
     {
-      return {Vec2(rows[0].x, rows[1].x), Vec2(rows[0].y, rows[1].y)};
+      return {Vec2f(rows[0].x, rows[1].x), Vec2f(rows[0].y, rows[1].y)};
     }
 
     // Matrix determinant
@@ -414,8 +419,8 @@ namespace Temp::Math
       float det = determinant();
       float invDet = 1.0f / (det + (det == 0.f)) * !(det == 0.f);
 
-      return {Vec2(rows[1].y, -rows[0].y) * invDet,
-              Vec2(-rows[1].x, rows[0].x) * invDet};
+      return {Vec2f(rows[1].y, -rows[0].y) * invDet,
+              Vec2f(-rows[1].x, rows[0].x) * invDet};
     }
   };
 
@@ -871,6 +876,58 @@ namespace Temp::Math
       rotationMatrix[1][1] = cosAngle;
 
       return *this * rotationMatrix;
+    }
+
+    constexpr Mat4 rotate(float angle, const Vec3f &axis)
+    {
+      Mat4 mat;
+      float c = std::cos(angle);
+      float s = std::sin(angle);
+      float t = 1.0f - c;
+
+      float x = axis.x;
+      float y = axis.y;
+      float z = axis.z;
+
+      // Normalize the axis
+      float length = std::sqrt(x * x + y * y + z * z);
+      if (length != 0.0f)
+      {
+        x /= length;
+        y /= length;
+        z /= length;
+      }
+
+      // Calculate the rotation matrix elements
+      float xt = x * t;
+      float yt = y * t;
+      float zt = z * t;
+      float xs = x * s;
+      float ys = y * s;
+      float zs = z * s;
+
+      // Set the rotation matrix elements
+      mat[0][0] = xt * x + c;
+      mat[0][1] = xt * y + zs;
+      mat[0][2] = xt * z - ys;
+      mat[0][3] = 0.0f;
+
+      mat[1][0] = xt * y - zs;
+      mat[1][1] = yt * y + c;
+      mat[1][2] = yt * z + xs;
+      mat[1][3] = 0.0f;
+
+      mat[2][0] = xt * z + ys;
+      mat[2][1] = yt * z - xs;
+      mat[2][2] = zt * z + c;
+      mat[2][3] = 0.0f;
+
+      mat[3][0] = 0.0f;
+      mat[3][1] = 0.0f;
+      mat[3][2] = 0.0f;
+      mat[3][3] = 1.0f;
+
+      return *this * mat;
     }
 
     static constexpr Mat4 perspective(float fov, float aspectRatio, float near, float far)
