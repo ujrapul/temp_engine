@@ -1,88 +1,98 @@
 #pragma once
 
 #include "stb_image.h"
-#include "../glad/gl.h"
-#include "stb_image.h"
+#include "gl.h"
+#include "EngineUtils.hpp"
 #include <iostream>
+#include <vector>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+// IMPORTANT NOTES SINCE YOU'RE TOO DUMB TO REMEMBER THEM!
+//
+// Use glVertexAttribPointer for vec2, GLfloat, GLdouble, and GLubyte
+// Use glVertexAttrib"I"Pointer for ivec2, GLint, GLuint, and GLbyte
+//
 
 namespace Temp::Render::OpenGLWrapper
 {
-  // Vertex shader source code
-  constexpr const char *vertexShaderSource = R"(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aTexCoord;
-
-out vec2 TexCoord;
-  
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-void main()
-{
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
-    TexCoord = vec2(aTexCoord.x, aTexCoord.y);
-}
-)";
-
-  // Fragment shader source code
-  constexpr const char *fragmentShaderSource = R"(
-    #version 330 core
-out vec4 FragColor;
-
-in vec3 ourColor;
-in vec2 TexCoord;
-
-// texture samplers
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-
-void main()
-{
-	// linearly interpolate between both textures (80% container, 20% awesomeface)
-	//FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
-  vec4 sampled = vec4(1.0, 1.0, 1.0, texture(texture2, TexCoord).r);
-  vec4 color = vec4(1.0, 1.0, 1.0, 1.0) * sampled;
-  FragColor = mix(texture(texture1, TexCoord), color, 1.0);
-}
-)";
-
-  constexpr GLuint CreateShader(const char *shaderSource, int shaderType)
+  namespace ShaderIdx
   {
-    // Create vertex shader
+    enum ShaderIdx
+    {
+      TEST,
+      TEXT,
+      GRID,
+      MAX
+    };
+  };
+
+  inline const char **GetShader(int shader)
+  {
+    std::filesystem::path shadersPath = ApplicationDirectory / "Shaders";
+
+    static const char *VERT_HEADER = "#version 330\n#define VERTEX_SHADER\n";
+    static const char *FRAG_HEADER = "#version 330\n#define FRAGMENT_SHADER\n";
+    static std::vector<std::vector<const char *>> globalShaders = {
+        {VERT_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Test.glsl").c_str())},
+        {FRAG_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Test.glsl").c_str())},
+
+        {VERT_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Text.glsl").c_str())},
+        {FRAG_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Text.glsl").c_str())},
+
+        {VERT_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Grid.glsl").c_str())},
+        {FRAG_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Grid.glsl").c_str())}};
+
+    return globalShaders[shader].data();
+  }
+
+  constexpr GLuint CreateShader(const char **shaderSource, int shaderType)
+  {
+    // Create shader
     GLuint shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &shaderSource, nullptr);
+    glShaderSource(shader, 2, shaderSource, nullptr);
     glCompileShader(shader);
 
-    // Check for vertex shader compilation errors
+    // Check for shader compilation errors
     GLint success = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
       char infoLog[512] = {};
       glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-      std::cerr << "Vertex shader compilation failed\n"
-                << infoLog << std::endl;
+      switch (shaderType)
+      {
+      case GL_VERTEX_SHADER:
+        std::cerr << "Vertex shader compilation failed\n"
+                  << infoLog << std::endl;
+        break;
+      case GL_FRAGMENT_SHADER:
+        std::cerr << "Fragment shader compilation failed\n"
+                  << infoLog << std::endl;
+        break;
+      default:
+        break;
+      }
       return -1;
     }
     return shader;
   }
 
-  constexpr GLuint CreateVertexShader(const char *shaderSource)
+  inline GLuint CreateVertexShader(int shader)
   {
-    return CreateShader(shaderSource, GL_VERTEX_SHADER);
+    return CreateShader(GetShader(shader * 2), GL_VERTEX_SHADER);
   }
 
-  constexpr GLuint CreateFragmentShader(const char *shaderSource)
+  inline GLuint CreateFragmentShader(int shader)
   {
-    return CreateShader(shaderSource, GL_FRAGMENT_SHADER);
+    // We add a '1' since shaders are compiled in two sets.
+    return CreateShader(GetShader(shader * 2 + 1), GL_FRAGMENT_SHADER);
   }
 
-  constexpr GLuint CreateShaderProgram(const char *vertexShaderSource, const char *fragmentShaderSource)
+  inline GLuint CreateShaderProgram(int shader)
   {
-    GLuint vertexShader = CreateVertexShader(vertexShaderSource);
-    GLuint fragmentShader = CreateFragmentShader(fragmentShaderSource);
+    GLuint vertexShader = CreateVertexShader(shader);
+    GLuint fragmentShader = CreateFragmentShader(shader);
 
     // Create shader program and link shaders
     GLuint shaderProgram = glCreateProgram();
@@ -127,6 +137,15 @@ void main()
     return VBO;
   }
 
+  constexpr GLuint CreateVBO(void *data, size_t typeSize, size_t arraySize)
+  {
+    GLuint VBO = -1;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, typeSize * arraySize, data, GL_STATIC_DRAW);
+    return VBO;
+  }
+
   constexpr GLuint CreateEBO(GLuint *indices, size_t arraySize)
   {
     // Create Element Buffer Object (EBO) and copy index data
@@ -137,10 +156,26 @@ void main()
     return EBO;
   }
 
-  constexpr void SetVertexAttribArray(size_t arrayIndex, size_t numOfElements, size_t rowStride, size_t stride)
+  constexpr void SetVertexAttribArray(size_t arrayIndex, size_t numOfElements, size_t stride, size_t position)
   {
-    glVertexAttribPointer(arrayIndex, numOfElements, GL_FLOAT, GL_FALSE, rowStride * sizeof(float), (void *)(stride * sizeof(float)));
+    glVertexAttribPointer(arrayIndex, numOfElements, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void *)(position * sizeof(float)));
     glEnableVertexAttribArray(arrayIndex);
+  }
+
+  // Assumes you're only using int
+  constexpr void SetVertexAttribIArrayInstanced(size_t arrayIndex, size_t numOfElements, size_t stride, size_t position)
+  {
+    glVertexAttribIPointer(arrayIndex, numOfElements, GL_INT, stride * sizeof(int), (void *)(position * sizeof(int)));
+    glEnableVertexAttribArray(arrayIndex);
+    glVertexAttribDivisor(arrayIndex, 1); // Set the attribute to update once per instance
+  }
+
+  // Assumes you're only using float
+  constexpr void SetVertexAttribArrayInstanced(size_t arrayIndex, size_t numOfElements, size_t stride, size_t position)
+  {
+    glVertexAttribPointer(arrayIndex, numOfElements, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void *)(position * sizeof(float)));
+    glEnableVertexAttribArray(arrayIndex);
+    glVertexAttribDivisor(arrayIndex, 1); // Set the attribute to update once per instance
   }
 
   constexpr void UnbindBuffers()
@@ -216,6 +251,13 @@ void main()
     glBindVertexArray(0);
   }
 
+  constexpr void DrawElementsInstanced(GLuint vao, int numIndices, int numInstances)
+  {
+    glBindVertexArray(vao);
+    glDrawElementsInstanced(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0, numInstances);
+    glBindVertexArray(0);
+  }
+
   constexpr void CleanArrays(GLuint &vao)
   {
     glDeleteVertexArrays(1, &vao);
@@ -226,8 +268,39 @@ void main()
     glDeleteBuffers(1, &buffer);
   }
 
-  constexpr void cleanShader(GLuint& shader)
+  constexpr void CleanShader(GLuint &shader)
   {
     glDeleteProgram(shader);
+  }
+
+  // Default is 4, use 1 for Font Textures
+  // 1 to disable byte-alignment restriction
+  constexpr void SetUnpackAlignment(int alignment = 4)
+  {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+  }
+
+  constexpr GLuint GenerateFontTexture(FT_Face face)
+  {
+    GLuint texture = -1;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RED,
+        face->glyph->bitmap.width,
+        face->glyph->bitmap.rows,
+        0,
+        GL_RED,
+        GL_UNSIGNED_BYTE,
+        face->glyph->bitmap.buffer);
+    // set texture options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    return texture;
   }
 }

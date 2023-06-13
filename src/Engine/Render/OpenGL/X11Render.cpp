@@ -1,14 +1,16 @@
 #include "X11Render.hpp"
 #include "Input.hpp"
 #include "ImageLoader.hpp"
-#include "../glad/gl.h"
+#include "gl.h"
+#include "glx.h"
 #include "OpenGLWrapper.hpp"
-#include "../Utils.hpp"
+#include "RenderUtils.hpp"
+#include "Drawable.hpp"
+#include "Scene.hpp"
 #include <chrono>
 #include <thread>
 #include <condition_variable>
 #include <iostream>
-#include "../glad/glx.h"
 #include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -35,7 +37,7 @@ namespace Temp::Render
 
     bool quit = false;
 
-    void RenderThread()
+    void RenderThread(Engine::Data &engine)
     {
       // Make the OpenGL context current for the rendering thread
       glXMakeCurrent(display, window, context);
@@ -45,10 +47,12 @@ namespace Temp::Render
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+      Font::LoadFont();
+
       auto start = std::chrono::high_resolution_clock::now();
 
-      Cube mesh;
-      Initialize(mesh);
+      // Cube mesh;
+      // Initialize(mesh);
 
       float time = 0;
 
@@ -64,7 +68,28 @@ namespace Temp::Render
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Draw(mesh, time);
+        // TODO: Observe if objects get constructed properly if this is left to run indefinitly
+        // while (!engine.currentScene->renderConstructQueue.empty())
+        // {
+          Scene::DequeueRenderConstruct(engine.currentScene);
+        // }
+
+        if (engine.currentScene && engine.currentScene->state == Scene::State::RUN)
+        {
+          // std::cout << "GOT TO X11RENDER STATE RUN!" << std::endl;
+          if (auto* drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*engine.currentScene))
+          {
+            // std::cout << "GOT TO X11RENDER drawableArray!" << std::endl;
+
+            for (auto i = 0; i < drawableArray->mapping.size; ++i)
+            {
+              // std::cout << "GOT TO X11RENDER DRAW!" << std::endl;
+              Component::Drawable::Draw(&drawableArray->array[drawableArray->mapping.indexToEntity[i]]);
+            }
+          }
+        }
+
+        // Draw(mesh, time);
 
         glXSwapBuffers(display, window);
 
@@ -72,7 +97,7 @@ namespace Temp::Render
       }
 
       // Clean up resources
-      Clean(mesh);
+      // Clean(mesh);
     }
 
     void CreateDisplay(const char *windowName)
@@ -100,13 +125,14 @@ namespace Temp::Render
 
       // Create an OpenGL-capable visual
       int attribs[] = {
-          GLX_RGBA,
-          GLX_DOUBLEBUFFER,
-          GLX_DEPTH_SIZE, 24,
-          GLX_RED_SIZE, 8,
-          GLX_GREEN_SIZE, 8,
-          GLX_BLUE_SIZE, 8,
-          None};
+        GLX_RGBA,
+        GLX_DOUBLEBUFFER,
+        GLX_DEPTH_SIZE, 24,
+        GLX_RED_SIZE, 8,
+        GLX_GREEN_SIZE, 8,
+        GLX_BLUE_SIZE, 8,
+        None
+      };
 
       visualInfo = glXChooseVisual(display, screen, attribs);
       if (visualInfo == NULL)
@@ -160,10 +186,10 @@ namespace Temp::Render
 
   }
 
-  void Initialize(const char *windowName)
+  void Initialize(const char *windowName, Engine::Data &engine)
   {
     CreateDisplay(windowName);
-    renderThread = std::thread(RenderThread);
+    renderThread = std::thread(RenderThread, std::ref(engine));
   }
 
   void Run(Engine::Data &engine)

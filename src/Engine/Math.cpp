@@ -50,8 +50,8 @@ namespace Temp::Math
     void Run()
     {
       // Test Vec2 operations
-      Vec2 v2a(2.0f, 3.0f);
-      Vec2 v2b(4.0f, 5.0f);
+      Vec2f v2a(2.0f, 3.0f);
+      Vec2f v2b(4.0f, 5.0f);
 
       // Addition
       Vec2 v2add = v2a + v2b;
@@ -87,6 +87,9 @@ namespace Temp::Math
       // Test Vec3 operations
       Vec3f v3a(2.0f, 3.0f, 4.0f);
       Vec3f v3b(4.0f, 5.0f, 6.0f);
+
+      // Operator[]
+      assert(v3a[0] == 2.0f && v3a[1] == 3.0f && v3a[2] == 4.0f);
 
       // Addition
       Vec3 v3add = v3a + v3b;
@@ -127,6 +130,9 @@ namespace Temp::Math
       // Test Vec4 operations
       Vec4 v4a(2.0f, 3.0f, 4.0f, 5.0f);
       Vec4 v4b(4.0f, 5.0f, 6.0f, 7.0f);
+
+      // Operator[]
+      assert(v4a[0] == 2.0f && v4a[1] == 3.0f && v4a[2] == 4.0f && v4a[3] == 5.0f);
 
       // Addition
       Vec4 v4add = v4a + v4b;

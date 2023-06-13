@@ -16,9 +16,10 @@ namespace Temp
     {
       std::vector<Scene::Data*> scenes;
       Input::KeyEventData keyEventData;
+      Scene::Data* currentScene{nullptr};
       bool quit{false};
     };
-    
+
     void Run(Engine::Data& engine, const char* windowName);
     void Destroy(Engine::Data& engine);
     [[nodiscard]] Engine::Data Construct();

@@ -28,13 +28,15 @@ set ( ENGINE_HEADER
   src/Engine/Components/ComponentType.hpp
   src/Engine/Components/ComponentContainer.hpp
   src/Engine/Components/ComponentData.hpp
-  src/Engine/Render/Utils.hpp
+  src/Engine/Components/Drawable.hpp
+  src/Engine/Render/RenderUtils.hpp
   src/Engine/Render/glad/gl.h
   src/Engine/Render/glad/khrplatform.h
   src/Engine/Render/OpenGL/X11Render.hpp
   src/Engine/Render/OpenGL/OpenGLWrapper.hpp
   src/Engine/Coordinator.hpp
   src/Engine/Engine.hpp
+  src/Engine/EngineUtils.hpp
   src/Engine/Entity.hpp
   src/Engine/EntityManager.hpp
   src/Engine/FontLoader.hpp
@@ -90,6 +92,7 @@ set ( NUMBER_GAME_HEADER
   src/NumberGame/Entry.hpp
   src/NumberGame/Coordinator.hpp
   src/NumberGame/Scene.hpp
+  src/NumberGame/Grid.hpp
   src/NumberGame/Components/ComponentType.hpp
   src/NumberGame/Components/ComponentContainer.hpp
 )

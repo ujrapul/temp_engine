@@ -5,6 +5,7 @@
 #include <array>
 #include <cassert>
 #include <climits>
+#include <mutex>
 
 namespace Temp
 {
@@ -13,22 +14,24 @@ namespace Temp
     struct Mapping
     {
       // Value = Entity     | Index = Data Index
-      std::array<Entity, MAX_ENTITIES> indexToEntity;
+      std::array<Entity, MAX_ENTITIES> indexToEntity{};
       // Value = Data Index | Index = Entity
-      std::array<std::size_t, MAX_ENTITIES> entityToIndex;
+      std::array<std::size_t, MAX_ENTITIES> entityToIndex{};
       std::size_t size{};
     };
     
     template<typename T>
     struct ArrayData
     {
-      std::array<T, MAX_ENTITIES> array;
-      Mapping mapping;
+      std::array<T, MAX_ENTITIES> array{};
+      Mapping mapping{};
+      std::mutex mtx{};
     };
     
     template<typename T>
-    constexpr void Init(ArrayData<T>& data)
+    inline void Init(ArrayData<T>& data)
     {
+      std::scoped_lock<std::mutex> lock(data.mtx);
       for (Entity e = 0; e < MAX_ENTITIES; ++e) {
         data.mapping.indexToEntity[e] = UINT_MAX;
         data.mapping.entityToIndex[e] = SIZE_MAX;
@@ -36,13 +39,14 @@ namespace Temp
     }
 
     template<typename T>
-    constexpr void Set(
+    inline void Set(
       ArrayData<T>& data,
       Entity entity,
       const T& component)
     {
       assert(entity < MAX_ENTITIES && "Component added to same entity more than once.");
 
+      std::scoped_lock<std::mutex> lock(data.mtx);
       if (data.mapping.entityToIndex[entity] < MAX_ENTITIES) {
         data.array[entity] = component;
       } else {
@@ -56,9 +60,11 @@ namespace Temp
     }
 
     template<typename T>
-    constexpr void Remove(ArrayData<T>& data, Entity entity)
+    inline void Remove(ArrayData<T>& data, Entity entity)
     {
       assert(entity < MAX_ENTITIES && "Removing non-existent component.");
+
+      std::scoped_lock<std::mutex> lock(data.mtx);
 
       std::size_t indexOfRemovedEntity = data.mapping.entityToIndex[entity];
       std::size_t indexOfLastElement = data.mapping.size - 1;
@@ -91,7 +97,7 @@ namespace Temp
     }
     
     template<typename T>
-    constexpr void EntityDestroyed(ArrayData<T>& data, Entity entity)
+    inline void EntityDestroyed(ArrayData<T>& data, Entity entity)
     {
       if (data.mapping.entityToIndex[entity] < MAX_ENTITIES) {
         Remove<T>(data, entity);

@@ -3,7 +3,6 @@
 #include <chrono>
 #include <thread>
 #ifdef __linux__
-#include "Render/glad/glx.h"
 #include "Render/OpenGL/X11Render.hpp"
 #endif
 
@@ -11,8 +10,9 @@ namespace Temp::Engine
 {
   void Run(Engine::Data &engine, const char* windowName)
   {
-    Render::Initialize(windowName);
     Scene::Data *currentScene = engine.scenes.front();
+    // Start Render Thread
+    Render::Initialize(windowName, engine);
 
 #ifndef __linux__
     std::thread inputThread(Input::HandleThread, std::ref(engine.keyEventData));
@@ -21,12 +21,14 @@ namespace Temp::Engine
 
     while (currentScene && !engine.quit)
     {
+      // Process events in the renderer
       Render::Run(engine);
       switch (currentScene->state)
       {
       case Scene::State::ENTER:
         if (currentScene->Construct)
           currentScene->Construct(currentScene);
+        engine.currentScene = currentScene;
         currentScene->state = Scene::State::RUN;
         break;
       case Scene::State::RUN:
@@ -38,6 +40,7 @@ namespace Temp::Engine
           currentScene->Destruct(currentScene);
         currentScene->state = Scene::State::ENTER;
         currentScene = currentScene->nextScene;
+        engine.currentScene = currentScene;
         if (currentScene)
           currentScene->state = Scene::State::ENTER;
         break;

@@ -2,6 +2,8 @@
 
 #include "Coordinator.hpp"
 #include <iostream>
+#include <functional>
+#include <mutex>
 
 namespace Temp
 {
@@ -13,16 +15,29 @@ namespace Temp
       RUN   = 1,
       LEAVE = 2,
     };
+
+    struct RenderConstructData;
     
     struct Data
     {
       Coordinator::Data coordinator{};
       std::array<Entity, MAX_ENTITIES> entities{};
+      std::queue<RenderConstructData> renderConstructQueue{};
       State state{State::ENTER};
       Data* nextScene{nullptr};
       void (*Construct)(Scene::Data*){nullptr};
       void (*Update)(Scene::Data*, float){nullptr};
       void (*Destruct)(Scene::Data*){nullptr};
+      std::mutex mtx{};
+    };
+
+    typedef std::function<void(Data*, void*)> RenderConstructFunction;
+
+    struct RenderConstructData
+    {
+      RenderConstructFunction func;
+      Scene::Data* scene;
+      void* data;
     };
     
     template<uint8_t T>
@@ -44,6 +59,13 @@ namespace Temp
       return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
         (data.coordinator.componentData.components[T])->mapping.size;
     }
+
+    template<uint8_t T>
+    [[nodiscard]] constexpr Component::ArrayData<Component::MapToComponentDataType<T>>* GetComponentArray(Data & data)
+    {
+      return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>>*>
+        (data.coordinator.componentData.components[T]);
+    }
     
     template<uint8_t T>
     constexpr void AddComponent(Data& data, Entity entity, Component::MapToComponentDataType<T> component)
@@ -55,5 +77,23 @@ namespace Temp
     Entity CreateEntity(Data& data);
     void DestroyEntity(Data& data, Entity entity);
     Math::Vec2f& GetPosition(Data& data, Entity entity);
+
+    inline void EnqueueRenderConstruct(Scene::Data* scene, RenderConstructFunction func, void* data)
+    {
+      std::scoped_lock<std::mutex> lock(scene->mtx);
+      scene->renderConstructQueue.push({func, scene, data});
+    }
+
+    inline void DequeueRenderConstruct(Scene::Data* scene)
+    {
+      if (scene->renderConstructQueue.empty()) {
+        return;
+      }
+
+      std::scoped_lock<std::mutex> lock(scene->mtx);
+      auto construct = scene->renderConstructQueue.front();
+      construct.func(construct.scene, construct.data);
+      scene->renderConstructQueue.pop();
+    }
   }
 }

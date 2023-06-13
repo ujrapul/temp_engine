@@ -8,9 +8,13 @@ namespace Game
   {
     namespace Type
     {
-      constexpr uint8_t VALUE             = Temp::Component::Type::MAX;
-      constexpr uint8_t COLLECTED_VALUE   = Temp::Component::Type::MAX + 1;
-      constexpr uint8_t SCORE             = Temp::Component::Type::MAX + 2;
+      enum Type
+      {
+        VALUE = Temp::Component::Type::MAX,
+        COLLECTED_VALUE,
+        SCORE,
+        MAX
+      };
     }
   }
 }

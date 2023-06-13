@@ -2,6 +2,7 @@
 #include "Scene.hpp"
 #include "Components/ComponentType.hpp"
 #include "Coordinator.hpp"
+#include "Grid.hpp"
 #include <unordered_set>
 
 namespace Game::Scene::GameLevel
@@ -13,6 +14,7 @@ namespace Game::Scene::GameLevel
       std::array<Player::Data, 2> players{};
       std::unordered_set<int> numbersUsed{};
       std::array<int, 10> numbersUnused{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+      Grid::Data grid;
       int currentNumber{-1};
       int numbersLeft{10};
       bool player1Turn{true};
@@ -173,24 +175,26 @@ namespace Game::Scene::GameLevel
       Coordinator::Init(data->coordinator);
 
       int count = 0;
-      int row = 0;
-      int column = 0;
-      srand(static_cast<uint>(time(NULL)));
-      for (auto &entity : data->entities)
-      {
-        if (count >= BOARD_WIDTH * BOARD_WIDTH)
-        {
-          break;
-        }
-        entity = Temp::Scene::CreateEntity(*data);
-        Temp::Scene::AddComponent<Temp::Component::Type::POSITION2D>(*data, entity, Math::Vec2{(float)row, (float)column});
-        Temp::Scene::AddComponent<Component::Type::VALUE>(*data, entity, '0' + rand() % 10);
+      // int row = 0;
+      // int column = 0;
+      // srand(static_cast<uint>(time(NULL)));
+      // for (auto &entity : data->entities)
+      // {
+      //   if (count >= BOARD_WIDTH * BOARD_WIDTH)
+      //   {
+      //     break;
+      //   }
+      //   entity = Temp::Scene::CreateEntity(*data);
+      //   Temp::Scene::AddComponent<Temp::Component::Type::POSITION2D>(*data, entity, Math::Vec2{(float)row, (float)column});
+      //   Temp::Scene::AddComponent<Component::Type::VALUE>(*data, entity, '0' + rand() % 10);
 
-        ++column;
-        column %= BOARD_WIDTH;
-        row = column == 0 ? row + 1 : row;
-        ++count;
-      }
+      //   ++column;
+      //   column %= BOARD_WIDTH;
+      //   row = column == 0 ? row + 1 : row;
+      //   ++count;
+      // }
+      // std::cout << "GOT TO GAMELEVEL CONSTRUCT!" << std::endl;
+      Grid::Construct(data, &gameData.grid);
       Entity Player1 = count++;
       data->entities[Player1] = Temp::Scene::CreateEntity(*data);
       Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(*data, Player1, {});
@@ -202,6 +206,8 @@ namespace Game::Scene::GameLevel
       Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(*data, Player2, {});
       Temp::Scene::AddComponent<Component::Type::SCORE>(*data, Player2, {});
       gameData.players[1].entity = Player2;
+
+      Temp::Scene::EnqueueRenderConstruct(data, Grid::ConstructRenderVoid, &gameData.grid);
     }
 
     void Update(Temp::Scene::Data *data, float deltaTime)

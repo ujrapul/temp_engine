@@ -22,7 +22,7 @@ namespace Temp::Math
         T x;
         T y;
       };
-      float *data;
+      T data[2];
       __m128 simdData;
     };
 
@@ -78,19 +78,19 @@ namespace Temp::Math
     }
 
     // Dot product of two vectors
-    constexpr float dot(const Vec2 &other) const
+    constexpr T dot(const Vec2 &other) const
     {
       return x * other.x + y * other.y;
     }
 
     // Magnitude (length) of the vector
-    constexpr float magnitude() const
+    constexpr T magnitude() const
     {
       return std::sqrt(dot(*this));
     }
 
     // Squared magnitude (length) of the vector
-    constexpr float magnitude2() const
+    constexpr T magnitude2() const
     {
       return dot(*this);
     }
@@ -119,7 +119,7 @@ namespace Temp::Math
         T y;
         T z;
       };
-      T *data;
+      T data[3];
       __m128 simdData;
     };
 
@@ -176,13 +176,13 @@ namespace Temp::Math
       return {x / scalar, y / scalar, z / scalar};
     }
 
-    constexpr float &operator[](int i)
+    constexpr T &operator[](int i)
     {
-      return simdData[i];
+      return data[i];
     }
 
     // Dot product of two vectors
-    constexpr float dot(const Vec3 &other) const
+    constexpr T dot(const Vec3 &other) const
     {
       return x * other.x + y * other.y + z * other.z;
     }
@@ -197,13 +197,13 @@ namespace Temp::Math
     }
 
     // Magnitude (length) of the vector
-    constexpr float magnitude() const
+    constexpr T magnitude() const
     {
       return std::sqrt(dot(*this));
     }
 
     // Squared magnitude (length) of the vector
-    constexpr float magnitude2() const
+    constexpr T magnitude2() const
     {
       return dot(*this);
     }
@@ -232,7 +232,7 @@ namespace Temp::Math
         T z;
         T w;
       };
-      T *data;
+      T data[4];
       __m128 simdData;
     };
 
@@ -293,25 +293,25 @@ namespace Temp::Math
       return _mm_div_ps(simdData, scalarData);
     }
 
-    constexpr float &operator[](int i)
+    constexpr T &operator[](int i)
     {
-      return simdData[i];
+      return data[i];
     }
 
     // Dot product of two vectors
-    inline float dot(const Vec4 &other) const
+    inline T dot(const Vec4 &other) const
     {
       return _mm_dp_ps(simdData, other.simdData, 0xFF)[0];
     }
 
     // Magnitude (length) of the vector
-    inline float magnitude() const
+    inline T magnitude() const
     {
       return _mm_sqrt_ps(_mm_dp_ps(simdData, simdData, 0xFF))[0];
     }
 
     // Squared magnitude (length) of the vector
-    inline float magnitude2() const
+    inline T magnitude2() const
     {
       return dot(*this);
     }
