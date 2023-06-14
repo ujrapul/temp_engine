@@ -16,9 +16,11 @@ namespace Game
       Temp::Entity entity{};
       std::vector<Temp::Entity> gridEntities{};
       std::vector<int> gridTranslations{};
+      std::vector<float> gridUVOffsets{};
       Temp::Render::Square square{};
       int gridSize{10};
-      GLuint VBOInstanced;
+      GLuint translationVBO;
+      GLuint uvOffsetVBO;
     };
 
     inline void Construct(Temp::Scene::Data *data, Data *grid)
@@ -32,7 +34,7 @@ namespace Game
       auto& drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(*data, grid->entity);
 
       drawable.vertices.resize(20);
-      std::copy(grid->square.vertices, grid->square.vertices + 20, drawable.vertices.begin());
+      std::copy(grid->square.fontVertices, grid->square.fontVertices + 20, drawable.vertices.begin());
 
       drawable.indices.resize(6);
       std::copy(grid->square.indices, grid->square.indices + 6, drawable.indices.begin());
@@ -49,6 +51,8 @@ namespace Game
           grid->gridEntities.push_back(entity);
           grid->gridTranslations.push_back(-grid->gridSize / 2 + row);
           grid->gridTranslations.push_back(-grid->gridSize / 2 + col);
+          grid->gridUVOffsets.push_back(6.f/11.f);
+          grid->gridUVOffsets.push_back(6.f/12.f);
         }
       }
     }
@@ -58,12 +62,6 @@ namespace Game
       using namespace Temp;
       using namespace Temp::Render;
 
-      // TODO: Why does this need to be called here?
-      // Because Characters is declared static this always needs to be called
-      // for Characters to be populated.
-      // Turn it into an accessor function.
-      Font::LoadFont();
-
       auto& drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(*data, grid->entity);
       Temp::Component::Drawable::Construct(&drawable, Temp::Render::OpenGLWrapper::ShaderIdx::GRID);
 
@@ -72,8 +70,11 @@ namespace Game
       OpenGLWrapper::SetVertexAttribArray(0, 3, 5, 0);
       OpenGLWrapper::SetVertexAttribArray(1, 2, 5, 3);
 
-      grid->VBOInstanced = OpenGLWrapper::CreateVBO(grid->gridTranslations.data(), sizeof(int), grid->gridTranslations.size());
+      grid->translationVBO = OpenGLWrapper::CreateVBO(grid->gridTranslations.data(), sizeof(int), grid->gridTranslations.size());
       OpenGLWrapper::SetVertexAttribIArrayInstanced(2, 2, 2, 0);
+
+      grid->uvOffsetVBO = OpenGLWrapper::CreateVBO(grid->gridUVOffsets.data(), sizeof(float), grid->gridUVOffsets.size());
+      OpenGLWrapper::SetVertexAttribArrayInstanced(3, 2, 2, 0);
 
       // Unbind VAO and VBO and EBO
       OpenGLWrapper::UnbindBuffers();
