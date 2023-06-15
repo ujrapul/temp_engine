@@ -158,7 +158,7 @@ namespace Temp::Render
     OpenGLWrapper::Set1IntShaderProperty(cube.shaderProgram, "texture2", 1);
   }
 
-  constexpr void Draw(const Square &square, float time)
+  inline void Draw(const Square &square, float time)
   {
     // create transformations
     Math::Mat4 model{}, view{}, projection{}; // make sure to initialize matrix to identity matrix first

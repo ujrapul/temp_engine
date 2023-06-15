@@ -20,8 +20,6 @@ namespace Temp::Render
 {
   namespace
   {
-    float deltaTime{};
-
     // X11 Display and Window variables
     Display *display{nullptr};
     Window window{};
@@ -49,55 +47,18 @@ namespace Temp::Render
 
       Font::LoadFont();
 
-      auto start = std::chrono::high_resolution_clock::now();
-
-      // Cube mesh;
-      // Initialize(mesh);
-
-      float time = 0;
-
       // Main rendering loop
       while (!quit)
       {
-        auto stop = std::chrono::high_resolution_clock::now();
-        deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(stop - start).count();
-        start = stop;
-
-        time += deltaTime;
-
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // TODO: Observe if objects get constructed properly if this is left to run indefinitly
-        // while (!engine.currentScene->renderConstructQueue.empty())
-        // {
-          Scene::DequeueRenderConstruct(engine.currentScene);
-        // }
-
-        if (engine.currentScene && engine.currentScene->state == Scene::State::RUN)
-        {
-          // std::cout << "GOT TO X11RENDER STATE RUN!" << std::endl;
-          if (auto* drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*engine.currentScene))
-          {
-            // std::cout << "GOT TO X11RENDER drawableArray!" << std::endl;
-
-            for (auto i = 0; i < drawableArray->mapping.size; ++i)
-            {
-              // std::cout << "GOT TO X11RENDER DRAW!" << std::endl;
-              Component::Drawable::Draw(&drawableArray->array[drawableArray->mapping.indexToEntity[i]]);
-            }
-          }
-        }
-
-        // Draw(mesh, time);
+        engine.currentScene->Draw(engine.currentScene);
 
         glXSwapBuffers(display, window);
-
-        // std::this_thread::sleep_for(std::chrono::milliseconds(16));
       }
 
-      // Clean up resources
-      // Clean(mesh);
+      // TODO: Clean up resources
     }
 
     void CreateDisplay(const char *windowName)
@@ -125,14 +86,13 @@ namespace Temp::Render
 
       // Create an OpenGL-capable visual
       int attribs[] = {
-        GLX_RGBA,
-        GLX_DOUBLEBUFFER,
-        GLX_DEPTH_SIZE, 24,
-        GLX_RED_SIZE, 8,
-        GLX_GREEN_SIZE, 8,
-        GLX_BLUE_SIZE, 8,
-        None
-      };
+          GLX_RGBA,
+          GLX_DOUBLEBUFFER,
+          GLX_DEPTH_SIZE, 24,
+          GLX_RED_SIZE, 8,
+          GLX_GREEN_SIZE, 8,
+          GLX_BLUE_SIZE, 8,
+          None};
 
       visualInfo = glXChooseVisual(display, screen, attribs);
       if (visualInfo == NULL)
@@ -154,6 +114,10 @@ namespace Temp::Render
 
       // Set the window title
       XStoreName(display, window, windowName);
+
+      // Set the WM_DELETE_WINDOW protocol on the window
+      Atom wmDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", False);
+      XSetWMProtocols(display, window, &wmDeleteWindow, 1);
 
       // Create the OpenGL context
       context = glXCreateContext(display, visualInfo, NULL, GL_TRUE);
@@ -199,12 +163,27 @@ namespace Temp::Render
       XEvent xev;
       XNextEvent(display, &xev);
 
-      // Process only key events
-      if (xev.type == KeyPress)
+      switch (xev.type)
+      {
+      case KeyPress:
       {
         // Needed to map X11 KeyCode to native Linux
         int linuxKeyCode = xev.xkey.keycode - MIN_KEYCODE;
         Input::PushKeyQueue(static_cast<Input::KeyboardCode>(linuxKeyCode), &engine.keyEventData);
+      }
+      break;
+      case ClientMessage:
+      {
+        // Window close check
+        Atom wmDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", False);
+        if (xev.xclient.message_type == wmDeleteWindow)
+        {
+          Engine::Quit(engine);
+        }
+      }
+      break;
+      default:
+        break;
       }
     }
   }

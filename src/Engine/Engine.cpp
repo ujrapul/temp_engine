@@ -8,7 +8,7 @@
 
 namespace Temp::Engine
 {
-  void Run(Engine::Data &engine, const char* windowName)
+  void Run(Engine::Data &engine, const char *windowName)
   {
     Scene::Data *currentScene = engine.scenes.front();
     // Start Render Thread
@@ -19,8 +19,15 @@ namespace Temp::Engine
     inputThread.detach();
 #endif
 
+    float deltaTime{};
+    auto start = std::chrono::high_resolution_clock::now();
+
     while (currentScene && !engine.quit)
     {
+      auto stop = std::chrono::high_resolution_clock::now();
+      deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(stop - start).count();
+      start = stop;
+
       // Process events in the renderer
       Render::Run(engine);
       switch (currentScene->state)
@@ -32,8 +39,8 @@ namespace Temp::Engine
         currentScene->state = Scene::State::RUN;
         break;
       case Scene::State::RUN:
-        // if (currentScene->Update)
-        //   currentScene->Update(currentScene, 0.01f/*deltaTime*/);
+        if (currentScene->Update)
+          currentScene->Update(currentScene, deltaTime);
         break;
       case Scene::State::LEAVE:
         if (currentScene->Destruct)
@@ -71,7 +78,7 @@ namespace Temp::Engine
     return out;
   }
 
-  void Quit(Engine::Data& engine)
+  void Quit(Engine::Data &engine)
   {
     engine.quit = true;
   }

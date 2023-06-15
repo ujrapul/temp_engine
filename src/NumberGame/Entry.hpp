@@ -19,6 +19,8 @@ namespace Game
     {
       using namespace Temp;
 
+      Component::Drawable::SetProjection(Component::Drawable::Projection::ORTHOGRAPHIC);
+
       Math::UnitTests::Run();
       
       engine = Engine::Construct();

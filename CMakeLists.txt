@@ -21,6 +21,7 @@ set ( NUMBER_GAME_SRC
   src/NumberGame/Coordinator.cpp
   src/NumberGame/Scene.cpp
   src/NumberGame/GameLevel.cpp
+  src/NumberGame/Grid.cpp
   src/NumberGame/main.cpp
 )
 set ( ENGINE_HEADER
@@ -63,8 +64,10 @@ set ( ENGINE_SRC
   src/Engine/Math.cpp
   src/Engine/Coordinator.cpp
   src/Engine/Components/ComponentContainer.cpp
+  src/Engine/Components/Drawable.cpp
   src/Engine/Render/glad/gl.c
   src/Engine/Render/OpenGL/X11Render.cpp
+  src/Engine/Render/OpenGL/OpenGLWrapper.cpp
   src/Engine/Scene.cpp
   src/Engine/Input.cpp
   # TODO: When you become more knowledgable try writing your own image loading system

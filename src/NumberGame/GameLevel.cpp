@@ -44,24 +44,7 @@ namespace Game::Scene::GameLevel
 
     void UpdateNumbers(Temp::Scene::Data *sceneData, Entity player, int currentValue)
     {
-      for (const auto &entity : sceneData->entities)
-      {
-        Math::Vec2f pos = GetPosition(*sceneData, entity);
-        char &value = GetValue(*sceneData, entity);
-        if (value - '0' == currentValue)
-        {
-          value = '-';
-          Player::addScore(player, sceneData, 1);
-        }
-        if (pos.y == BOARD_WIDTH - 1)
-        {
-          //            std::cout << std::endl;
-          if (pos.x == BOARD_WIDTH - 1)
-          {
-            break;
-          }
-        }
-      }
+      Grid::UpdateNumbers(sceneData, &gameData.grid, player, currentValue);
     }
 
     bool PrintBoard(Temp::Scene::Data *data, float deltaTime)
@@ -76,22 +59,6 @@ namespace Game::Scene::GameLevel
       currTime = 0;
 
       system("clear");
-
-      std::cout << std::endl;
-      for (const auto &entity : data->entities)
-      {
-        Math::Vec2f pos = GetPosition(*data, entity);
-        std::cout << GetValue(*data, entity)
-                  << " ";
-        if (pos.y == BOARD_WIDTH - 1)
-        {
-          std::cout << std::endl;
-          if (pos.x == BOARD_WIDTH - 1)
-          {
-            break;
-          }
-        }
-      }
 
       std::cout << "Player 1's numbers: ";
       for (auto num : GetCollectedValue(*data, gameData.players[0].entity))
@@ -175,25 +142,9 @@ namespace Game::Scene::GameLevel
       Coordinator::Init(data->coordinator);
 
       int count = 0;
-      // int row = 0;
-      // int column = 0;
-      // srand(static_cast<uint>(time(NULL)));
-      // for (auto &entity : data->entities)
-      // {
-      //   if (count >= BOARD_WIDTH * BOARD_WIDTH)
-      //   {
-      //     break;
-      //   }
-      //   entity = Temp::Scene::CreateEntity(*data);
-      //   Temp::Scene::AddComponent<Temp::Component::Type::POSITION2D>(*data, entity, Math::Vec2{(float)row, (float)column});
-      //   Temp::Scene::AddComponent<Component::Type::VALUE>(*data, entity, '0' + rand() % 10);
 
-      //   ++column;
-      //   column %= BOARD_WIDTH;
-      //   row = column == 0 ? row + 1 : row;
-      //   ++count;
-      // }
-      // std::cout << "GOT TO GAMELEVEL CONSTRUCT!" << std::endl;
+      gameData.grid.gridSize = 50;
+
       Grid::Construct(data, &gameData.grid);
       Entity Player1 = count++;
       data->entities[Player1] = Temp::Scene::CreateEntity(*data);
@@ -207,7 +158,8 @@ namespace Game::Scene::GameLevel
       Temp::Scene::AddComponent<Component::Type::SCORE>(*data, Player2, {});
       gameData.players[1].entity = Player2;
 
-      Temp::Scene::EnqueueRenderConstruct(data, Grid::ConstructRenderVoid, &gameData.grid);
+      Temp::Component::Drawable::UpdateOrthoScale(32.f);
+      Temp::Component::Drawable::GetCamera()->view = Temp::Component::Drawable::GetCamera()->view.translate({0, 5, 0});
     }
 
     void Update(Temp::Scene::Data *data, float deltaTime)
@@ -218,6 +170,12 @@ namespace Game::Scene::GameLevel
       }
     }
 
+    void Draw(Temp::Scene::Data *data)
+    {
+      Temp::Scene::Draw(data);
+      Grid::UpdateUVOffsets(data, &gameData.grid);
+    }
+
     void Destruct(Temp::Scene::Data *data)
     {
       for (auto &entity : data->entities)
@@ -225,7 +183,7 @@ namespace Game::Scene::GameLevel
         Temp::Scene::DestroyEntity(*data, entity);
         entity = 0;
       }
-      Coordinator::Destruct(data->coordinator);
+      Temp::Scene::Destruct(*data);
     }
   }
 
@@ -235,6 +193,7 @@ namespace Game::Scene::GameLevel
     scene->Construct = Construct;
     scene->Update = Update;
     scene->Destruct = Destruct;
+    scene->Draw = Draw;
 
     Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_0);
     Temp::Input::AddCallback(inputCallback, keyEventData, Temp::Input::KeyboardCode::KB_1);

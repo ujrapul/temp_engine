@@ -930,7 +930,7 @@ namespace Temp::Math
       return *this * mat;
     }
 
-    static constexpr Mat4 perspective(float fov, float aspectRatio, float near, float far)
+    static inline Mat4 perspective(float fov, float aspectRatio, float near, float far)
     {
       Mat4 result;
 
