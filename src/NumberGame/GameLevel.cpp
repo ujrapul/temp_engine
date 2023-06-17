@@ -1,8 +1,11 @@
 #include "GameLevel.hpp"
-#include "Scene.hpp"
+
+#include "Camera.hpp"
 #include "Components/ComponentType.hpp"
 #include "Coordinator.hpp"
 #include "Grid.hpp"
+#include "Scene.hpp"
+#include "TextBox.hpp"
 #include <unordered_set>
 
 namespace Game::Scene::GameLevel
@@ -14,7 +17,9 @@ namespace Game::Scene::GameLevel
       std::array<Player::Data, 2> players{};
       std::unordered_set<int> numbersUsed{};
       std::array<int, 10> numbersUnused{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-      Grid::Data grid;
+      Grid::Data grid{};
+      TextBox::Data player1NumbersTextBox{"Player 1's numbers: ", -1, -0.8, 0.0006f, (Entity)-1};
+      TextBox::Data player2NumbersTextBox{"Player 2's numbers: ", -1, -0.9, 0.0006f, (Entity)-1};
       int currentNumber{-1};
       int numbersLeft{10};
       bool player1Turn{true};
@@ -143,9 +148,12 @@ namespace Game::Scene::GameLevel
 
       int count = 0;
 
-      gameData.grid.gridSize = 50;
+      gameData.grid.gridSize = 10;
 
+      Temp::TextBox::Construct(data, &gameData.player1NumbersTextBox);
+      Temp::TextBox::Construct(data, &gameData.player2NumbersTextBox);
       Grid::Construct(data, &gameData.grid);
+
       Entity Player1 = count++;
       data->entities[Player1] = Temp::Scene::CreateEntity(*data);
       Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(*data, Player1, {});
@@ -158,8 +166,9 @@ namespace Game::Scene::GameLevel
       Temp::Scene::AddComponent<Component::Type::SCORE>(*data, Player2, {});
       gameData.players[1].entity = Player2;
 
-      Temp::Component::Drawable::UpdateOrthoScale(32.f);
-      Temp::Component::Drawable::GetCamera()->view = Temp::Component::Drawable::GetCamera()->view.translate({0, 5, 0});
+      float scale = 32.f * gameData.grid.gridSize / 50.f;
+      Temp::Camera::UpdateOrthoScale(data, scale);
+      Temp::Camera::TranslateView({0, 5 * gameData.grid.gridSize / 50.f, 0});
     }
 
     void Update(Temp::Scene::Data *data, float deltaTime)

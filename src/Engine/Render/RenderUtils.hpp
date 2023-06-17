@@ -122,8 +122,8 @@ namespace Temp::Render
 
     // load and create a texture
     // -------------------------
-    square.texture1 = OpenGLWrapper::LoadTexture((ApplicationDirectory / "Images" / "container.jpg").c_str(), GL_RGB);
-    square.texture2 = OpenGLWrapper::LoadTexture((ApplicationDirectory / "Images" / "awesomeface.png").c_str(), GL_RGBA);
+    square.texture1 = OpenGLWrapper::LoadTexture((ApplicationDirectory() / "Images" / "container.jpg").c_str(), GL_RGB);
+    square.texture2 = OpenGLWrapper::LoadTexture((ApplicationDirectory() / "Images" / "awesomeface.png").c_str(), GL_RGBA);
 
     // Needs to be called to set variables in the shader!
     OpenGLWrapper::Set1IntShaderProperty(square.shaderProgram, "texture1", 0);
@@ -150,8 +150,8 @@ namespace Temp::Render
 
     // load and create a texture
     // -------------------------
-    cube.texture1 = OpenGLWrapper::LoadTexture((ApplicationDirectory / "Images" / "container.jpg").c_str(), GL_RGB);
-    cube.texture2 = OpenGLWrapper::LoadTexture((ApplicationDirectory / "Images" / "awesomeface.png").c_str(), GL_RGBA);
+    cube.texture1 = OpenGLWrapper::LoadTexture((ApplicationDirectory() / "Images" / "container.jpg").c_str(), GL_RGB);
+    cube.texture2 = OpenGLWrapper::LoadTexture((ApplicationDirectory() / "Images" / "awesomeface.png").c_str(), GL_RGBA);
 
     // Needs to be called to set variables in the shader!
     OpenGLWrapper::Set1IntShaderProperty(cube.shaderProgram, "texture1", 0);
@@ -196,7 +196,7 @@ namespace Temp::Render
     OpenGLWrapper::Set4x4MatrixShaderProperty(cube.shaderProgram, "projection", &projection.rows[0][0]);
 
     OpenGLWrapper::BindTexture(GL_TEXTURE0, cube.texture1);
-    OpenGLWrapper::BindTexture(GL_TEXTURE1, Font::Characters['A'].TextureID);
+    OpenGLWrapper::BindTexture(GL_TEXTURE1, Font::Characters['A'].texture);
 
     // Bind the VAO and draw the triangle
     OpenGLWrapper::DrawArrays(cube.VAO, 180);

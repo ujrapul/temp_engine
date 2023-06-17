@@ -19,35 +19,36 @@ set ( TEST_GAME_2_SRC
 set ( NUMBER_GAME_SRC
   src/NumberGame/Components/ComponentContainer.cpp
   src/NumberGame/Coordinator.cpp
-  src/NumberGame/Scene.cpp
   src/NumberGame/GameLevel.cpp
   src/NumberGame/Grid.cpp
+  src/NumberGame/Scene.cpp
   src/NumberGame/main.cpp
 )
 set ( ENGINE_HEADER
+  src/Engine/Camera.hpp
   src/Engine/Components/Component.hpp
-  src/Engine/Components/ComponentType.hpp
   src/Engine/Components/ComponentContainer.hpp
   src/Engine/Components/ComponentData.hpp
+  src/Engine/Components/ComponentType.hpp
   src/Engine/Components/Drawable.hpp
-  src/Engine/Render/RenderUtils.hpp
-  src/Engine/Render/glad/gl.h
-  src/Engine/Render/glad/khrplatform.h
-  src/Engine/Render/OpenGL/X11Render.hpp
-  src/Engine/Render/OpenGL/OpenGLWrapper.hpp
   src/Engine/Coordinator.hpp
   src/Engine/Engine.hpp
   src/Engine/EngineUtils.hpp
   src/Engine/Entity.hpp
   src/Engine/EntityManager.hpp
   src/Engine/FontLoader.hpp
+  src/Engine/ImageLoader.hpp
+  src/Engine/Input.hpp
   src/Engine/Math.hpp
   src/Engine/Player.hpp
+  src/Engine/Render/OpenGL/OpenGLWrapper.hpp
+  src/Engine/Render/OpenGL/X11Render.hpp
+  src/Engine/Render/RenderUtils.hpp
+  src/Engine/Render/glad/gl.h
+  src/Engine/Render/glad/khrplatform.h
   src/Engine/Scene.hpp
-  src/Engine/Input.hpp
-  src/Engine/ImageLoader.hpp
-  # TODO: When you become more knowledgable try writing your own image loading system
-  src/Engine/stb_image.h
+  src/Engine/TextBox.hpp
+  src/Engine/stb_image.h # TODO: When you become more knowledgable try writing your own image loading system
 )
 if (WIN32)
   list (APPEND ENGINE_HEADER
@@ -59,19 +60,21 @@ elseif (UNIX)
   )
 endif()
 set ( ENGINE_SRC
-  src/Engine/Engine.cpp
-  src/Engine/EntityManager.cpp
-  src/Engine/Math.cpp
-  src/Engine/Coordinator.cpp
+  src/Engine/Camera.cpp
   src/Engine/Components/ComponentContainer.cpp
   src/Engine/Components/Drawable.cpp
-  src/Engine/Render/glad/gl.c
-  src/Engine/Render/OpenGL/X11Render.cpp
-  src/Engine/Render/OpenGL/OpenGLWrapper.cpp
-  src/Engine/Scene.cpp
+  src/Engine/Coordinator.cpp
+  src/Engine/Engine.cpp
+  src/Engine/EngineUtils.cpp
+  src/Engine/EntityManager.cpp
+  src/Engine/FontLoader.cpp
   src/Engine/Input.cpp
-  # TODO: When you become more knowledgable try writing your own image loading system
-  src/Engine/stb_image.cpp
+  src/Engine/Math.cpp
+  src/Engine/Render/OpenGL/OpenGLWrapper.cpp
+  src/Engine/Render/OpenGL/X11Render.cpp
+  src/Engine/Render/glad/gl.c
+  src/Engine/Scene.cpp
+  src/Engine/stb_image.cpp # TODO: When you become more knowledgable try writing your own image loading system
 )
 if (WIN32)
   list (APPEND ENGINE_HEADER
@@ -83,21 +86,21 @@ elseif (UNIX)
   )
 endif()
 set ( TEST_GAME_HEADER
-  src/TestGame/TestLevel.hpp
   src/TestGame/Entry.hpp
+  src/TestGame/TestLevel.hpp
 )
 set ( TEST_GAME_2_HEADER
-  src/TestGame2/TestLevel.hpp
   src/TestGame2/Entry.hpp
+  src/TestGame2/TestLevel.hpp
 )
 set ( NUMBER_GAME_HEADER
-  src/NumberGame/GameLevel.hpp
-  src/NumberGame/Entry.hpp
-  src/NumberGame/Coordinator.hpp
-  src/NumberGame/Scene.hpp
-  src/NumberGame/Grid.hpp
-  src/NumberGame/Components/ComponentType.hpp
   src/NumberGame/Components/ComponentContainer.hpp
+  src/NumberGame/Components/ComponentType.hpp
+  src/NumberGame/Coordinator.hpp
+  src/NumberGame/Entry.hpp
+  src/NumberGame/GameLevel.hpp
+  src/NumberGame/Grid.hpp
+  src/NumberGame/Scene.hpp
 )
 
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${ENGINE_HEADER})
@@ -125,17 +128,17 @@ add_executable(${TARGET_NUMBER_GAME} ${NUMBER_GAME_SRC} ${NUMBER_GAME_HEADER})
 set_target_properties(${TARGET_ENGINE} PROPERTIES LINKER_LANGUAGE CXX)
 
 include_directories(
+  ${OPENGL_INCLUDE_DIRS}
   src
   src/Engine
   src/Engine/Components
   src/Engine/Render
-  src/Engine/Render/glad
   src/Engine/Render/OpenGL
-  src/TestGame
-  src/TestGame2
+  src/Engine/Render/glad
   src/NumberGame
   src/NumberGame/Components
-  ${OPENGL_INCLUDE_DIRS}
+  src/TestGame
+  src/TestGame2
 )
 
 target_link_libraries(${TARGET_ENGINE} PRIVATE ${OPENGL_LIBRARIES})

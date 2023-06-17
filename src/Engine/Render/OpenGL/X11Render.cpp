@@ -34,6 +34,7 @@ namespace Temp::Render
     constexpr int window_width = 1024, window_height = 768;
 
     bool quit = false;
+    bool initialized = false;
 
     void RenderThread(Engine::Data &engine)
     {
@@ -46,6 +47,9 @@ namespace Temp::Render
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       Font::LoadFont();
+      OpenGLWrapper::LoadShaders();
+
+      initialized = true;
 
       // Main rendering loop
       while (!quit)
@@ -53,6 +57,10 @@ namespace Temp::Render
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        if (!engine.currentScene)
+        {
+          continue;
+        }
         engine.currentScene->Draw(engine.currentScene);
 
         glXSwapBuffers(display, window);
@@ -147,13 +155,17 @@ namespace Temp::Render
         return;
       }
     }
-
   }
 
   void Initialize(const char *windowName, Engine::Data &engine)
   {
     CreateDisplay(windowName);
     renderThread = std::thread(RenderThread, std::ref(engine));
+  }
+
+  bool IsInitialized()
+  {
+    return initialized;
   }
 
   void Run(Engine::Data &engine)
@@ -175,10 +187,23 @@ namespace Temp::Render
       case ClientMessage:
       {
         // Window close check
+        Atom wmProtocols = XInternAtom(display, "WM_PROTOCOLS", False);
         Atom wmDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", False);
-        if (xev.xclient.message_type == wmDeleteWindow)
+        if (xev.type == ClientMessage && xev.xclient.message_type == wmProtocols)
         {
-          Engine::Quit(engine);
+          Atom actualAtom;
+          int actualFormat;
+          unsigned long numItems, bytesAfter;
+          Atom *data = nullptr;
+          if (XGetWindowProperty(display, xev.xclient.window, wmProtocols, 0, 1, False, AnyPropertyType,
+                                 &actualAtom, &actualFormat, &numItems, &bytesAfter, (unsigned char **)&data) == Success)
+          {
+            if (numItems > 0 && data[0] == wmDeleteWindow)
+            {
+              Engine::Quit(engine);
+            }
+            XFree(data);
+          }
         }
       }
       break;

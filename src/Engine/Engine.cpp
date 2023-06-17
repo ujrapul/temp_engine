@@ -28,6 +28,11 @@ namespace Temp::Engine
       deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(stop - start).count();
       start = stop;
 
+      if (!Render::IsInitialized())
+      {
+        continue;
+      }
+
       // Process events in the renderer
       Render::Run(engine);
       switch (currentScene->state)

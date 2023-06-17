@@ -1,111 +1,57 @@
 #include "Drawable.hpp"
+#include "Camera.hpp"
 
-namespace Temp
+namespace Temp::Component::Drawable
 {
-  namespace Component
+  void Construct(Data *data, int shaderIdx, int BufferDraw /*= GL_STATIC_DRAW*/, int vertexStride /*= 3*/)
   {
-    namespace Drawable
-    {
-      namespace
-      {
-        Projection projection = Projection::PERSPECTIVE;
+    using namespace Temp::Render;
 
-        Math::Mat4 orthoProjection = Math::Mat4::orthographic(-GetCamera()->aspect * GetCamera()->orthoScale,
-                                                              GetCamera()->aspect *GetCamera()->orthoScale,
-                                                              -GetCamera()->orthoScale, GetCamera()->orthoScale,
-                                                              -100, 100);
+    data->shaderProgram = OpenGLWrapper::CreateShaderProgram(shaderIdx);
 
-        Math::Mat4 perspProjection = Math::Mat4::perspective(Math::ToRadians(GetCamera()->fov), 1.33333333333, 0.1, 100);
+    // Create vertex array object (VAO)
+    data->VAO = OpenGLWrapper::CreateVAO();
 
-        Math::Mat4 GetProjection()
-        {
-          switch (projection)
-          {
-          case Projection::PERSPECTIVE:
-            return perspProjection;
-          default:
-            return orthoProjection;
-          };
-        }
-      }
+    // Create vertex buffer object (VBO)
+    data->VBO = OpenGLWrapper::CreateVBO(data->vertices.data(), data->vertices.size(), BufferDraw);
 
-      void UpdateOrthoScale(float orthoScale)
-      {
-        orthoProjection = Math::Mat4::orthographic(-GetCamera()->aspect * GetCamera()->orthoScale,
-                                                   GetCamera()->aspect * GetCamera()->orthoScale,
-                                                   -GetCamera()->orthoScale, GetCamera()->orthoScale,
-                                                   -100, 100);
-      }
+    // Create Element Buffer Object (EBO) and copy index data
+    data->EBO = OpenGLWrapper::CreateEBO(data->indices.data(), data->indices.size());
 
-      void UpdateCameraAspect(float aspect)
-      {
-        orthoProjection = Math::Mat4::orthographic(-GetCamera()->aspect * GetCamera()->orthoScale,
-                                                   GetCamera()->aspect * GetCamera()->orthoScale,
-                                                   -GetCamera()->orthoScale, GetCamera()->orthoScale,
-                                                   -100, 100);
-      }
+    // Specify vertex attributes
+    // position attribute
+    OpenGLWrapper::SetVertexAttribArray(0, vertexStride, vertexStride, 0);
 
-      void UpdateFov(float fov)
-      {
-        perspProjection = Math::Mat4::perspective(Math::ToRadians(GetCamera()->fov), 1.33333333333, 0.1, 100);
-      }
+    Update(data);
 
-      // Should only be called once!
-      void SetProjection(Projection _projection)
-      {
-        projection = _projection;
-      }
+    // We are making the assumption that every shader has a Matrices uniform block
+    // For getting view and projection from the camera
+    OpenGLWrapper::BindUBOShader(Camera::UBO(), data->shaderProgram, "Matrices", 0);
 
-      Camera *GetCamera()
-      {
-        static Camera camera{};
-        return &camera;
-      }
+    // Unbind VAO and VBO and EBO
+    // OpenGLWrapper::UnbindBuffers();
+  }
 
-      void Construct(Data *data, int shaderIdx)
-      {
-        using namespace Temp::Render;
+  void Update(Data *data)
+  {
+    using namespace Temp::Render;
 
-        data->shaderProgram = OpenGLWrapper::CreateShaderProgram(shaderIdx);
+    OpenGLWrapper::Set4x4MatrixShaderProperty(data->shaderProgram, "model", &data->model.rows[0][0]);
+  }
 
-        // Create vertex array object (VAO)
-        data->VAO = OpenGLWrapper::CreateVAO();
+  void Draw(Data *data)
+  {
+    using namespace Temp::Render;
 
-        // Create vertex buffer object (VBO)
-        data->VBO = OpenGLWrapper::CreateVBO(data->vertices.data(), data->vertices.size());
+    // std::cout << "GOT TO DRAW!" << std::endl;
 
-        // Create Element Buffer Object (EBO) and copy index data
-        data->EBO = OpenGLWrapper::CreateEBO(data->indices.data(), data->indices.size());
+    // data->model = data->model.rotate(0.01f * Math::ToRadians(50.0f), Math::Vec3f(0.5, 1.0, 0));
 
-        // Specify vertex attributes
-        // position attribute
-        OpenGLWrapper::SetVertexAttribArray(0, 3, 3, 0);
+    glUseProgram(data->shaderProgram);
 
-        // Unbind VAO and VBO and EBO
-        // OpenGLWrapper::UnbindBuffers();
-      }
+    OpenGLWrapper::BindTexture(GL_TEXTURE0, data->texture);
 
-      // TODO: OpenGLWrapper::Set4x4MatrixShaderProperty needs to be set everytime projection changes
-      // Might need to set projection and view inside the data
-      void Draw(Data *data)
-      {
-        using namespace Temp::Render;
-
-        // std::cout << "GOT TO DRAW!" << std::endl;
-
-        // data->model = data->model.rotate(0.01f * Math::ToRadians(50.0f), Math::Vec3f(0.5, 1.0, 0));
-
-        OpenGLWrapper::Set4x4MatrixShaderProperty(data->shaderProgram, "model", &data->model.rows[0][0]);
-        OpenGLWrapper::Set4x4MatrixShaderProperty(data->shaderProgram, "view", &GetCamera()->view.rows[0][0]);
-        OpenGLWrapper::Set4x4MatrixShaderProperty(data->shaderProgram, "projection", &GetProjection().rows[0][0]);
-
-        OpenGLWrapper::BindTexture(GL_TEXTURE0, data->texture);
-
-        // std::cout << data->indices.size() << " " << data->vertices.size() << std::endl;
-
-        // Bind the VAO and draw the triangle
-        OpenGLWrapper::DrawElementsInstanced(data->VAO, data->indices.size(), data->numInstances);
-      }
-    }
+    // Bind the VAO and draw the triangle
+    OpenGLWrapper::DrawElementsInstanced(data->VAO, data->indices.size(), data->numInstances);
   }
 }

@@ -6,25 +6,22 @@
 #include "FontLoader.hpp"
 #include <vector>
 
-namespace Game
+namespace Game::Grid
 {
-  namespace Grid
+  struct Data
   {
-    struct Data
-    {
-      std::vector<Temp::Entity> gridEntities{};
-      std::vector<int> gridTranslations{};
-      std::vector<float> gridUVOffsets{};
-      Temp::Entity entity{};
-      int gridSize{50};
-      GLuint uvVBO;
-      GLuint translationVBO;
-      GLuint uvOffsetVBO;
-    };
+    std::vector<Temp::Entity> gridEntities{};
+    std::vector<int> gridTranslations{};
+    std::vector<float> gridUVOffsets{};
+    Temp::Entity entity{};
+    int gridSize{50};
+    GLuint uvVBO;
+    GLuint translationVBO;
+    GLuint uvOffsetVBO;
+  };
 
-    void Construct(Temp::Scene::Data *data, Data *grid);
-    // Should only be called on the RenderThread
-    void UpdateUVOffsets(Temp::Scene::Data *data, Data *grid);
-    void UpdateNumbers(Temp::Scene::Data *sceneData, Data *grid, Temp::Entity player, int currentValue);
-  }
+  void Construct(Temp::Scene::Data *data, Data *grid);
+  // Should only be called on the RenderThread
+  void UpdateUVOffsets(Temp::Scene::Data *data, Data *grid);
+  void UpdateNumbers(Temp::Scene::Data *sceneData, Data *grid, Temp::Entity player, int currentValue);
 }

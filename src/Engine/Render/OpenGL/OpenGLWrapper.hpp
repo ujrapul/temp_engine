@@ -1,11 +1,12 @@
 #pragma once
 
-#include "stb_image.h"
-#include "gl.h"
 #include "EngineUtils.hpp"
+#include "Math.hpp"
+#include "gl.h"
+#include "stb_image.h"
+#include <ft2build.h>
 #include <iostream>
 #include <vector>
-#include <ft2build.h>
 #include FT_FREETYPE_H
 
 // IMPORTANT NOTES SINCE YOU'RE TOO DUMB TO REMEMBER THEM!
@@ -27,7 +28,7 @@ namespace Temp::Render::OpenGLWrapper
     };
   };
 
-  const char **GetShader(int shader);
+  void LoadShaders();
 
   constexpr GLuint CreateShader(const char **shaderSource, int shaderType)
   {
@@ -73,12 +74,12 @@ namespace Temp::Render::OpenGLWrapper
     return VAO;
   }
 
-  constexpr GLuint CreateVBO(float *data, size_t arraySize)
+  constexpr GLuint CreateVBO(float *data, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     GLuint VBO = -1;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, data, BufferDraw);
     return VBO;
   }
 
@@ -106,6 +107,30 @@ namespace Temp::Render::OpenGLWrapper
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * arraySize, indices, GL_STATIC_DRAW);
     return EBO;
+  }
+
+  constexpr GLuint CreateUBO(size_t bytes)
+  {
+    GLuint UBO = -1;
+    glGenBuffers(1, &UBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+    glBufferData(GL_UNIFORM_BUFFER, bytes, NULL, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    // glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, bytes);
+    return UBO;
+  }
+
+  constexpr void BindUBOShader(GLuint UBO, GLuint shaderProgram, const char *property, size_t index)
+  {
+    glUniformBlockBinding(shaderProgram, glGetUniformBlockIndex(shaderProgram, property), index);
+    glBindBufferBase(GL_UNIFORM_BUFFER, index, UBO);
+  }
+
+  constexpr void UpdateUBO(GLuint UBO, float *data, size_t size, uint32_t offset)
+  {
+    glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, (void *)data);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
   }
 
   constexpr void SetVertexAttribArray(size_t arrayIndex, size_t numOfElements, size_t stride, size_t position)
@@ -139,6 +164,28 @@ namespace Temp::Render::OpenGLWrapper
 
   GLuint LoadTexture(const char *texturePath, int imageDataType);
 
+  constexpr GLuint CreateTexture(int imageDataType, int width, int height, void *data, GLint param = GL_REPEAT)
+  {
+    // load and create a texture
+    // -------------------------
+    GLuint texture = -1;
+    // texture 1
+    // ---------
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, param); // set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, param);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, imageDataType, width, height, 0, imageDataType, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    return texture;
+  }
+
   constexpr void BindTexture(GLuint textureIndex, GLuint texture)
   {
     glActiveTexture(textureIndex);
@@ -157,10 +204,10 @@ namespace Temp::Render::OpenGLWrapper
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, property), 1, GL_TRUE, matrix);
   }
 
-  constexpr void DrawArrays(GLuint vao, int numTriangles)
+  constexpr void DrawArrays(GLuint vao, int numVertices)
   {
     glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, numTriangles);
+    glDrawArrays(GL_TRIANGLES, 0, numVertices);
     glBindVertexArray(0);
   }
 
@@ -202,25 +249,20 @@ namespace Temp::Render::OpenGLWrapper
 
   constexpr GLuint GenerateFontTexture(FT_Face face)
   {
-    GLuint texture = -1;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(
+    return CreateTexture(GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer, GL_CLAMP_TO_EDGE);
+  }
+
+  constexpr void UpdateSubTexture(int xOffset, int yOffset, int textureWidth, int textureHeight, void* data)
+  {
+    glTexSubImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RED,
-        face->glyph->bitmap.width,
-        face->glyph->bitmap.rows,
-        0,
+        xOffset,
+        yOffset,
+        textureWidth,
+        textureHeight,
         GL_RED,
         GL_UNSIGNED_BYTE,
-        face->glyph->bitmap.buffer);
-    // set texture options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    return texture;
+        data);
   }
 }

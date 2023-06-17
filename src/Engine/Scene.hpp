@@ -16,8 +16,7 @@ namespace Temp
       LEAVE = 2,
     };
 
-    struct RenderConstructData;
-    struct RenderUpdateData;
+    struct RenderData;
 
     inline void NoOpConstruct(struct Data *) {}
     inline void NoOpUpdate(struct Data *, float) {}
@@ -26,7 +25,7 @@ namespace Temp
     {
       Coordinator::Data coordinator{};
       std::array<Entity, MAX_ENTITIES> entities{};
-      std::queue<RenderConstructData> renderConstructQueue{};
+      std::queue<RenderData> renderQueue{};
       State state{State::ENTER};
       Data *nextScene{nullptr};
       void (*Construct)(Scene::Data *){NoOpConstruct};
@@ -36,11 +35,11 @@ namespace Temp
       std::mutex mtx{};
     };
 
-    typedef std::function<void(Data *, void *)> RenderConstructFunction;
+    typedef std::function<void(Data *, void *)> RenderFunction;
 
-    struct RenderConstructData
+    struct RenderData
     {
-      RenderConstructFunction func;
+      RenderFunction func;
       Scene::Data *scene;
       void *data;
     };
@@ -75,41 +74,18 @@ namespace Temp
       Coordinator::AddComponent<T>(data.coordinator, entity, component);
     }
 
+    template <uint8_t T>
+    constexpr void AddComponent(Data &data, Entity entity)
+    {
+      Coordinator::AddComponent<T>(data.coordinator, entity, Component::GetDefaultValue<T>());
+    }
+
     void Destruct(Data &data);
     Entity CreateEntity(Data &data);
     void DestroyEntity(Data &data, Entity entity);
     Math::Vec2f &GetPosition(Data &data, Entity entity);
-
-    inline void EnqueueRenderConstruct(Scene::Data *scene, RenderConstructFunction func, void *data)
-    {
-      std::scoped_lock<std::mutex> lock(scene->mtx);
-      scene->renderConstructQueue.push({func, scene, data});
-    }
-
-    inline void DequeueRenderConstruct(Scene::Data *scene)
-    {
-      if (scene->renderConstructQueue.empty())
-      {
-        return;
-      }
-
-      std::scoped_lock<std::mutex> lock(scene->mtx);
-      auto construct = scene->renderConstructQueue.front();
-      construct.func(construct.scene, construct.data);
-      scene->renderConstructQueue.pop();
-    }
-
-    inline void Draw(Data *data)
-    {
-      DequeueRenderConstruct(data);
-      if (data->state == Scene::State::RUN)
-      {
-        static auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*data);
-        for (size_t i = 0; i < drawableArray->mapping.size; ++i)
-        {
-          Component::Drawable::Draw(&drawableArray->array[drawableArray->mapping.indexToEntity[i]]);
-        }
-      }
-    }
+    void EnqueueRender(Scene::Data *scene, RenderFunction func, void *data);
+    void DequeueRender(Scene::Data *scene);
+    void Draw(Data *data);
   }
 }
