@@ -1,19 +1,21 @@
 #include "X11Render.hpp"
-#include "Input.hpp"
+
+#include "Camera.hpp"
+#include "Drawable.hpp"
 #include "ImageLoader.hpp"
-#include "gl.h"
-#include "glx.h"
+#include "Input.hpp"
 #include "OpenGLWrapper.hpp"
 #include "RenderUtils.hpp"
-#include "Drawable.hpp"
 #include "Scene.hpp"
-#include <chrono>
-#include <thread>
-#include <condition_variable>
-#include <iostream>
-#include <unistd.h>
+#include "gl.h"
+#include "glx.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <chrono>
+#include <condition_variable>
+#include <iostream>
+#include <thread>
+#include <unistd.h>
 #define MIN_KEYCODE 8
 
 namespace Temp::Render
@@ -31,10 +33,16 @@ namespace Temp::Render
 
     std::thread renderThread{};
 
-    constexpr int window_width = 1024, window_height = 768;
-
     bool quit = false;
     bool initialized = false;
+
+    int windowWidth{};
+    int windowHeight{};
+
+    void Resize(void *)
+    {
+      glViewport(0, 0, windowWidth, windowHeight);
+    }
 
     void RenderThread(Engine::Data &engine)
     {
@@ -51,17 +59,19 @@ namespace Temp::Render
 
       initialized = true;
 
+      Resize(nullptr);
+
       // Main rendering loop
       while (!quit)
       {
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (!engine.currentScene)
+        Engine::DequeueGlobalRender(engine);
+        if (engine.currentScene) [[likely]]
         {
-          continue;
+          engine.currentScene->Draw(engine.currentScene);
         }
-        engine.currentScene->Draw(engine.currentScene);
 
         glXSwapBuffers(display, window);
       }
@@ -69,8 +79,11 @@ namespace Temp::Render
       // TODO: Clean up resources
     }
 
-    void CreateDisplay(const char *windowName)
+    void CreateDisplay(const char *windowName, int windowX, int windowY)
     {
+      windowWidth = windowX;
+      windowHeight = windowY;
+
       // Open the X11 display
       display = XOpenDisplay(NULL);
       if (display == NULL)
@@ -116,7 +129,7 @@ namespace Temp::Render
       colormap = windowAttribs.colormap;
 
       // Create the window
-      window = XCreateWindow(display, rootWindow, 0, 0, window_width, window_height, 0,
+      window = XCreateWindow(display, rootWindow, 0, 0, windowX, windowY, 0,
                              visualInfo->depth, InputOutput, visualInfo->visual,
                              CWColormap | CWEventMask, &windowAttribs);
 
@@ -157,9 +170,10 @@ namespace Temp::Render
     }
   }
 
-  void Initialize(const char *windowName, Engine::Data &engine)
+  void Initialize(const char *windowName, int windowX, int windowY, Engine::Data &engine)
   {
-    CreateDisplay(windowName);
+    CreateDisplay(windowName, windowX, windowY);
+    Camera::UpdateCameraAspect(engine, (float)windowX / windowY);
     renderThread = std::thread(RenderThread, std::ref(engine));
   }
 
@@ -204,6 +218,24 @@ namespace Temp::Render
             }
             XFree(data);
           }
+        }
+      }
+      break;
+      case ConfigureNotify:
+      {
+        XWindowAttributes windowAttributes;
+        XGetWindowAttributes(display, window, &windowAttributes);
+
+        int currentWidth = windowAttributes.width;
+        int currentHeight = windowAttributes.height;
+
+        if (currentWidth != windowWidth || currentHeight != windowHeight)
+        {
+          Camera::UpdateCameraAspect(engine, (float)currentWidth / currentHeight);
+          windowWidth = currentWidth;
+          windowHeight = currentHeight;
+
+          Engine::EnqueueGlobalRender(engine, Resize, nullptr);
         }
       }
       break;

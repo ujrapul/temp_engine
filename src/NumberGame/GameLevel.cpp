@@ -18,8 +18,10 @@ namespace Game::Scene::GameLevel
       std::unordered_set<int> numbersUsed{};
       std::array<int, 10> numbersUnused{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
       Grid::Data grid{};
-      TextBox::Data player1NumbersTextBox{"Player 1's numbers: ", -1, -0.8, 0.0006f, (Entity)-1};
-      TextBox::Data player2NumbersTextBox{"Player 2's numbers: ", -1, -0.9, 0.0006f, (Entity)-1};
+      TextBox::Data player1NumbersTextBox{"Player 1's numbers", -1, -0.8, 0.0006f, (Entity)-1};
+      TextBox::Data player1Numbers2TextBox{"1's numbers", -1.5, 0, 0.0006f, (Entity)-1};
+      TextBox::Data player2NumbersTextBox{"Player 2's numbers", -1, -0.9, 0.0006f, (Entity)-1};
+      TextBox::Data player2Numbers2TextBox{"2's numbers", 1, -0, 0.0006f, (Entity)-1};
       int currentNumber{-1};
       int numbersLeft{10};
       bool player1Turn{true};
@@ -47,9 +49,32 @@ namespace Game::Scene::GameLevel
       gameData.acceptInput = false;
     }
 
+    void UpdateText(Temp::Scene::Data *sceneData, int currentValue)
+    {
+      std::string appendText = std::to_string(currentValue);
+      if (gameData.numbersLeft > 2)
+      {
+        appendText += ", ";
+      }
+      if (gameData.player1Turn)
+      {
+        std::cout << gameData.player1NumbersTextBox.text + (currentValue + ", ") << std::endl;
+        TextBox::UpdateText(sceneData,
+                            &gameData.player1NumbersTextBox,
+                            gameData.player1NumbersTextBox.text + appendText);
+      }
+      else
+      {
+        TextBox::UpdateText(sceneData,
+                            &gameData.player2NumbersTextBox,
+                            gameData.player2NumbersTextBox.text + appendText);
+      }
+    }
+
     void UpdateNumbers(Temp::Scene::Data *sceneData, Entity player, int currentValue)
     {
       Grid::UpdateNumbers(sceneData, &gameData.grid, player, currentValue);
+      UpdateText(sceneData, currentValue);
     }
 
     bool PrintBoard(Temp::Scene::Data *data, float deltaTime)
@@ -64,21 +89,6 @@ namespace Game::Scene::GameLevel
       currTime = 0;
 
       system("clear");
-
-      std::cout << "Player 1's numbers: ";
-      for (auto num : GetCollectedValue(*data, gameData.players[0].entity))
-      {
-        std::cout << num << " ";
-      }
-      std::cout << std::endl;
-
-      std::cout << "Player 2's numbers: ";
-      for (auto num : GetCollectedValue(*data, gameData.players[1].entity))
-      {
-        std::cout << num << " ";
-      }
-      std::cout << std::endl
-                << std::endl;
 
       std::cout << "Numbers left: ";
       for (auto num : gameData.numbersUnused)
@@ -148,10 +158,12 @@ namespace Game::Scene::GameLevel
 
       int count = 0;
 
-      gameData.grid.gridSize = 10;
+      gameData.grid.gridSize = 50;
 
       Temp::TextBox::Construct(data, &gameData.player1NumbersTextBox);
       Temp::TextBox::Construct(data, &gameData.player2NumbersTextBox);
+      Temp::TextBox::Construct(data, &gameData.player1Numbers2TextBox);
+      Temp::TextBox::Construct(data, &gameData.player2Numbers2TextBox);
       Grid::Construct(data, &gameData.grid);
 
       Entity Player1 = count++;

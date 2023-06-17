@@ -1,5 +1,6 @@
 #include "Engine.hpp"
 #include "Scene.hpp"
+#include "Camera.hpp"
 #include <chrono>
 #include <thread>
 #ifdef __linux__
@@ -8,11 +9,11 @@
 
 namespace Temp::Engine
 {
-  void Run(Engine::Data &engine, const char *windowName)
+  void Run(Data &engine, const char *windowName, int windowX, int windowY)
   {
     Scene::Data *currentScene = engine.scenes.front();
     // Start Render Thread
-    Render::Initialize(windowName, engine);
+    Render::Initialize(windowName, windowX, windowY, engine);
 
 #ifndef __linux__
     std::thread inputThread(Input::HandleThread, std::ref(engine.keyEventData));
@@ -66,7 +67,7 @@ namespace Temp::Engine
     Render::Destroy();
   }
 
-  void Destroy(Engine::Data &engine)
+  void Destroy(Data &engine)
   {
     // For now the games should handle clean up of scenes
     for (Scene::Data *scene : engine.scenes)
@@ -76,15 +77,32 @@ namespace Temp::Engine
     engine.scenes.clear();
   }
 
-  Engine::Data Construct()
+  void Construct(Data &engine)
   {
-    Engine::Data out;
-    out.keyEventData = std::move(Input::Construct());
-    return out;
+    engine.keyEventData = std::move(Input::Construct());
   }
 
-  void Quit(Engine::Data &engine)
+  void Quit(Data &engine)
   {
     engine.quit = true;
+  }
+
+  void EnqueueGlobalRender(Data &engine, RenderFunction func, void *data)
+  {
+    std::scoped_lock<std::mutex> lock(engine.mtx);
+    engine.renderQueue.push({func, data});
+  }
+
+  void DequeueGlobalRender(Data &engine)
+  {
+    if (engine.renderQueue.empty())
+    {
+      return;
+    }
+
+    std::scoped_lock<std::mutex> lock(engine.mtx);
+    auto render = engine.renderQueue.front();
+    render.func(render.data);
+    engine.renderQueue.pop();
   }
 }

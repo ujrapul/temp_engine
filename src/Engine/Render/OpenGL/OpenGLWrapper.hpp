@@ -83,29 +83,37 @@ namespace Temp::Render::OpenGLWrapper
     return VBO;
   }
 
-  constexpr GLuint CreateVBO(void *data, size_t typeSize, size_t arraySize)
+  constexpr GLuint CreateVBO(void *data, size_t typeSize, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     GLuint VBO = -1;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, typeSize * arraySize, data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, typeSize * arraySize, data, BufferDraw);
     return VBO;
   }
 
-  constexpr void UpdateVBO(GLuint VBO, void *data, size_t arraySize)
+  constexpr void UpdateVBO(GLuint VBO, void *data, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, data, BufferDraw);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  constexpr GLuint CreateEBO(GLuint *indices, size_t arraySize)
+  constexpr GLuint CreateEBO(GLuint *indices, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     // Create Element Buffer Object (EBO) and copy index data
     GLuint EBO = -1;
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * arraySize, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * arraySize, indices, BufferDraw);
+    return EBO;
+  }
+
+  constexpr GLuint UpdateEBO(GLuint EBO, GLuint *indices, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
+  {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * arraySize, indices, BufferDraw);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     return EBO;
   }
 
@@ -252,7 +260,7 @@ namespace Temp::Render::OpenGLWrapper
     return CreateTexture(GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer, GL_CLAMP_TO_EDGE);
   }
 
-  constexpr void UpdateSubTexture(int xOffset, int yOffset, int textureWidth, int textureHeight, void* data)
+  constexpr void UpdateSubTexture(int xOffset, int yOffset, int textureWidth, int textureHeight, void *data)
   {
     glTexSubImage2D(
         GL_TEXTURE_2D,

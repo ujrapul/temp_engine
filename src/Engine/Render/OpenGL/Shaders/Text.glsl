@@ -4,7 +4,14 @@
 layout(location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
 out vec2 TexCoords;
 
-uniform mat4 projection;
+// Reference: https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL
+layout(std140) uniform FontMatrices {
+                   // Base alignment // Aligned offset (Starting byte, always multiple of 16)
+  mat4 projection; // 16             // 0   (col1)
+                   // 16             // 16  (col2)
+                   // 16             // 32  (col3)
+                   // 16             // 48  (col4)
+};
 
 void main() {
   gl_Position = projection * vec4(vertex.xy, 10.0, 1.0);

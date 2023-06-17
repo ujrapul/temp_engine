@@ -2,6 +2,7 @@
 
 #include "Input.hpp"
 #include <vector>
+#include <functional>
 
 namespace Temp
 {
@@ -12,17 +13,29 @@ namespace Temp
 
   namespace Engine
   {
+    typedef std::function<void(void *)> RenderFunction;
+
+    struct RenderData
+    {
+      RenderFunction func;
+      void *data;
+    };
+
     struct Data
     {
-      std::vector<Scene::Data*> scenes;
-      Input::KeyEventData keyEventData;
-      Scene::Data* currentScene{nullptr};
+      std::vector<Scene::Data *> scenes{};
+      std::queue<RenderData> renderQueue{};
+      Input::KeyEventData keyEventData{};
+      Scene::Data *currentScene{nullptr};
+      std::mutex mtx{};
       bool quit{false};
     };
 
-    void Run(Engine::Data& engine, const char* windowName);
-    void Destroy(Engine::Data& engine);
-    [[nodiscard]] Engine::Data Construct();
-    void Quit(Engine::Data& engine);
+    void Run(Data &engine, const char *windowName, int windowX, int windowY);
+    void Destroy(Data &engine);
+    void Construct(Data& engine);
+    void Quit(Data &engine);
+    void EnqueueGlobalRender(Data& engine, RenderFunction func, void *data);
+    void DequeueGlobalRender(Data& engine);
   }
 }

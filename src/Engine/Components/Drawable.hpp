@@ -2,6 +2,7 @@
 
 #include "Math.hpp"
 #include "OpenGLWrapper.hpp"
+#include "Camera.hpp"
 #include <vector>
 
 // TODO: Clean up resources, VAO, VBO, EBO, texture, shaderProgram etc.
@@ -21,7 +22,8 @@ namespace Temp::Component::Drawable
   };
 
   // Make sure all API construction happens before render-thread executes!
-  void Construct(Data *data, int shaderIdx, int BufferDraw = GL_STATIC_DRAW, int vertexStride = 3);
+  void Construct(Data *data, int shaderIdx, int BufferDraw = GL_STATIC_DRAW, int vertexStride = 3, int UBO = Camera::UBO());
+  void ConstructFont(Data *data, int shaderIdx, int BufferDraw = GL_DYNAMIC_DRAW, int vertexStride = 4, int UBO = Camera::FontUBO());
   void Update(Data *data);
   void Draw(Data *data);
 }
