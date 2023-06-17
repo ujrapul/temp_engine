@@ -16,10 +16,13 @@ namespace Temp
       LEAVE = 2,
     };
 
+    struct Data;
     struct RenderData;
 
-    inline void NoOpConstruct(struct Data *) {}
-    inline void NoOpUpdate(struct Data *, float) {}
+    inline void NoOpScene(struct Data *) {}
+    inline void NoOpSceneUpdate(struct Data *, float) {}
+    void Destruct(Data *data);
+    void Draw(Data *data);
 
     struct Data
     {
@@ -28,10 +31,10 @@ namespace Temp
       std::queue<RenderData> renderQueue{};
       State state{State::ENTER};
       Data *nextScene{nullptr};
-      void (*Construct)(Scene::Data *){NoOpConstruct};
-      void (*Update)(Scene::Data *, float){NoOpUpdate};
-      void (*Destruct)(Scene::Data *){Destruct};
-      void (*Draw)(Scene::Data *){Draw};
+      void (*Construct)(Scene::Data *){NoOpScene};
+      void (*Update)(Scene::Data *, float){NoOpSceneUpdate};
+      void (*DestructFunc)(Scene::Data *){Destruct};
+      void (*DrawFunc)(Scene::Data *){Draw};
       std::mutex mtx{};
     };
 
@@ -80,12 +83,10 @@ namespace Temp
       Coordinator::AddComponent<T>(data.coordinator, entity, Component::GetDefaultValue<T>());
     }
 
-    void Destruct(Data &data);
     Entity CreateEntity(Data &data);
     void DestroyEntity(Data &data, Entity entity);
     Math::Vec2f &GetPosition(Data &data, Entity entity);
     void EnqueueRender(Scene::Data *scene, RenderFunction func, void *data);
     void DequeueRender(Scene::Data *scene);
-    void Draw(Data *data);
   }
 }

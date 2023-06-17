@@ -49,6 +49,9 @@ namespace Temp::Render
       // Make the OpenGL context current for the rendering thread
       glXMakeCurrent(display, window, context);
 
+      // Vertical Sync | Set to 1 to Enable | 0 to disable
+      glXSwapIntervalEXT(display, window, 0);
+
       glEnable(GL_DEPTH_TEST);
 
       glEnable(GL_BLEND);
@@ -67,10 +70,11 @@ namespace Temp::Render
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Avoid using the Render Queue for real-time updates to avoid flickering!
         Engine::DequeueGlobalRender(engine);
         if (engine.currentScene) [[likely]]
         {
-          engine.currentScene->Draw(engine.currentScene);
+          engine.currentScene->DrawFunc(engine.currentScene);
         }
 
         glXSwapBuffers(display, window);

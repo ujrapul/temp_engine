@@ -63,12 +63,12 @@ namespace Temp::Component::Drawable
   {
     using namespace Temp::Render;
 
-    // std::cout << "GOT TO DRAW!" << std::endl;
-
-    // data->model = data->model.rotate(0.01f * Math::ToRadians(50.0f), Math::Vec3f(0.5, 1.0, 0));
+    if (!data->visible)
+    {
+      return;
+    }
 
     glUseProgram(data->shaderProgram);
-
     OpenGLWrapper::BindTexture(GL_TEXTURE0, data->texture);
 
     // Bind the VAO and draw the triangle

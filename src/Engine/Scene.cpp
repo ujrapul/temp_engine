@@ -4,9 +4,9 @@ namespace Temp
 {
   namespace Scene
   {
-    void Destruct(Data &data)
+    void Destruct(Data *data)
     {
-      Temp::Coordinator::Destruct(data.coordinator);
+      Temp::Coordinator::Destruct(data->coordinator);
     }
 
     Entity CreateEntity(Data &data)
@@ -48,7 +48,7 @@ namespace Temp
       DequeueRender(data);
       if (data->state == Scene::State::RUN && data->renderQueue.empty())
       {
-        static auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*data);
+        auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*data);
         for (size_t i = 0; i < drawableArray->mapping.size; ++i)
         {
           Component::Drawable::Draw(&drawableArray->array[drawableArray->mapping.indexToEntity[i]]);

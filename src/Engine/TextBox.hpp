@@ -114,6 +114,18 @@ namespace Temp::TextBox
     Scene::EnqueueRender(scene, ConstructRenderVoid, data);
   }
 
+  // TODO: Keeping here for reference to NOT do this.
+  // Avoid using the Render Queue for real-time updates to avoid flickering
+  // inline void UpdateText(Scene::Data *scene, Data *data, const std::string &newText)
+  // {
+  //   Scene::Get<Temp::Component::Type::TEXT>(*scene, data->entity) = newText;
+  //   data->text = newText;
+  //   auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
+  //   PopulateVerticesIndices(drawable, data);
+
+  //   Scene::EnqueueRender(scene, UpdateRenderVoid, data);
+  // }
+
   inline void UpdateText(Scene::Data *scene, Data *data, const std::string &newText)
   {
     Scene::Get<Temp::Component::Type::TEXT>(*scene, data->entity) = newText;
@@ -121,6 +133,13 @@ namespace Temp::TextBox
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
     PopulateVerticesIndices(drawable, data);
 
-    Scene::EnqueueRender(scene, UpdateRenderVoid, data);
+    // Scene::EnqueueRender(scene, UpdateRenderVoid, data);
+  }
+
+  inline void UpdateTextRender(Scene::Data *scene, Data *data)
+  {
+    // auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
+    // PopulateVerticesIndices(drawable, data);
+    UpdateRender(scene, data);
   }
 }

@@ -19,6 +19,7 @@ namespace Temp::Component::Drawable
     GLuint texture{};
     GLuint shaderProgram{};
     int numInstances{1};
+    bool visible{true};
   };
 
   // Make sure all API construction happens before render-thread executes!

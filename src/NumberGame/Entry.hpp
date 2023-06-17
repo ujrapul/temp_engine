@@ -26,11 +26,11 @@ namespace Game
 
       Engine::Construct(engine);
       Temp::Scene::Data *scene1 = Scene::GameLevel::Create(engine.keyEventData);
-      //      Temp::Scene::Data* scene2 = Scene::GameLevel::Create2();
-      //      scene1->nextScene = scene2;
-      //      scene2->nextScene = scene1;
+      Temp::Scene::Data *scene2 = Scene::GameLevel::Create2(engine.keyEventData);
+      scene1->nextScene = scene2;
+      scene2->nextScene = scene1;
       engine.scenes.push_back(scene1);
-      //      engine.scenes.push_back(scene2);
+      engine.scenes.push_back(scene2);
 
       // Testing Add and Remove works
       Input::AddCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);

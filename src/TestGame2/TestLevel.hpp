@@ -86,7 +86,7 @@ namespace Game
         Coordinator::Init(scene->coordinator);
         scene->Construct = Construct1;
         scene->Update = Update1;
-        scene->Destruct = Destruct;
+        scene->DestructFunc = Destruct;
         return scene;
       }
       
@@ -96,7 +96,7 @@ namespace Game
         Coordinator::Init(scene->coordinator);
         scene->Construct = Construct2;
         scene->Update = Update2;
-        scene->Destruct = Destruct;
+        scene->DestructFunc = Destruct;
         return scene;
       }
     }
