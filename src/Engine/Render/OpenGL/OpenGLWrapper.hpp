@@ -17,6 +17,9 @@
 
 namespace Temp::Render::OpenGLWrapper
 {
+  // DO NOT USE OUTSIDE OPENGLWRAPPER!
+  inline std::vector<std::vector<const char *>> globalShaders{};
+
   namespace ShaderIdx
   {
     enum ShaderIdx
@@ -62,9 +65,52 @@ namespace Temp::Render::OpenGLWrapper
     return shader;
   }
 
-  GLuint CreateVertexShader(int shader);
-  GLuint CreateFragmentShader(int shader);
-  GLuint CreateShaderProgram(int shader);
+  constexpr const char **GetShader(int shader)
+  {
+    return globalShaders[shader].data();
+  }
+
+  constexpr GLuint CreateVertexShader(int shader)
+  {
+    return CreateShader(GetShader(shader * 2), GL_VERTEX_SHADER);
+  }
+
+  constexpr GLuint CreateFragmentShader(int shader)
+  {
+    // We add a '1' since shaders are compiled in two sets.
+    return CreateShader(GetShader(shader * 2 + 1), GL_FRAGMENT_SHADER);
+  }
+
+  constexpr GLuint CreateShaderProgram(int shader)
+  {
+    GLuint vertexShader = CreateVertexShader(shader);
+    GLuint fragmentShader = CreateFragmentShader(shader);
+
+    // Create shader program and link shaders
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    GLint success = 0;
+
+    // Check for shader program linking errors
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+      char infoLog[512] = {};
+      glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
+      std::cerr << "Shader program linking failed\n"
+                << infoLog << std::endl;
+      return -1;
+    }
+
+    // Clean up shaders (they are already linked into the program)
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+  }
 
   constexpr GLuint CreateVAO()
   {

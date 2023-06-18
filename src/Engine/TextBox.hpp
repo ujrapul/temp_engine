@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Camera.hpp"
 #include "Entity.hpp"
 #include "FontLoader.hpp"
 #include "OpenGLWrapper.hpp"
@@ -20,7 +19,7 @@ namespace Temp::TextBox
     Entity entity{};
   };
 
-  inline void UpdateRender(Scene::Data *scene, Data *data)
+  constexpr void UpdateRender(Scene::Data *scene, Data *data)
   {
     using namespace Temp::Render;
 
@@ -29,30 +28,10 @@ namespace Temp::TextBox
     OpenGLWrapper::UpdateEBO(drawable.EBO, drawable.indices.data(), drawable.indices.size(), GL_DYNAMIC_DRAW);
   }
 
-  inline void UpdateRenderVoid(Scene::Data *scene, void *data)
-  {
-    UpdateRender(scene, static_cast<Data *>(data));
-  }
+  void ConstructRender(Scene::Data *scene, Data *data);
+  void ConstructRenderVoid(Scene::Data *scene, void *data);
 
-  inline void ConstructRender(Scene::Data *scene, Data *data)
-  {
-    using namespace Temp::Render;
-
-    auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
-    drawable.texture = Font::Characters['0'].texture;
-
-    Component::Drawable::ConstructFont(&drawable, OpenGLWrapper::ShaderIdx::TEXT);
-
-    OpenGLWrapper::Set1IntShaderProperty(drawable.shaderProgram, "text", 0);
-    OpenGLWrapper::UnbindBuffers();
-  }
-
-  inline void ConstructRenderVoid(Scene::Data *scene, void *data)
-  {
-    ConstructRender(scene, static_cast<Data *>(data));
-  }
-
-  inline void PopulateVerticesIndices(Component::Drawable::Data &drawable, Data *data)
+  constexpr void PopulateVerticesIndices(Component::Drawable::Data &drawable, Data *data)
   {
     drawable.vertices.clear();
     drawable.indices.clear();
@@ -100,47 +79,18 @@ namespace Temp::TextBox
     }
   }
 
-  inline void Construct(Scene::Data *scene, Data *data)
-  {
-    data->entity = Scene::CreateEntity(*scene);
+  void Construct(Scene::Data *scene, Data *data);
 
-    Component::Drawable::Data drawable;
-    PopulateVerticesIndices(drawable, data);
-
-    Scene::AddComponent<Component::Type::DRAWABLE>(*scene, data->entity, drawable);
-    Scene::AddComponent<Component::Type::POSITION2D>(*scene, data->entity, {data->x, data->y});
-    Scene::AddComponent<Component::Type::SCALE>(*scene, data->entity, data->scale);
-    Scene::AddComponent<Component::Type::TEXT>(*scene, data->entity, data->text);
-
-    Scene::EnqueueRender(scene, ConstructRenderVoid, data);
-  }
-
-  // TODO: Keeping here for reference to NOT do this.
-  // Avoid using the Render Queue for real-time updates to avoid flickering
-  // inline void UpdateText(Scene::Data *scene, Data *data, const std::string &newText)
-  // {
-  //   Scene::Get<Temp::Component::Type::TEXT>(*scene, data->entity) = newText;
-  //   data->text = newText;
-  //   auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
-  //   PopulateVerticesIndices(drawable, data);
-
-  //   Scene::EnqueueRender(scene, UpdateRenderVoid, data);
-  // }
-
-  inline void UpdateText(Scene::Data *scene, Data *data, const std::string &newText)
+  constexpr void UpdateText(Scene::Data *scene, Data *data, const std::string &newText)
   {
     Scene::Get<Temp::Component::Type::TEXT>(*scene, data->entity) = newText;
     data->text = newText;
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
     PopulateVerticesIndices(drawable, data);
-
-    // Scene::EnqueueRender(scene, UpdateRenderVoid, data);
   }
 
-  inline void UpdateTextRender(Scene::Data *scene, Data *data)
+  constexpr void UpdateTextRender(Scene::Data *scene, Data *data)
   {
-    // auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
-    // PopulateVerticesIndices(drawable, data);
     UpdateRender(scene, data);
   }
 }

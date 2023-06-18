@@ -47,6 +47,7 @@ set ( ENGINE_HEADER
   src/Engine/Render/glad/gl.h
   src/Engine/Render/glad/khrplatform.h
   src/Engine/Scene.hpp
+  src/Engine/TextButton.hpp
   src/Engine/TextBox.hpp
   src/Engine/stb_image.h # TODO: When you become more knowledgable try writing your own image loading system
 )
@@ -74,6 +75,7 @@ set ( ENGINE_SRC
   src/Engine/Render/OpenGL/X11Render.cpp
   src/Engine/Render/glad/gl.c
   src/Engine/Scene.cpp
+  src/Engine/TextBox.cpp
   src/Engine/stb_image.cpp # TODO: When you become more knowledgable try writing your own image loading system
 )
 if (WIN32)

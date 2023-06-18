@@ -6,6 +6,7 @@
 #include "Grid.hpp"
 #include "Scene.hpp"
 #include "TextBox.hpp"
+#include "TextButton.hpp"
 #include <unordered_set>
 
 namespace Game::Scene::GameLevel
