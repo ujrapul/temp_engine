@@ -36,24 +36,24 @@ namespace Game
         return index;
       }
       
-      void Construct1(Temp::Scene::Data* data)
+      void Construct1(Temp::Scene::Data* /*data*/)
       {
-        for (auto& entity : data->entities) {
-          entity = Coordinator::CreateEntity(data->coordinator);
-          if (entity % 3 == 0) {
-            Temp::Scene::AddComponent<Component::Type::POSITION2D>(*data, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f});
-          }
-        }
+        // for (auto& entity : data->entities) {
+        //   entity = Coordinator::CreateEntity(data->coordinator);
+        //   if (entity % 3 == 0) {
+        //     Temp::Scene::AddComponent<Component::Type::POSITION2D>(*data, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f});
+        //   }
+        // }
       }
       
-      void Construct2(Temp::Scene::Data* data)
+      void Construct2(Temp::Scene::Data* /*data*/)
       {
-        for (auto& entity : data->entities) {
-          entity = Coordinator::CreateEntity(data->coordinator);
-          if (entity % 5 == 0) {
-            Temp::Scene::AddComponent<Component::Type::POSITION2D>(*data, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f});
-          }
-        }
+        // for (auto& entity : data->entities) {
+        //   entity = Coordinator::CreateEntity(data->coordinator);
+        //   if (entity % 5 == 0) {
+        //     Temp::Scene::AddComponent<Component::Type::POSITION2D>(*data, entity, Math::Vec2{rand() % 999 / 1000.f, rand() % 999 / 1000.f});
+        //   }
+        // }
       }
       
       void Update1(Temp::Scene::Data* data, float deltaTime)
@@ -72,12 +72,12 @@ namespace Game
         }
       }
       
-      void Destruct(Temp::Scene::Data* data)
+      void Destruct(Temp::Scene::Data* /*data*/)
       {
-        for (auto& entity : data->entities) {
-          Coordinator::DestroyEntity(data->coordinator, entity);
-          entity = 0;
-        }
+        // for (auto& entity : data->entities) {
+        //   Coordinator::DestroyEntity(data->coordinator, entity);
+        //   entity = 0;
+        // }
       }
       
       Temp::Scene::Data* Create1()

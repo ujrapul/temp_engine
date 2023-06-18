@@ -8,15 +8,16 @@
 #include "gl.h"
 #include <string>
 
+// NOTE: Don't use inline global mutexes, it'll stall multiple instances of the same object
 namespace Temp::TextBox
 {
   struct Data
   {
-    std::string text;
-    float x;
-    float y;
-    float scale;
-    Entity entity;
+    std::string text{};
+    float x{};
+    float y{};
+    float scale{};
+    Entity entity{};
   };
 
   inline void UpdateRender(Scene::Data *scene, Data *data)

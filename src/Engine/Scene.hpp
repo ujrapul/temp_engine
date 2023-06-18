@@ -27,7 +27,6 @@ namespace Temp
     struct Data
     {
       Coordinator::Data coordinator{};
-      std::array<Entity, MAX_ENTITIES> entities{};
       std::queue<RenderData> renderQueue{};
       State state{State::ENTER};
       Data *nextScene{nullptr};
@@ -87,6 +86,6 @@ namespace Temp
     void DestroyEntity(Data &data, Entity entity);
     Math::Vec2f &GetPosition(Data &data, Entity entity);
     void EnqueueRender(Scene::Data *scene, RenderFunction func, void *data);
-    void DequeueRender(Scene::Data *scene);
+    void ClearRender(Scene::Data *scene);
   }
 }

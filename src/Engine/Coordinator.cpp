@@ -9,28 +9,25 @@ namespace Temp
   {
     Entity CreateEntity(Data& data)
     {
-      return EntityManager::CreateEntity(data.entityData.availableEntities,
-                                         data.entityData.livingEntityCount);
+      return EntityManager::CreateEntity(data.entityData);
     }
     
     void DestroyEntity(Data& data, Entity entity)
     {
       Component::Container::EntityDestroyed(data.componentData, entity);
-      EntityManager::DestroyEntity(data.entityData.availableEntities,
-                                   data.entityData.livingEntityCount,
-                                   data.entityData.signatures,
-                                   entity);
+      EntityManager::DestroyEntity(data.entityData, entity);
     }
     
     void Init(Data& data)
     {
-      EntityManager::InitData(data.entityData.availableEntities);
+      EntityManager::InitData(data.entityData);
       Component::Container::Init(data.componentData);
     }
     
     void Destruct(Data& data)
     {
       Component::Container::Destruct(data.componentData);
+      EntityManager::Destruct(data.entityData);
     }
     
     Math::Vec2f& GetPosition(Data& data, Entity entity)

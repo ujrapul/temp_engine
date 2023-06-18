@@ -145,6 +145,11 @@ namespace Temp::Camera
     view = view.translate(translate);
   }
 
+  void ResetView()
+  {
+    view = {};
+  }
+
   const Math::Mat4 &GetOrthoProjecton()
   {
     return GetProjection(Projection::ORTHOGRAPHIC);

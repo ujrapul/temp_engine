@@ -1,46 +1,52 @@
 #include "EntityManager.hpp"
 #include "Entity.hpp"
 #include <cassert>
+#include <iostream>
+#include <algorithm>
 
 namespace Temp
 {
   namespace EntityManager
   {
-    void InitData(EntityQueue& availableEntities)
+    void InitData(Data &data)
     {
-      for (Entity e = 0; e < MAX_ENTITIES; ++e) {
-        availableEntities.push(e);
+      data = {};
+      for (Entity e = 0; e < MAX_ENTITIES; ++e)
+      {
+        data.availableEntities.push(e);
       }
     }
 
-    Entity CreateEntity(EntityQueue& availableEntities, uint32_t& livingEntityCount)
+    Entity CreateEntity(Data &data)
     {
-      assert(livingEntityCount < MAX_ENTITIES && "Too many entities in existence.");
+      assert(data.livingEntityCount < MAX_ENTITIES && "Too many entities in existence.");
 
-      Entity id = availableEntities.front();
-      availableEntities.pop();
-      ++livingEntityCount;
-      
+      Entity id = data.availableEntities.front();
+      data.availableEntities.pop();
+      ++data.livingEntityCount;
+
+      data.currentEntities.push_back(id);
+
       return id;
     }
 
-    void DestroyEntity(
-      EntityQueue& availableEntities,
-      uint32_t& livingEntityCount,
-      SignatureArray& signatures,
-      Entity entity)
+    void DestroyEntity(Data &data, Entity entity)
     {
       assert(entity < MAX_ENTITIES && "Entity out of range.");
 
       // Invalidate the destroyed entity's signature
-      signatures[entity].reset();
+      data.signatures[entity].reset();
 
       // Put the destroyed ID at the back of the queue
-      availableEntities.push(entity);
-      --livingEntityCount;
+      data.availableEntities.push(entity);
+      --data.livingEntityCount;
+
+      data.currentEntities.erase(std::find(data.currentEntities.begin(), data.currentEntities.end(), entity));
+
+      assert(data.livingEntityCount < MAX_ENTITIES && "Living Entity Count underflowed!");
     }
 
-    void SetSignature(SignatureArray& signatures, Entity entity, Signature signature)
+    void SetSignature(SignatureArray &signatures, Entity entity, Signature signature)
     {
       assert(entity < MAX_ENTITIES && "Entity out of range.");
 
@@ -48,12 +54,20 @@ namespace Temp
       signatures[entity] = signature;
     }
 
-    Signature GetSignature(SignatureArray& signatures, Entity entity)
+    Signature GetSignature(SignatureArray &signatures, Entity entity)
     {
       assert(entity < MAX_ENTITIES && "Entity out of range.");
 
       // Get this entity's signature from the array
       return signatures[entity];
+    }
+
+    void Destruct(Data &data)
+    {
+      while (!data.currentEntities.empty())
+      {
+        DestroyEntity(data, data.currentEntities.back());
+      }
     }
   }
 }

@@ -39,6 +39,7 @@ namespace Temp::Engine
       switch (currentScene->state)
       {
       case Scene::State::ENTER:
+        Temp::Scene::ClearRender(currentScene);
         if (currentScene->Construct)
           currentScene->Construct(currentScene);
         engine.currentScene = currentScene;
@@ -49,6 +50,7 @@ namespace Temp::Engine
           currentScene->Update(currentScene, deltaTime);
         break;
       case Scene::State::LEAVE:
+        Temp::Scene::ClearRender(currentScene);
         if (currentScene->DestructFunc)
           currentScene->DestructFunc(currentScene);
         currentScene->state = Scene::State::ENTER;

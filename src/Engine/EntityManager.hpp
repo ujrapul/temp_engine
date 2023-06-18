@@ -16,17 +16,15 @@ namespace Temp
     {
       EntityQueue availableEntities{};
       SignatureArray signatures{};
+      std::vector<Entity> currentEntities{};
       uint32_t livingEntityCount{};
     };
     
-    void InitData(EntityQueue& availableEntities);
-    [[nodiscard]] Entity CreateEntity(EntityQueue& availableEntities, uint32_t& livingEntityCount);
-    void DestroyEntity(
-      EntityQueue& availableEntities,
-      uint32_t& livingEntityCount,
-      SignatureArray& signatures,
-      Entity entity);
+    void InitData(Data& data);
+    [[nodiscard]] Entity CreateEntity(Data& data);
+    void DestroyEntity(Data& data, Entity entity);
     void SetSignature(SignatureArray& signatures, Entity entity, Signature signature);
     [[nodiscard]] Signature GetSignature(SignatureArray& signatures, Entity entity);
+    void Destruct(Data& data);
   }
 }

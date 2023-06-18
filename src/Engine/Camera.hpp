@@ -30,5 +30,6 @@ namespace Temp::Camera
   void UpdateFov(Scene::Data *scene, float _fov);
   void SetProjection(Projection _projection);
   void TranslateView(const Math::Vec3f &translate);
+  void ResetView();
   const Math::Mat4& GetOrthoProjecton();
 }

@@ -39,6 +39,10 @@ namespace Temp::Render
     int windowWidth{};
     int windowHeight{};
 
+    bool limitFps{false};
+    float fps60{0.0166666 * 2};
+    float fps30{0.0333333 * 2};
+
     void Resize(void *)
     {
       glViewport(0, 0, windowWidth, windowHeight);
@@ -64,9 +68,19 @@ namespace Temp::Render
 
       Resize(nullptr);
 
+      float time = 0;
+
+      clock_t begin{clock()};
       // Main rendering loop
       while (!quit)
       {
+        clock_t end{clock()};
+        if (limitFps && ((float)(end - begin) / CLOCKS_PER_SEC) < fps60)
+        {
+          continue;
+        }
+        begin = clock();
+
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

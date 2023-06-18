@@ -4,6 +4,24 @@ namespace Temp
 {
   namespace Scene
   {
+    namespace
+    {
+      void DequeueRender(Scene::Data *scene)
+      {
+        if (scene->renderQueue.empty())
+        {
+          return;
+        }
+
+        std::scoped_lock<std::mutex> lock(scene->mtx);
+        while (!scene->renderQueue.empty())
+        {
+          auto render = scene->renderQueue.front();
+          render.func(render.scene, render.data);
+          scene->renderQueue.pop();
+        }
+      }
+    }
     void Destruct(Data *data)
     {
       Temp::Coordinator::Destruct(data->coordinator);
@@ -30,21 +48,10 @@ namespace Temp
       scene->renderQueue.push({func, scene, data});
     }
 
-    void DequeueRender(Scene::Data *scene)
-    {
-      if (scene->renderQueue.empty())
-      {
-        return;
-      }
-
-      std::scoped_lock<std::mutex> lock(scene->mtx);
-      auto render = scene->renderQueue.front();
-      render.func(render.scene, render.data);
-      scene->renderQueue.pop();
-    }
-
     void Draw(Data *data)
     {
+      // TODO: Redesign so that we don't need the render queue
+      // Perhaps use a state machine
       DequeueRender(data);
       if (data->state == Scene::State::RUN && data->renderQueue.empty())
       {
@@ -54,6 +61,12 @@ namespace Temp
           Component::Drawable::Draw(&drawableArray->array[drawableArray->mapping.indexToEntity[i]]);
         }
       }
+    }
+
+    void ClearRender(Data *scene)
+    {
+      std::scoped_lock<std::mutex> lock(scene->mtx);
+      scene->renderQueue = {};
     }
   }
 }
