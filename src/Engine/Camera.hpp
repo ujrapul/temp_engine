@@ -34,4 +34,5 @@ namespace Temp::Camera
   void TranslateView(const Math::Vec3f &translate);
   void ResetView();
   const Math::Mat4& GetOrthoProjecton();
+  Math::Vec2f ConvertToFontOrthoViewSpace(float x, float y);
 }

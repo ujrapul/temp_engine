@@ -5,6 +5,8 @@ namespace Temp::Scene
   struct Data;
 }
 
+// TODO: Currently making an assumption that game objects can't be hoverable.
+// May change in the future.
 namespace Temp::Component::Hoverable
 {
   constexpr void NoOp(Scene::Data *, struct Data *) {}
@@ -18,11 +20,13 @@ namespace Temp::Component::Hoverable
     float height{};
   };
 
+  // TOD0: Might need to revisit this for other widgets
+  //       For now this is assuming the origin is at the lower left-hand corner (this is the case for TextBoxes)
   constexpr bool IsInside(Data *hoverable, float x, float y)
   {
-    std::cout << x << " " << y << std::endl;
-    return x >= hoverable->x && x <= hoverable->x + hoverable->width &&
-           y >= hoverable->y && y <= hoverable->y + hoverable->height;
+    auto viewSpaceCoords = Temp::Camera::ConvertToFontOrthoViewSpace(x, y);
+    return viewSpaceCoords.x >= hoverable->x && viewSpaceCoords.x <= hoverable->x + hoverable->width &&
+           viewSpaceCoords.y >= hoverable->y && viewSpaceCoords.y <= hoverable->y + hoverable->height;
   }
 
   constexpr void Hover(Data * /*hoverable*/)

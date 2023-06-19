@@ -70,15 +70,15 @@ namespace Temp
         auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*data);
         for (size_t i = 0; i < drawableArray->mapping.size; ++i)
         {
-          // std::cout << drawableArray->mapping.indexToEntity[i] << std::endl;
           Component::Drawable::Draw(&drawableArray->array[i]);
         }
+        data->DrawUpdateFunc(data);
       }
       break;
       case State::LEAVE:
       {
-        data->DrawDestructFunc(data);
         data->renderState = State::MAX;
+        data->DrawDestructFunc(data);
       }
       break;
       default:

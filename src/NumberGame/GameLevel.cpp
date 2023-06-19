@@ -14,7 +14,7 @@ namespace Game::Scene::GameLevel
   namespace
   {
     float fontScale = 0.04;
-    std::mutex mtx{};
+
     struct Data
     {
       std::array<Player::Data, 2> players{};
@@ -165,8 +165,9 @@ namespace Game::Scene::GameLevel
 
     void Construct(Temp::Scene::Data *data)
     {
-      std::scoped_lock<std::mutex> lock(mtx);
       Temp::Camera::ResetView();
+      Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid.gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
+      Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
 
       gameData = {};
       gameData2 = {};
@@ -198,8 +199,6 @@ namespace Game::Scene::GameLevel
       gameData.players[1].entity = Player2;
 
       Temp::Camera::TranslateView({0.75, 0.5, 0});
-
-      data->DrawFunc = Draw;
     }
 
     void Construct2(Temp::Scene::Data *data)
@@ -247,7 +246,6 @@ namespace Game::Scene::GameLevel
     {
       if (PrintBoard(data, deltaTime))
       {
-        data->DrawFunc = NoOp;
         data->state = Temp::Scene::State::LEAVE;
       }
     }
@@ -270,11 +268,34 @@ namespace Game::Scene::GameLevel
       }
     }
 
-    void Draw(Temp::Scene::Data *data)
+    void Draw2(Temp::Scene::Data *data)
     {
-      std::scoped_lock<std::mutex> lock(mtx);
-
       Temp::Scene::Draw(data);
+      Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
+    }
+
+    void DrawConstruct(Temp::Scene::Data *data)
+    {
+      Grid::ConstructRender(data, &gameData.grid);
+      Temp::TextBox::ConstructRender(data, &gameData.playerTurnTextBox);
+      Temp::TextBox::ConstructRender(data, &gameData.player1TextBox);
+      Temp::TextBox::ConstructRender(data, &gameData.player1NumbersTextBox);
+      Temp::TextBox::ConstructRender(data, &gameData.player2TextBox);
+      Temp::TextBox::ConstructRender(data, &gameData.player2NumbersTextBox);
+      Temp::TextBox::ConstructRender(data, &gameData.numbersLeftTextBox);
+    }
+
+    void DrawConstruct2(Temp::Scene::Data *data)
+    {
+      Temp::TextBox::ConstructRender(data, &gameData2.playerWinTextBox);
+      Temp::TextBox::ConstructRender(data, &gameData2.player1ScoreTextBox);
+      Temp::TextBox::ConstructRender(data, &gameData2.player2ScoreTextBox);
+      Temp::TextBox::ConstructRender(data, &gameData2.quitTextBox);
+      Temp::TextBox::ConstructRender(data, &gameData2.replayTextBox);
+    }
+
+    void DrawUpdate(Temp::Scene::Data *data)
+    {
       Grid::UpdateUVOffsets(data, &gameData.grid);
       TextBox::UpdateTextRender(data, &gameData.player1NumbersTextBox);
       TextBox::UpdateTextRender(data, &gameData.player2NumbersTextBox);
@@ -284,19 +305,9 @@ namespace Game::Scene::GameLevel
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
     }
 
-    void Draw2(Temp::Scene::Data *data)
+    void DrawUpdate2(Temp::Scene::Data *data)
     {
-      std::scoped_lock<std::mutex> lock(mtx);
-
-      Temp::Scene::Draw(data);
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
-    }
-
-    void Destruct(Temp::Scene::Data *data)
-    {
-      std::scoped_lock<std::mutex> lock(mtx);
-
-      Temp::Scene::Destruct(data);
     }
   }
 
@@ -305,8 +316,8 @@ namespace Game::Scene::GameLevel
     Temp::Scene::Data *scene = new Temp::Scene::Data();
     scene->Construct = Construct;
     scene->Update = Update;
-    scene->DestructFunc = Destruct;
-    scene->DrawFunc = Draw;
+    scene->DrawConstructFunc = DrawConstruct;
+    scene->DrawUpdateFunc = DrawUpdate;
 
     keyEventDataPtr = &keyEventData;
 
@@ -330,8 +341,8 @@ namespace Game::Scene::GameLevel
     Temp::Scene::Data *scene = new Temp::Scene::Data();
     scene->Construct = Construct2;
     scene->Update = Update2;
-    // scene->DestructFunc = Destruct;
-    scene->DrawFunc = Draw2;
+    scene->DrawConstructFunc = DrawConstruct2;
+    scene->DrawUpdateFunc = DrawUpdate2;
 
     // Temp::Input::AddCallback(inputCallback2, keyEventData, Temp::Input::KeyboardCode::KB_1);
     // Temp::Input::AddCallback(inputCallback2, keyEventData, Temp::Input::KeyboardCode::KB_2);

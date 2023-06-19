@@ -49,6 +49,7 @@ namespace Temp::Engine
         currentScene->Update(currentScene, deltaTime);
         break;
       case Scene::State::LEAVE:
+        currentScene->renderState = Scene::State::LEAVE;
         Temp::Scene::ClearRender(currentScene);
         currentScene->DestructFunc(currentScene);
         currentScene->state = Scene::State::ENTER;

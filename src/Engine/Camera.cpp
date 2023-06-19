@@ -172,4 +172,13 @@ namespace Temp::Camera
   {
     return GetProjection(Projection::ORTHOGRAPHIC);
   }
+
+  Math::Vec2f ConvertToFontOrthoViewSpace(float x, float y)
+  {
+    float normalizedX = x / width;
+    float normalizedY = y / height;
+
+    return {(-width / 2 + width * normalizedX) * fontOrthoScale,
+            (height / 2 - height * normalizedY) * fontOrthoScale};
+  }
 }

@@ -21,6 +21,7 @@ namespace Game::Grid
   };
 
   void Construct(Temp::Scene::Data *data, Data *grid);
+  void ConstructRender(Temp::Scene::Data *data, Data *grid);
   // Should only be called on the RenderThread
   void UpdateUVOffsets(Temp::Scene::Data *data, Data *grid);
   void UpdateNumbers(Temp::Scene::Data *sceneData, Data *grid, Temp::Entity player, int currentValue);

@@ -89,7 +89,7 @@ namespace Temp::Render
         Engine::DequeueGlobalRender(engine);
         if (engine.currentScene) [[likely]]
         {
-          engine.currentScene->DrawFunc(engine.currentScene);
+          Temp::Scene::Draw(engine.currentScene);
         }
 
         glXSwapBuffers(display, window);

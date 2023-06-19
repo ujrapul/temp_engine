@@ -31,9 +31,9 @@ namespace Temp::Scene
     void (*Construct)(Scene::Data *){Construct};
     void (*Update)(Scene::Data *, float){NoOpSceneUpdate};
     void (*DestructFunc)(Scene::Data *){Destruct};
-    void (*DrawFunc)(Scene::Data *){Draw};
     void (*DrawConstructFunc)(Scene::Data *){NoOpScene};
     void (*DrawDestructFunc)(Scene::Data *){NoOpScene};
+    void (*DrawUpdateFunc)(Scene::Data *){NoOpScene};
     std::mutex mtx{};
   };
 

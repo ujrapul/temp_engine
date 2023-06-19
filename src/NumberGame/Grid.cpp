@@ -68,55 +68,6 @@ namespace Game::Grid
     }
 
     void (*UpdateUVOffsetsFunc)(Temp::Scene::Data *, Data *grid){UpdateUVOffsetsNoOp};
-
-    void ConstructRender(Temp::Scene::Data *data, Data *grid)
-    {
-      using namespace Temp;
-      using namespace Temp::Render;
-
-      grid->gridUVOffsets.reserve(grid->gridSize * grid->gridSize);
-      for (auto entity : grid->gridEntities)
-      {
-        auto value = Temp::Scene::Get<Component::Type::VALUE>(*data, entity);
-        grid->gridUVOffsets.push_back(Font::Characters[value].left);
-        grid->gridUVOffsets.push_back(Font::Characters[value].top);
-      }
-
-      auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(*data, grid->entity);
-
-      drawable.vertices = Vertices();
-      drawable.indices = Indices();
-
-      Temp::Component::Drawable::Construct(&drawable, Temp::Render::OpenGLWrapper::ShaderIdx::GRID);
-
-      grid->uvVBO = OpenGLWrapper::CreateVBO(TexCoords().data(), TexCoords().size());
-      OpenGLWrapper::SetVertexAttribArray(1, 2, 2, 0);
-
-      grid->translationVBO = OpenGLWrapper::CreateVBO(grid->gridTranslations.data(), sizeof(int), grid->gridTranslations.size());
-      OpenGLWrapper::SetVertexAttribIArrayInstanced(2, 2, 2, 0);
-
-      grid->uvOffsetVBO = OpenGLWrapper::CreateVBO(grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
-      OpenGLWrapper::SetVertexAttribArrayInstanced(3, 2, 2, 0);
-
-      // Unbind VAO and VBO and EBO
-      OpenGLWrapper::UnbindBuffers();
-
-      // load and create a texture
-      // -------------------------
-      // drawable.texture = OpenGLWrapper::LoadTexture((ApplicationDirectory / "Images" / "awesomeface.png").c_str(), GL_RGBA);
-      drawable.texture = Font::Characters[0].texture;
-
-      // Needs to be called to set variables in the shader!
-      OpenGLWrapper::Set1IntShaderProperty(drawable.shaderProgram, "texture1", 0);
-
-      UpdateUVOffsetsFunc = UpdateUVOffsetsProper;
-    }
-
-    // Should be queued into the RenderThread
-    void ConstructRenderVoid(Temp::Scene::Data *data, void *grid)
-    {
-      ConstructRender(data, static_cast<Data *>(grid));
-    }
   }
 
   void Construct(Temp::Scene::Data *data, Data *grid)
@@ -145,7 +96,49 @@ namespace Game::Grid
       }
     }
 
-    Temp::Scene::EnqueueRender(data, ConstructRenderVoid, grid);
+  }
+
+  void ConstructRender(Temp::Scene::Data *data, Data *grid)
+  {
+    using namespace Temp;
+    using namespace Temp::Render;
+
+    grid->gridUVOffsets.reserve(grid->gridSize * grid->gridSize);
+    for (auto entity : grid->gridEntities)
+    {
+      auto value = Temp::Scene::Get<Component::Type::VALUE>(*data, entity);
+      grid->gridUVOffsets.push_back(Font::Characters[value].left);
+      grid->gridUVOffsets.push_back(Font::Characters[value].top);
+    }
+
+    auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(*data, grid->entity);
+
+    drawable.vertices = Vertices();
+    drawable.indices = Indices();
+
+    Temp::Component::Drawable::Construct(&drawable, Temp::Render::OpenGLWrapper::ShaderIdx::GRID);
+
+    grid->uvVBO = OpenGLWrapper::CreateVBO(TexCoords().data(), TexCoords().size());
+    OpenGLWrapper::SetVertexAttribArray(1, 2, 2, 0);
+
+    grid->translationVBO = OpenGLWrapper::CreateVBO(grid->gridTranslations.data(), sizeof(int), grid->gridTranslations.size());
+    OpenGLWrapper::SetVertexAttribIArrayInstanced(2, 2, 2, 0);
+
+    grid->uvOffsetVBO = OpenGLWrapper::CreateVBO(grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
+    OpenGLWrapper::SetVertexAttribArrayInstanced(3, 2, 2, 0);
+
+    // Unbind VAO and VBO and EBO
+    OpenGLWrapper::UnbindBuffers();
+
+    // load and create a texture
+    // -------------------------
+    // drawable.texture = OpenGLWrapper::LoadTexture((ApplicationDirectory / "Images" / "awesomeface.png").c_str(), GL_RGBA);
+    drawable.texture = Font::Characters[0].texture;
+
+    // Needs to be called to set variables in the shader!
+    OpenGLWrapper::Set1IntShaderProperty(drawable.shaderProgram, "texture1", 0);
+
+    UpdateUVOffsetsFunc = UpdateUVOffsetsProper;
   }
 
   // Add one layer of indirection so that the function isn't called before construction occurs
