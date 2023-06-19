@@ -63,6 +63,7 @@ namespace Temp
       {
         data->DrawConstructFunc(data);
         data->renderState = State::RUN;
+        data->state = Scene::State::RUN;
       }
       break;
       case State::RUN:

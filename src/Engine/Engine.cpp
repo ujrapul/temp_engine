@@ -42,7 +42,7 @@ namespace Temp::Engine
         Temp::Scene::ClearRender(currentScene);
         currentScene->Construct(currentScene);
         engine.currentScene = currentScene;
-        currentScene->state = Scene::State::RUN;
+        currentScene->state = Scene::State::MAX;
         currentScene->renderState = Scene::State::ENTER;
         break;
       case Scene::State::RUN:

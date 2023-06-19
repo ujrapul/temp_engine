@@ -48,26 +48,38 @@ namespace Game::Grid
       return indices;
     }
 
-    inline void UpdateUVOffsetsProper(Temp::Scene::Data *data, Data *grid)
-    {
-      using namespace Temp;
-      using namespace Temp::Render;
-
-      // We can't check by entities here because the first entity is non-zero
-      for (size_t i = 0; i < grid->gridEntities.size(); ++i)
-      {
-        auto value = Game::Scene::GetValue(*data, grid->gridEntities[i]);
-        grid->gridUVOffsets[i * 2] = Font::Characters[value].left;
-        grid->gridUVOffsets[i * 2 + 1] = Font::Characters[value].top;
-      }
-      OpenGLWrapper::UpdateVBO(grid->uvOffsetVBO, grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
-    }
-
     constexpr void UpdateUVOffsetsNoOp(Temp::Scene::Data * /*data*/, Data * /*grid*/)
     {
     }
 
     void (*UpdateUVOffsetsFunc)(Temp::Scene::Data *, Data *grid){UpdateUVOffsetsNoOp};
+
+    inline void UpdateUVOffsetsProper(Temp::Scene::Data *data, Data *grid)
+    {
+      using namespace Temp;
+      using namespace Temp::Render;
+
+      // Need this to make sure
+      if (!grid->updateVBO)
+      {
+        return;
+      }
+
+      // This is needed because UpdateVBO can take a long time on large grids
+      // This kind of measure shouldn't be needed in production code so long as the operable data set is small
+
+      grid->isUpdateVBOFinished = false;
+      std::lock_guard<std::mutex> lock(*grid->mtx);
+
+      OpenGLWrapper::UpdateVBO(grid->uvOffsetVBO, grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
+      grid->updateVBO = false;
+      grid->isUpdateVBOFinished = true;
+      if (grid->destructing)
+      {
+        UpdateUVOffsetsFunc = UpdateUVOffsetsNoOp;
+      }
+      grid->cv.notify_one();
+    }
   }
 
   void Construct(Temp::Scene::Data *data, Data *grid)
@@ -87,15 +99,11 @@ namespace Game::Grid
     {
       for (auto col = 0; col < grid->gridSize; ++col)
       {
-        Temp::Entity entity = Temp::Scene::CreateEntity(*data);
-        Temp::Scene::AddComponent<Temp::Component::Type::POSITION2D>(*data, entity, Temp::Math::Vec2f{(float)row, (float)col});
-        Temp::Scene::AddComponent<Game::Component::Type::VALUE>(*data, entity, '0' + rand() % 10);
-        grid->gridEntities.push_back(entity);
+        grid->gridValues.push_back('0' + rand() % 10);
         grid->gridTranslations.push_back(-grid->gridSize / 2 + row);
         grid->gridTranslations.push_back(-grid->gridSize / 2 + col);
       }
     }
-
   }
 
   void ConstructRender(Temp::Scene::Data *data, Data *grid)
@@ -103,10 +111,12 @@ namespace Game::Grid
     using namespace Temp;
     using namespace Temp::Render;
 
+    std::lock_guard<std::mutex> lock(*grid->mtx);
+
     grid->gridUVOffsets.reserve(grid->gridSize * grid->gridSize);
-    for (auto entity : grid->gridEntities)
+    for (size_t i = 0; i < grid->gridValues.size(); ++i)
     {
-      auto value = Temp::Scene::Get<Component::Type::VALUE>(*data, entity);
+      auto value = grid->gridValues[i];
       grid->gridUVOffsets.push_back(Font::Characters[value].left);
       grid->gridUVOffsets.push_back(Font::Characters[value].top);
     }
@@ -149,14 +159,34 @@ namespace Game::Grid
 
   void UpdateNumbers(Temp::Scene::Data *sceneData, Data *grid, Temp::Entity player, int currentValue)
   {
-    for (auto entity : grid->gridEntities)
+    using namespace Temp;
+    using namespace Temp::Render;
+
+    std::lock_guard<std::mutex> lock(*grid->mtx);
+
+    for (size_t i = 0; i < grid->gridValues.size(); ++i)
     {
-      char &value = Game::Scene::GetValue(*sceneData, entity);
+      auto &value = grid->gridValues[i];
       if (value - '0' == currentValue)
       {
         value = '-';
         Game::Scene::Player::addScore(player, sceneData, 1);
       }
+      grid->gridUVOffsets[i * 2] = Font::Characters[value].left;
+      grid->gridUVOffsets[i * 2 + 1] = Font::Characters[value].top;
     }
+
+    grid->updateVBO = true;
+  }
+
+  void Destruct(Data *grid)
+  {
+    {
+      grid->destructing = true;
+      std::unique_lock<std::mutex> lock(*grid->mtx);
+      grid->cv.wait(lock, [grid]()
+                    { return grid->isUpdateVBOFinished; });
+    }
+    delete grid->mtx;
   }
 }
