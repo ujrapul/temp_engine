@@ -24,6 +24,7 @@ namespace Temp::TextBox
     using namespace Temp::Render;
 
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
+
     OpenGLWrapper::UpdateVBO(drawable.VBO, drawable.vertices.data(), drawable.vertices.size(), GL_DYNAMIC_DRAW);
     OpenGLWrapper::UpdateEBO(drawable.EBO, drawable.indices.data(), drawable.indices.size(), GL_DYNAMIC_DRAW);
   }

@@ -23,6 +23,7 @@ namespace Temp
     template<typename T>
     struct ArrayData
     {
+      // This is using Indexes not Entities!
       std::array<T, MAX_ENTITIES> array{};
       Mapping mapping{};
       std::mutex mtx{};

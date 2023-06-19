@@ -13,6 +13,7 @@ namespace Game::Scene::GameLevel
 {
   namespace
   {
+    float fontScale = 0.04;
     std::mutex mtx{};
     struct Data
     {
@@ -20,12 +21,12 @@ namespace Game::Scene::GameLevel
       std::unordered_set<int> numbersUsed{};
       std::array<int, 10> numbersUnused{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
       Grid::Data grid{};
-      TextBox::Data playerTurnTextBox{"Player 1's Turn", -0.25, 0.9, 0.0006f, (Entity)-1};
-      TextBox::Data player1TextBox{"Player 1's numbers", -1.6, 0, 0.0006f, (Entity)-1};
-      TextBox::Data player1NumbersTextBox{"", -1.6, -0.1, 0.0006f, (Entity)-1};
-      TextBox::Data player2TextBox{"Player 2's numbers", 0.9, 0, 0.0006f, (Entity)-1};
-      TextBox::Data player2NumbersTextBox{"", 0.9, -0.1, 0.0006f, (Entity)-1};
-      TextBox::Data numbersLeftTextBox{"Numbers Left: 0 1 2 3 4 5 6 7 8 9", -0.55, -0.9, 0.0006f, (Entity)-1};
+      TextBox::Data playerTurnTextBox{"Player 1's Turn", -20, 40, fontScale, (Entity)-1};
+      TextBox::Data player1TextBox{"Player 1's numbers", -85, 10, fontScale, (Entity)-1};
+      TextBox::Data player1NumbersTextBox{"", -85, 0, fontScale, (Entity)-1};
+      TextBox::Data player2TextBox{"Player 2's numbers", 40, 10, fontScale, (Entity)-1};
+      TextBox::Data player2NumbersTextBox{"", 40, 0, fontScale, (Entity)-1};
+      TextBox::Data numbersLeftTextBox{"Numbers Left: 0 1 2 3 4 5 6 7 8 9", -35, -40, fontScale, (Entity)-1};
       int currentNumber{-1};
       int numbersLeft{10};
       bool player1Turn{true};
@@ -34,11 +35,11 @@ namespace Game::Scene::GameLevel
 
     struct Data2
     {
-      TextBox::Data playerWinTextBox{"Player 1 Wins!", -0.25, 0.2, 0.0006f, (Entity)-1};
-      TextBox::Data player1ScoreTextBox{"Player 1 Score: ", -0.25, 0, 0.0006f, (Entity)-1};
-      TextBox::Data player2ScoreTextBox{"Player 2 Score: ", -0.25, -0.1, 0.0006f, (Entity)-1};
-      TextBox::Data quitTextBox{"Press Q to quit", -0.25, -0.3, 0.0006f, (Entity)-1};
-      TextBox::Data replayTextBox{"Press 0-9 to replay", -0.25, -0.4, 0.0006f, (Entity)-1};
+      TextBox::Data playerWinTextBox{"Player 1 Wins!", -20, 10, fontScale, (Entity)-1};
+      TextBox::Data player1ScoreTextBox{"Player 1 Score: ", -20, 0, fontScale, (Entity)-1};
+      TextBox::Data player2ScoreTextBox{"Player 2 Score: ", -20, -5, fontScale, (Entity)-1};
+      TextBox::Data quitTextBox{"Press Q to quit", -20, -15, fontScale, (Entity)-1};
+      TextBox::Data replayTextBox{"Press 0-9 to replay", -20, -22, fontScale, (Entity)-1};
     };
 
     Data gameData{};
@@ -196,9 +197,7 @@ namespace Game::Scene::GameLevel
       Temp::Scene::AddComponent<Component::Type::SCORE>(*data, Player2, {});
       gameData.players[1].entity = Player2;
 
-      float scale = 32.f * gameData.grid.gridSize / 50.f;
-      Temp::Camera::UpdateOrthoScale(data, scale);
-      Temp::Camera::TranslateView({0.1, 2 * gameData.grid.gridSize / 50.f, 0});
+      Temp::Camera::TranslateView({0.75, 0.5, 0});
 
       data->DrawFunc = Draw;
     }
@@ -281,6 +280,16 @@ namespace Game::Scene::GameLevel
       TextBox::UpdateTextRender(data, &gameData.player2NumbersTextBox);
       TextBox::UpdateTextRender(data, &gameData.numbersLeftTextBox);
       TextBox::UpdateTextRender(data, &gameData.playerTurnTextBox);
+      Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid.gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
+      Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
+    }
+
+    void Draw2(Temp::Scene::Data *data)
+    {
+      std::scoped_lock<std::mutex> lock(mtx);
+
+      Temp::Scene::Draw(data);
+      Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
     }
 
     void Destruct(Temp::Scene::Data *data)
@@ -321,8 +330,8 @@ namespace Game::Scene::GameLevel
     Temp::Scene::Data *scene = new Temp::Scene::Data();
     scene->Construct = Construct2;
     scene->Update = Update2;
-    // scene->Destruct = Destruct;
-    // scene->Draw = Draw2;
+    // scene->DestructFunc = Destruct;
+    scene->DrawFunc = Draw2;
 
     // Temp::Input::AddCallback(inputCallback2, keyEventData, Temp::Input::KeyboardCode::KB_1);
     // Temp::Input::AddCallback(inputCallback2, keyEventData, Temp::Input::KeyboardCode::KB_2);

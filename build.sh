@@ -1,5 +1,7 @@
 #/bin/bash -x
 
+clear && clear
+
 if [ "$1" = "clean" ]; then
   rm -rf build/
   exit 0

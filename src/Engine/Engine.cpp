@@ -40,19 +40,17 @@ namespace Temp::Engine
       {
       case Scene::State::ENTER:
         Temp::Scene::ClearRender(currentScene);
-        if (currentScene->Construct)
-          currentScene->Construct(currentScene);
+        currentScene->Construct(currentScene);
         engine.currentScene = currentScene;
         currentScene->state = Scene::State::RUN;
+        currentScene->renderState = Scene::State::ENTER;
         break;
       case Scene::State::RUN:
-        if (currentScene->Update)
-          currentScene->Update(currentScene, deltaTime);
+        currentScene->Update(currentScene, deltaTime);
         break;
       case Scene::State::LEAVE:
         Temp::Scene::ClearRender(currentScene);
-        if (currentScene->DestructFunc)
-          currentScene->DestructFunc(currentScene);
+        currentScene->DestructFunc(currentScene);
         currentScene->state = Scene::State::ENTER;
         currentScene = currentScene->nextScene;
         engine.currentScene = currentScene;

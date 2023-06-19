@@ -31,6 +31,8 @@ namespace Temp
       bool quit{false};
     };
 
+    inline Temp::Engine::Data engine{};
+
     void Run(Data &engine, const char *windowName, int windowX, int windowY);
     void Destroy(Data &engine);
     void Construct(Data& engine);

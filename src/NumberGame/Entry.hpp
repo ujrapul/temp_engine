@@ -4,16 +4,15 @@
 #include "Engine/Engine.hpp"
 #include "Engine/Input.hpp"
 #include "GameLevel.hpp"
+#include "MainMenuLevel.hpp"
 
 namespace Game
 {
   namespace Entry
   {
-    Temp::Engine::Data engine{};
-
     void Exit(Temp::Input::KeyboardCode /*keyCode*/)
     {
-      Temp::Engine::Quit(engine);
+      Temp::Engine::Quit(Temp::Engine::engine);
     }
 
     void Run(const char *windowName)
@@ -24,11 +23,16 @@ namespace Game
 
       Math::UnitTests::Run();
 
+      auto &engine = Temp::Engine::engine;
+
       Engine::Construct(engine);
       Temp::Scene::Data *scene1 = Scene::GameLevel::Create(engine.keyEventData);
       Temp::Scene::Data *scene2 = Scene::GameLevel::Create2(engine.keyEventData);
+      Temp::Scene::Data *mainMenuLevel = Scene::MainMenuLevel::Create();
+      mainMenuLevel->nextScene = scene1;
       scene1->nextScene = scene2;
       scene2->nextScene = scene1;
+      engine.scenes.push_back(mainMenuLevel);
       engine.scenes.push_back(scene1);
       engine.scenes.push_back(scene2);
 

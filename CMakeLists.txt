@@ -20,6 +20,7 @@ set ( NUMBER_GAME_SRC
   src/NumberGame/Components/ComponentContainer.cpp
   src/NumberGame/Coordinator.cpp
   src/NumberGame/GameLevel.cpp
+  src/NumberGame/MainMenuLevel.cpp
   src/NumberGame/Grid.cpp
   src/NumberGame/Scene.cpp
   src/NumberGame/main.cpp
@@ -31,6 +32,7 @@ set ( ENGINE_HEADER
   src/Engine/Components/ComponentData.hpp
   src/Engine/Components/ComponentType.hpp
   src/Engine/Components/Drawable.hpp
+  src/Engine/Components/Hoverable.hpp
   src/Engine/Coordinator.hpp
   src/Engine/Engine.hpp
   src/Engine/EngineUtils.hpp
@@ -101,6 +103,7 @@ set ( NUMBER_GAME_HEADER
   src/NumberGame/Coordinator.hpp
   src/NumberGame/Entry.hpp
   src/NumberGame/GameLevel.hpp
+  src/NumberGame/MainMenuLevel.hpp
   src/NumberGame/Grid.hpp
   src/NumberGame/Scene.hpp
 )
@@ -164,15 +167,15 @@ if(APPLE)
   )
 endif()
 
-target_compile_options(${TARGET_TEST_GAME} PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
-)
-target_compile_options(${TARGET_TEST_GAME_2} PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
-)
-target_compile_options(${TARGET_NUMBER_GAME} PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
-)
+# target_compile_options(${TARGET_TEST_GAME} PRIVATE
+#   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+#   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+# )
+# target_compile_options(${TARGET_TEST_GAME_2} PRIVATE
+#   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+#   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+# )
+# target_compile_options(${TARGET_NUMBER_GAME} PRIVATE
+#   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+#   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+# )

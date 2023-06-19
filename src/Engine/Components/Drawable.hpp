@@ -3,6 +3,7 @@
 #include "Math.hpp"
 #include "OpenGLWrapper.hpp"
 #include "Camera.hpp"
+#include "Entity.hpp"
 #include <vector>
 
 // TODO: Clean up resources, VAO, VBO, EBO, texture, shaderProgram etc.
@@ -13,6 +14,7 @@ namespace Temp::Component::Drawable
     std::vector<float> vertices{};
     std::vector<unsigned int> indices{};
     Math::Mat4 model{};
+    Entity entity{UINT32_MAX};
     GLuint VAO{};
     GLuint VBO{};
     GLuint EBO{};
@@ -21,6 +23,11 @@ namespace Temp::Component::Drawable
     int numInstances{1};
     bool visible{true};
   };
+
+  constexpr void Scale(Data *data, const Math::Vec3f scale)
+  {
+    data->model = data->model.scale(scale);
+  }
 
   constexpr void Update(Data *data)
   {
@@ -58,7 +65,7 @@ namespace Temp::Component::Drawable
     // Unbind VAO and VBO and EBO
     // OpenGLWrapper::UnbindBuffers();
   }
-  
+
   constexpr void ConstructFont(Data *data, int shaderIdx, int BufferDraw = GL_DYNAMIC_DRAW, int vertexStride = 4, int UBO = Camera::FontUBO())
   {
     using namespace Temp::Render;
@@ -87,6 +94,8 @@ namespace Temp::Component::Drawable
     {
       return;
     }
+
+    // std::cout << data->entity << " " << data->indices.size() << " " << data->vertices.size() << " " << rand() << std::endl;
 
     glUseProgram(data->shaderProgram);
     OpenGLWrapper::BindTexture(GL_TEXTURE0, data->texture);

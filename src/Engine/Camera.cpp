@@ -6,24 +6,26 @@ namespace Temp::Camera
 {
   namespace
   {
-    float orthoScale = 1.f;
-    float fontOrthoScale = 1.f;
-    float aspect = 1024.f / 768.f;
-    float fov = 45.f;
+    float orthoScale{1.f};
+    float fontOrthoScale{1.f};
+    float aspect{1024.f / 768.f};
+    float width{1280};
+    float height{720};
+    float fov{45.f};
 
     Math::Mat4 FontOrthoProjection()
     {
-      return Math::Mat4::orthographic(-aspect * fontOrthoScale,
-                                      aspect * fontOrthoScale,
-                                      -fontOrthoScale, fontOrthoScale,
+      aspect = width / height;
+      return Math::Mat4::orthographic(-width / 2 * fontOrthoScale, width / 2 * fontOrthoScale,
+                                      -height / 2 * fontOrthoScale, height / 2 * fontOrthoScale,
                                       -100, 100);
     }
 
     Math::Mat4 OrthoProjection()
     {
-      return Math::Mat4::orthographic(-aspect * orthoScale,
-                                      aspect * orthoScale,
-                                      -orthoScale, orthoScale,
+      aspect = width / height;
+      return Math::Mat4::orthographic(-width / 2 * orthoScale, width / 2 * orthoScale,
+                                      -height / 2 * orthoScale, height / 2 * orthoScale,
                                       -100, 100);
     }
 
@@ -100,24 +102,35 @@ namespace Temp::Camera
   void UpdateOrthoScale(Scene::Data *scene, float _orthoScale)
   {
     orthoScale = _orthoScale;
-    orthoProjection = OrthoProjection();
+    orthoProjection = std::move(OrthoProjection());
     Temp::Scene::EnqueueRender(scene, UpdateCamera, nullptr);
   }
 
-  void UpdateCameraAspect(Scene::Data *scene, float _aspect)
+  void UpdateFontOrthoScale(Scene::Data *scene, float _orthoScale)
   {
-    aspect = _aspect;
-    orthoProjection = OrthoProjection();
-    fontOrthoProjection = FontOrthoProjection();
+    fontOrthoScale = _orthoScale;
+    fontOrthoProjection = std::move(FontOrthoProjection());
+    Temp::Scene::EnqueueRender(scene, UpdateCamera, nullptr);
+  }
+
+  void UpdateCameraAspect(Scene::Data *scene, float _width, float _height)
+  {
+    width = _width;
+    height = _height;
+    aspect = width / height;
+    orthoProjection = std::move(OrthoProjection());
+    fontOrthoProjection = std::move(FontOrthoProjection());
     perspProjection = Math::Mat4::perspective(Math::ToRadians(fov), aspect, 0.1, 100);
     Temp::Scene::EnqueueRender(scene, UpdateCamera, nullptr);
   }
 
-  void UpdateCameraAspect(Engine::Data &engine, float _aspect)
+  void UpdateCameraAspect(Engine::Data &engine, float _width, float _height)
   {
-    aspect = _aspect;
-    orthoProjection = OrthoProjection();
-    fontOrthoProjection = FontOrthoProjection();
+    width = _width;
+    height = _height;
+    aspect = width / height;
+    orthoProjection = std::move(OrthoProjection());
+    fontOrthoProjection = std::move(FontOrthoProjection());
     perspProjection = Math::Mat4::perspective(Math::ToRadians(fov), aspect, 0.1, 100);
     Temp::Engine::EnqueueGlobalRender(engine, UpdateCameraEngine, nullptr);
   }
@@ -125,6 +138,11 @@ namespace Temp::Camera
   float GetAspect()
   {
     return aspect;
+  }
+
+  float GetHeight()
+  {
+    return height;
   }
 
   void UpdateFov(Scene::Data *scene, float _fov)

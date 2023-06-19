@@ -14,6 +14,8 @@ namespace Temp::TextBox
 
     OpenGLWrapper::Set1IntShaderProperty(drawable.shaderProgram, "text", 0);
     OpenGLWrapper::UnbindBuffers();
+
+    UpdateRender(scene, data);
   }
 
   void ConstructRenderVoid(Scene::Data *scene, void *data)
@@ -26,14 +28,13 @@ namespace Temp::TextBox
     data->entity = Scene::CreateEntity(*scene);
 
     Component::Drawable::Data drawable;
+    drawable.entity = data->entity;
     PopulateVerticesIndices(drawable, data);
 
-    Scene::AddComponent<Component::Type::DRAWABLE>(*scene, data->entity, drawable);
+    Scene::AddComponent<Component::Type::DRAWABLE>(*scene, data->entity, std::move(drawable));
     Scene::AddComponent<Component::Type::POSITION2D>(*scene, data->entity, {data->x, data->y});
     Scene::AddComponent<Component::Type::SCALE>(*scene, data->entity, data->scale);
-    Scene::AddComponent<Component::Type::TEXT>(*scene, data->entity, data->text);
-
-    Scene::EnqueueRender(scene, ConstructRenderVoid, data);
+    Scene::AddComponent<Component::Type::TEXT>(*scene, data->entity, std::move(data->text));
   }
 
   // TODO: Keeping here for reference to NOT do this.

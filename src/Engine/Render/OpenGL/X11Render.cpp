@@ -2,6 +2,7 @@
 
 #include "Camera.hpp"
 #include "Drawable.hpp"
+#include "Hoverable.hpp"
 #include "ImageLoader.hpp"
 #include "Input.hpp"
 #include "OpenGLWrapper.hpp"
@@ -143,7 +144,7 @@ namespace Temp::Render
       // Create a colormap for the window
       XSetWindowAttributes windowAttribs;
       windowAttribs.colormap = XCreateColormap(display, rootWindow, visualInfo->visual, AllocNone);
-      windowAttribs.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask;
+      windowAttribs.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | PointerMotionMask | ButtonPressMask;
       colormap = windowAttribs.colormap;
 
       // Create the window
@@ -191,7 +192,7 @@ namespace Temp::Render
   void Initialize(const char *windowName, int windowX, int windowY, Engine::Data &engine)
   {
     CreateDisplay(windowName, windowX, windowY);
-    Camera::UpdateCameraAspect(engine, (float)windowX / windowY);
+    Camera::UpdateCameraAspect(engine, windowX, windowY);
     renderThread = std::thread(RenderThread, std::ref(engine));
   }
 
@@ -249,11 +250,60 @@ namespace Temp::Render
 
         if (currentWidth != windowWidth || currentHeight != windowHeight)
         {
-          Camera::UpdateCameraAspect(engine, (float)currentWidth / currentHeight);
+          Camera::UpdateCameraAspect(engine, currentWidth, currentHeight);
           windowWidth = currentWidth;
           windowHeight = currentHeight;
 
           Engine::EnqueueGlobalRender(engine, Resize, nullptr);
+        }
+      }
+      break;
+      case MotionNotify:
+      {
+        XWindowAttributes windowAttributes;
+        XGetWindowAttributes(display, window, &windowAttributes);
+
+        int mouseX = xev.xbutton.x - windowAttributes.x;
+        int mouseY = xev.xbutton.y - windowAttributes.y;
+
+        auto *scene = engine.currentScene;
+        if (scene->state == Scene::State::RUN)
+        {
+          auto *hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
+          for (size_t i = 0; i < hoverableArray->mapping.size; ++i)
+          {
+            auto *hoverable = &hoverableArray->array[i];
+            if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
+            {
+              Component::Hoverable::Hover(hoverable);
+            }
+          }
+        }
+      }
+      break;
+      case ButtonPress:
+      {
+        XWindowAttributes windowAttributes;
+        XGetWindowAttributes(display, window, &windowAttributes);
+
+        int mouseX = xev.xbutton.x - windowAttributes.x;
+        int mouseY = xev.xbutton.y - windowAttributes.y;
+        int button = xev.xbutton.button;
+
+        Window childWindow;
+
+        auto *scene = engine.currentScene;
+        if (scene->state == Scene::State::RUN)
+        {
+          auto *hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
+          for (size_t i = 0; i < hoverableArray->mapping.size; ++i)
+          {
+            auto *hoverable = &hoverableArray->array[i];
+            if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
+            {
+              Component::Hoverable::Click(scene, hoverable);
+            }
+          }
         }
       }
       break;

@@ -957,9 +957,9 @@ namespace Temp::Math
       result[0][0] = 2.0f / width;
       result[1][1] = 2.0f / height;
       result[2][2] = -2.0f / depth;
-      result[3][0] = -(right + left) / width;
-      result[3][1] = -(top + bottom) / height;
-      result[3][2] = -(far + near) / depth;
+      result[0][3] = -(right + left) / width;
+      result[1][3] = -(top + bottom) / height;
+      result[2][3] = -(far + near) / depth;
       result[3][3] = 1.0f;
 
       return result;

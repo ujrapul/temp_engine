@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Drawable.hpp"
+#include "Hoverable.hpp"
 
 namespace Temp
 {
@@ -14,6 +15,7 @@ namespace Temp
         DRAWABLE,
         SCALE,
         TEXT,
+        HOVERABLE,
         MAX
       };
     }
@@ -23,7 +25,8 @@ namespace Temp
     template <> struct MapToComponentDataType_t<Type::DRAWABLE> { using type = Drawable::Data; };
     template <> struct MapToComponentDataType_t<Type::SCALE> { using type = float; };
     template <> struct MapToComponentDataType_t<Type::TEXT> { using type = std::string; };
-    
+    template <> struct MapToComponentDataType_t<Type::HOVERABLE> { using type = Hoverable::Data; };
+
     template <uint8_t T> using MapToComponentDataType = typename MapToComponentDataType_t<T>::type;
 
     template <uint8_t T> constexpr MapToComponentDataType<T> GetDefaultValue() { return {}; }

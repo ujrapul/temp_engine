@@ -22,9 +22,15 @@ namespace Temp
         }
       }
     }
+
+    void Construct(Data *data)
+    {
+      Coordinator::Init(data->coordinator);
+    }
+
     void Destruct(Data *data)
     {
-      Temp::Coordinator::Destruct(data->coordinator);
+      Coordinator::Destruct(data->coordinator);
     }
 
     Entity CreateEntity(Data &data)
@@ -50,17 +56,34 @@ namespace Temp
 
     void Draw(Data *data)
     {
-      // TODO: Redesign so that we don't need the render queue
-      // Perhaps use a state machine
       DequeueRender(data);
-      if (data->state == Scene::State::RUN && data->renderQueue.empty())
+      switch (data->renderState)
+      {
+      case State::ENTER:
+      {
+        data->DrawConstructFunc(data);
+        data->renderState = State::RUN;
+      }
+      break;
+      case State::RUN:
       {
         auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*data);
         for (size_t i = 0; i < drawableArray->mapping.size; ++i)
         {
-          Component::Drawable::Draw(&drawableArray->array[drawableArray->mapping.indexToEntity[i]]);
+          // std::cout << drawableArray->mapping.indexToEntity[i] << std::endl;
+          Component::Drawable::Draw(&drawableArray->array[i]);
         }
       }
+      break;
+      case State::LEAVE:
+      {
+        data->DrawDestructFunc(data);
+        data->renderState = State::MAX;
+      }
+      break;
+      default:
+        break;
+      };
     }
 
     void ClearRender(Data *scene)
