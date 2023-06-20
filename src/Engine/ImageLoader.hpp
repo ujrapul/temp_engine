@@ -24,7 +24,7 @@ namespace Temp::ImageLoader
 
     constexpr Color3() : r(0), g(0), b(0) {}
 
-    constexpr int &operator[](int i)
+    inline int &operator[](int i)
     {
       return (int &)data[i];
     }
@@ -45,7 +45,7 @@ namespace Temp::ImageLoader
     };
     constexpr Color4() : r(0), g(0), b(0), a(0) {}
 
-    constexpr int &operator[](int i)
+    inline int &operator[](int i)
     {
       return (int &)data[i];
     }
@@ -63,7 +63,7 @@ namespace Temp::ImageLoader
     // Check SOI marker
     char marker[2];
     file.read(marker, 2);
-    if (file.gcount() < 2 || marker[0] != 0xFF || marker[1] != 0xD8)
+    if (file.gcount() < 2 /*|| marker[0] != 0xFF || marker[1] != 0xD8*/)
     {
       std::cerr << "SOI: Invalid JPEG file: " << filename << std::endl;
       return {};
@@ -141,7 +141,7 @@ namespace Temp::ImageLoader
     // Check PNG signature
     char signature[8];
     file.read(signature, 8);
-    if (file.gcount() < 8 || signature[0] != 0x89 || signature[1] != 'P' || signature[2] != 'N' ||
+    if (file.gcount() < 8 || /*signature[0] != 0x89 ||*/ signature[1] != 'P' || signature[2] != 'N' ||
         signature[3] != 'G' || signature[4] != 0x0D || signature[5] != 0x0A || signature[6] != 0x1A ||
         signature[7] != 0x0A)
     {

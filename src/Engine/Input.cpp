@@ -41,6 +41,15 @@ namespace
     CGEventTapEnable(eventTap, true);
 
     CFRunLoopRun();
+    
+    CFRunLoopRef runLoop = CFRunLoopGetCurrent();
+    CFRunLoopRemoveSource(runLoop, runLoopSource, kCFRunLoopDefaultMode);
+
+    // Step 2: Invalidate the run loop source
+    CFRunLoopSourceInvalidate(runLoopSource);
+
+    // Step 3: Release the run loop source
+    CFRelease(runLoopSource);
   }
 #elif __linux__
 
@@ -140,6 +149,8 @@ namespace Temp::Input
       return shift ? "*" : "8";
     case KeyboardCode::KB_9:
       return shift ? "(" : "9";
+    default:
+      break;
     }
     return "[unknown]";
   }
@@ -199,12 +210,12 @@ namespace Temp::Input
     }
 
     // Print the human readable key to the logfile.
-    bool shift = flags & kCGEventFlagMaskShift;
-    bool caps = flags & kCGEventFlagMaskAlphaShift;
+//    bool shift = flags & kCGEventFlagMaskShift;
+//    bool caps = flags & kCGEventFlagMaskAlphaShift;
 
     //      std::cout << "Input received: " << convertKeyCode(keyCode, shift, caps) << std::endl;
     //      MacActivateCallBack(keyCode, static_cast<KeyEventData*>(data));
-    PushKeyQueue(keyCode, static_cast<KeyEventData *>(data));
+    PushKeyQueue(static_cast<KeyboardCode>(keyCode), static_cast<KeyEventData *>(data));
 
     return event;
   }

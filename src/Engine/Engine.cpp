@@ -5,6 +5,8 @@
 #include <thread>
 #ifdef __linux__
 #include "Render/OpenGL/X11Render.hpp"
+#elif __APPLE__
+#include "Render/OpenGL/CGRender.hpp"
 #endif
 
 namespace Temp::Engine

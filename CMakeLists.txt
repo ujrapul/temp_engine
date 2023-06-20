@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.26.0)
 project(TEMP_ENGINE)
 
+if (UNIX AND NOT APPLE)
+  set(LINUX TRUE)
+endif()
+
 # Find the OpenGL package
 find_package(OpenGL REQUIRED)
-find_package(X11 REQUIRED)
+if (LINUX)
+  find_package(X11 REQUIRED)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -44,7 +50,6 @@ set ( ENGINE_HEADER
   src/Engine/Math.hpp
   src/Engine/Player.hpp
   src/Engine/Render/OpenGL/OpenGLWrapper.hpp
-  src/Engine/Render/OpenGL/X11Render.hpp
   src/Engine/Render/RenderUtils.hpp
   src/Engine/Render/glad/gl.h
   src/Engine/Render/glad/khrplatform.h
@@ -57,9 +62,14 @@ if (WIN32)
   list (APPEND ENGINE_HEADER
     src/Engine/Render/glad/wgl.h
   )
-elseif (UNIX)
+elseif (LINUX)
   list (APPEND ENGINE_HEADER
     src/Engine/Render/glad/glx.h
+    src/Engine/Render/OpenGL/X11Render.hpp
+  )
+elseif (APPLE)
+  list (APPEND ENGINE_HEADER
+    src/Engine/Render/OpenGL/CGRender.hpp
   )
 endif()
 set ( ENGINE_SRC
@@ -74,7 +84,6 @@ set ( ENGINE_SRC
   src/Engine/Input.cpp
   src/Engine/Math.cpp
   src/Engine/Render/OpenGL/OpenGLWrapper.cpp
-  src/Engine/Render/OpenGL/X11Render.cpp
   src/Engine/Render/glad/gl.c
   src/Engine/Scene.cpp
   src/Engine/TextBox.cpp
@@ -84,9 +93,10 @@ if (WIN32)
   list (APPEND ENGINE_HEADER
     src/Engine/Render/glad/wgl.c
   )
-elseif (UNIX)
+elseif (LINUX)
   list (APPEND ENGINE_HEADER
     src/Engine/Render/glad/glx.c
+    src/Engine/Render/OpenGL/X11Render.cpp
   )
 endif()
 set ( TEST_GAME_HEADER
@@ -147,7 +157,7 @@ include_directories(
 )
 
 target_link_libraries(${TARGET_ENGINE} PRIVATE ${OPENGL_LIBRARIES})
-if(UNIX)
+if (LINUX)
   target_link_libraries(${TARGET_ENGINE} PRIVATE X11)
 endif()
 

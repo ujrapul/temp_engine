@@ -33,7 +33,7 @@ namespace Temp::Render::OpenGLWrapper
 
   void LoadShaders();
 
-  constexpr GLuint CreateShader(const char **shaderSource, int shaderType)
+  inline GLuint CreateShader(const char **shaderSource, int shaderType)
   {
     // Create shader
     GLuint shader = glCreateShader(shaderType);
@@ -81,7 +81,7 @@ namespace Temp::Render::OpenGLWrapper
     return CreateShader(GetShader(shader * 2 + 1), GL_FRAGMENT_SHADER);
   }
 
-  constexpr GLuint CreateShaderProgram(int shader)
+  inline GLuint CreateShaderProgram(int shader)
   {
     GLuint vertexShader = CreateVertexShader(shader);
     GLuint fragmentShader = CreateFragmentShader(shader);
@@ -112,7 +112,7 @@ namespace Temp::Render::OpenGLWrapper
     return shaderProgram;
   }
 
-  constexpr GLuint CreateVAO()
+  inline GLuint CreateVAO()
   {
     GLuint VAO = -1;
     glGenVertexArrays(1, &VAO);
@@ -120,7 +120,7 @@ namespace Temp::Render::OpenGLWrapper
     return VAO;
   }
 
-  constexpr GLuint CreateVBO(float *data, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
+  inline GLuint CreateVBO(float *data, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     GLuint VBO = -1;
     glGenBuffers(1, &VBO);
@@ -129,7 +129,7 @@ namespace Temp::Render::OpenGLWrapper
     return VBO;
   }
 
-  constexpr GLuint CreateVBO(void *data, size_t typeSize, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
+  inline GLuint CreateVBO(void *data, size_t typeSize, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     GLuint VBO = -1;
     glGenBuffers(1, &VBO);
@@ -138,14 +138,14 @@ namespace Temp::Render::OpenGLWrapper
     return VBO;
   }
 
-  constexpr void UpdateVBO(GLuint VBO, void *data, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
+  inline void UpdateVBO(GLuint VBO, void *data, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arraySize, data, BufferDraw);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  constexpr GLuint CreateEBO(GLuint *indices, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
+  inline GLuint CreateEBO(GLuint *indices, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     // Create Element Buffer Object (EBO) and copy index data
     GLuint EBO = -1;
@@ -155,7 +155,7 @@ namespace Temp::Render::OpenGLWrapper
     return EBO;
   }
 
-  constexpr GLuint UpdateEBO(GLuint EBO, GLuint *indices, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
+  inline GLuint UpdateEBO(GLuint EBO, GLuint *indices, size_t arraySize, int BufferDraw = GL_STATIC_DRAW)
   {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * arraySize, indices, BufferDraw);
@@ -163,7 +163,7 @@ namespace Temp::Render::OpenGLWrapper
     return EBO;
   }
 
-  constexpr GLuint CreateUBO(size_t bytes)
+  inline GLuint CreateUBO(size_t bytes)
   {
     GLuint UBO = -1;
     glGenBuffers(1, &UBO);
@@ -174,27 +174,27 @@ namespace Temp::Render::OpenGLWrapper
     return UBO;
   }
 
-  constexpr void BindUBOShader(GLuint UBO, GLuint shaderProgram, const char *property, size_t index)
+  inline void BindUBOShader(GLuint UBO, GLuint shaderProgram, const char *property, int index)
   {
     glUniformBlockBinding(shaderProgram, glGetUniformBlockIndex(shaderProgram, property), index);
     glBindBufferBase(GL_UNIFORM_BUFFER, index, UBO);
   }
 
-  constexpr void UpdateUBO(GLuint UBO, float *data, size_t size, uint32_t offset)
+  inline void UpdateUBO(GLuint UBO, float *data, int size, int offset)
   {
     glBindBuffer(GL_UNIFORM_BUFFER, UBO);
     glBufferSubData(GL_UNIFORM_BUFFER, offset, size, (void *)data);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
   }
 
-  constexpr void SetVertexAttribArray(size_t arrayIndex, size_t numOfElements, size_t stride, size_t position)
+  inline void SetVertexAttribArray(int arrayIndex, int numOfElements, int stride, int position)
   {
     glVertexAttribPointer(arrayIndex, numOfElements, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void *)(position * sizeof(float)));
     glEnableVertexAttribArray(arrayIndex);
   }
 
   // Assumes you're only using int
-  constexpr void SetVertexAttribIArrayInstanced(size_t arrayIndex, size_t numOfElements, size_t stride, size_t position)
+  inline void SetVertexAttribIArrayInstanced(int arrayIndex, int numOfElements, int stride, int position)
   {
     glVertexAttribIPointer(arrayIndex, numOfElements, GL_INT, stride * sizeof(int), (void *)(position * sizeof(int)));
     glEnableVertexAttribArray(arrayIndex);
@@ -202,14 +202,14 @@ namespace Temp::Render::OpenGLWrapper
   }
 
   // Assumes you're only using float
-  constexpr void SetVertexAttribArrayInstanced(size_t arrayIndex, size_t numOfElements, size_t stride, size_t position)
+  inline void SetVertexAttribArrayInstanced(int arrayIndex, int numOfElements, int stride, int position)
   {
     glVertexAttribPointer(arrayIndex, numOfElements, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void *)(position * sizeof(float)));
     glEnableVertexAttribArray(arrayIndex);
     glVertexAttribDivisor(arrayIndex, 1); // Set the attribute to update once per instance
   }
 
-  constexpr void UnbindBuffers()
+  inline void UnbindBuffers()
   {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -218,7 +218,7 @@ namespace Temp::Render::OpenGLWrapper
 
   GLuint LoadTexture(const char *texturePath, int imageDataType);
 
-  constexpr GLuint CreateTexture(int imageDataType, int width, int height, void *data, GLint param = GL_REPEAT)
+  inline GLuint CreateTexture(int imageDataType, int width, int height, void *data, GLint param = GL_REPEAT)
   {
     // load and create a texture
     // -------------------------
@@ -240,63 +240,63 @@ namespace Temp::Render::OpenGLWrapper
     return texture;
   }
 
-  constexpr void BindTexture(GLuint textureIndex, GLuint texture)
+  inline void BindTexture(GLuint textureIndex, GLuint texture)
   {
     glActiveTexture(textureIndex);
     glBindTexture(GL_TEXTURE_2D, texture);
   }
 
-  constexpr void Set1IntShaderProperty(GLuint shaderProgram, const char *property, size_t index)
+  inline void Set1IntShaderProperty(GLuint shaderProgram, const char *property, int index)
   {
     glUseProgram(shaderProgram);
     glUniform1i(glGetUniformLocation(shaderProgram, property), index);
   }
 
-  constexpr void Set4x4MatrixShaderProperty(GLuint shaderProgram, const char *property, float *matrix)
+  inline void Set4x4MatrixShaderProperty(GLuint shaderProgram, const char *property, float *matrix)
   {
     glUseProgram(shaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, property), 1, GL_TRUE, matrix);
   }
 
-  constexpr void DrawArrays(GLuint vao, int numVertices)
+  inline void DrawArrays(GLuint vao, int numVertices)
   {
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, numVertices);
     glBindVertexArray(0);
   }
 
-  constexpr void DrawElements(GLuint vao, int numIndices)
+  inline void DrawElements(GLuint vao, int numIndices)
   {
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
   }
 
-  constexpr void DrawElementsInstanced(GLuint vao, int numIndices, int numInstances)
+  inline void DrawElementsInstanced(GLuint vao, int numIndices, int numInstances)
   {
     glBindVertexArray(vao);
     glDrawElementsInstanced(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0, numInstances);
     glBindVertexArray(0);
   }
 
-  constexpr void CleanArrays(GLuint &vao)
+  inline void CleanArrays(GLuint &vao)
   {
     glDeleteVertexArrays(1, &vao);
   }
 
-  constexpr void CleanBuffer(GLuint &buffer)
+  inline void CleanBuffer(GLuint &buffer)
   {
     glDeleteBuffers(1, &buffer);
   }
 
-  constexpr void CleanShader(GLuint &shader)
+  inline void CleanShader(GLuint &shader)
   {
     glDeleteProgram(shader);
   }
 
   // Default is 4, use 1 for Font Textures
   // 1 to disable byte-alignment restriction
-  constexpr void SetUnpackAlignment(int alignment = 4)
+  inline void SetUnpackAlignment(int alignment = 4)
   {
     glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
   }
@@ -306,7 +306,7 @@ namespace Temp::Render::OpenGLWrapper
     return CreateTexture(GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer, GL_CLAMP_TO_EDGE);
   }
 
-  constexpr void UpdateSubTexture(int xOffset, int yOffset, int textureWidth, int textureHeight, void *data)
+  inline void UpdateSubTexture(int xOffset, int yOffset, int textureWidth, int textureHeight, void *data)
   {
     glTexSubImage2D(
         GL_TEXTURE_2D,

@@ -37,7 +37,7 @@ namespace Temp::Component::Drawable
   }
 
   // Make sure all API construction happens before render-thread executes!
-  constexpr void Construct(Data *data, int shaderIdx, int BufferDraw = GL_STATIC_DRAW, int vertexStride = 3, int UBO = Camera::UBO())
+  inline void Construct(Data *data, int shaderIdx, int BufferDraw = GL_STATIC_DRAW, int vertexStride = 3, int UBO = Camera::UBO())
   {
     using namespace Temp::Render;
 
@@ -66,7 +66,7 @@ namespace Temp::Component::Drawable
     // OpenGLWrapper::UnbindBuffers();
   }
 
-  constexpr void ConstructFont(Data *data, int shaderIdx, int BufferDraw = GL_DYNAMIC_DRAW, int vertexStride = 4, int UBO = Camera::FontUBO())
+  inline void ConstructFont(Data *data, int shaderIdx, int BufferDraw = GL_DYNAMIC_DRAW, int vertexStride = 4, int UBO = Camera::FontUBO())
   {
     using namespace Temp::Render;
 
@@ -101,6 +101,6 @@ namespace Temp::Component::Drawable
     OpenGLWrapper::BindTexture(GL_TEXTURE0, data->texture);
 
     // Bind the VAO and draw the triangle
-    OpenGLWrapper::DrawElementsInstanced(data->VAO, data->indices.size(), data->numInstances);
+    OpenGLWrapper::DrawElementsInstanced(data->VAO, (int)data->indices.size(), data->numInstances);
   }
 }

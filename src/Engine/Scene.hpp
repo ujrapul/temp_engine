@@ -21,10 +21,19 @@ namespace Temp::Scene
   void Destruct(Data *data);
   void Draw(Data *data);
 
+  typedef std::function<void(Data *, void *)> RenderFunction;
+
+  struct RenderData
+  {
+    RenderFunction func;
+    struct Scene::Data *scene;
+    void *data;
+  };
+
   struct Data
   {
     Coordinator::Data coordinator{};
-    std::queue<struct RenderData> renderQueue{};
+    std::queue<RenderData> renderQueue{};
     State state{State::ENTER};
     State renderState{State::MAX};
     Data *nextScene{nullptr};
@@ -35,15 +44,6 @@ namespace Temp::Scene
     void (*DrawDestructFunc)(Scene::Data *){NoOpScene};
     void (*DrawUpdateFunc)(Scene::Data *){NoOpScene};
     std::mutex mtx{};
-  };
-
-  typedef std::function<void(Data *, void *)> RenderFunction;
-
-  struct RenderData
-  {
-    RenderFunction func;
-    Scene::Data *scene;
-    void *data;
   };
 
   template <uint8_t T>

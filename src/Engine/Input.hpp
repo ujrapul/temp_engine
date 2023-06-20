@@ -30,7 +30,7 @@ namespace Temp
       KB_8 = 9,
       KB_9 = 10,
       KB_Q = 16,
-#elif __APPLE_
+#elif __APPLE__
       KB_0 = 29,
       KB_1 = 18,
       KB_2 = 19,
