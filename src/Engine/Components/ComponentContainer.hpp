@@ -41,6 +41,15 @@ namespace Temp::Component::Container
   }
 
   template <uint8_t T>
+  [[nodiscard]] constexpr const MapToComponentDataType<T> &Get(const Data &data, Entity entity)
+  {
+    // This mess is only needed to make sure we don't need to reference the type twice
+    // in the function (once for enum and another for assigned type)
+    return Component::Get(*static_cast<Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]),
+                          entity);
+  }
+
+  template <uint8_t T>
   constexpr void Set(Data &data, Entity entity, const MapToComponentDataType<T> &component)
   {
     Component::Set(*static_cast<Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]),

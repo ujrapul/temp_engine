@@ -20,7 +20,7 @@ namespace Game::Scene
       Temp::Scene::Get<Game::Component::Type::SCORE>(data, player) += value;
     }
     
-    int getScore(Temp::Entity player, Temp::Scene::Data& data)
+    int getScore(Temp::Entity player, const Temp::Scene::Data& data)
     {
       return Temp::Scene::Get<Game::Component::Type::SCORE>(data, player);
     }

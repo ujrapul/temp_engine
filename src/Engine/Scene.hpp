@@ -54,6 +54,12 @@ namespace Temp::Scene
   }
 
   template <uint8_t T>
+  [[nodiscard]] constexpr const Component::MapToComponentDataType<T> &Get(const Data &scene, Entity entity)
+  {
+    return Component::Container::Get<T>(scene.coordinator.componentData, entity);
+  }
+
+  template <uint8_t T>
   [[nodiscard]] constexpr Entity GetEntityUsingIndex(Data &scene, size_t index)
   {
     return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T])->mapping.indexToEntity[index];

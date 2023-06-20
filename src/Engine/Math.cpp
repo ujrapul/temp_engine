@@ -49,6 +49,10 @@ namespace Temp::Math
     // Function to run the unit tests
     void Run()
     {
+      assert(Sqrt(4) == 2);
+      assert(Sqrt(100) == 10);
+      assert(Sqrt(763) == 27.6224546339);
+
       // Test Vec2 operations
       Vec2f v2a(2.0f, 3.0f);
       Vec2f v2b(4.0f, 5.0f);
