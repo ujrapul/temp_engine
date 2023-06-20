@@ -1,4 +1,6 @@
 #include "Grid.hpp"
+#include "Math.hpp"
+#include "FontLoader.hpp"
 #include "Components/ComponentType.hpp"
 
 namespace Game::Grid
@@ -46,39 +48,6 @@ namespace Game::Grid
       };
 
       return indices;
-    }
-
-    constexpr void UpdateUVOffsetsNoOp(Data * /*grid*/)
-    {
-    }
-
-    void (*UpdateUVOffsetsFunc)(Data *grid){UpdateUVOffsetsNoOp};
-
-    inline void UpdateUVOffsetsProper(Data *grid)
-    {
-      using namespace Temp;
-      using namespace Temp::Render;
-
-      // Need this to make sure
-      if (!grid->updateVBO)
-      {
-        return;
-      }
-
-      // This is needed because UpdateVBO can take a long time on large grids
-      // This kind of measure shouldn't be needed in production code so long as the operable data set is small
-
-      grid->isUpdateVBOFinished = false;
-      std::lock_guard<std::mutex> lock(*grid->mtx);
-
-      OpenGLWrapper::UpdateVBO(grid->uvOffsetVBO, grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
-      grid->updateVBO = false;
-      grid->isUpdateVBOFinished = true;
-      if (grid->destructing)
-      {
-        UpdateUVOffsetsFunc = UpdateUVOffsetsNoOp;
-      }
-      grid->cv.notify_one();
     }
   }
 
@@ -147,14 +116,23 @@ namespace Game::Grid
 
     // Needs to be called to set variables in the shader!
     OpenGLWrapper::Set1IntShaderProperty(drawable.shaderProgram, "texture1", 0);
-
-    UpdateUVOffsetsFunc = UpdateUVOffsetsProper;
   }
 
-  // Add one layer of indirection so that the function isn't called before construction occurs
-  void UpdateUVOffsets(Temp::Scene::Data */*data*/, Data *grid)
+  void DrawUpdate(Temp::Scene::Data * /*data*/, Data *grid)
   {
-    UpdateUVOffsetsFunc(grid);
+    using namespace Temp;
+    using namespace Temp::Render;
+
+    // This is needed because UpdateVBO can take a long time on large grids
+    // This kind of measure shouldn't be needed in production code so long as the operable data set is small
+    {
+      std::lock_guard<std::mutex> lock(*grid->mtx);
+      grid->isUpdateVBOFinished = false;
+
+      OpenGLWrapper::UpdateVBO(grid->uvOffsetVBO, grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
+      grid->isUpdateVBOFinished = true;
+    }
+    grid->cv.notify_one();
   }
 
   void UpdateNumbers(Temp::Scene::Data *sceneData, Data *grid, Temp::Entity player, int currentValue)
@@ -175,14 +153,11 @@ namespace Game::Grid
       grid->gridUVOffsets[i * 2] = Font::Characters[value].left;
       grid->gridUVOffsets[i * 2 + 1] = Font::Characters[value].top;
     }
-
-    grid->updateVBO = true;
   }
 
   void Destruct(Data *grid)
   {
     {
-      grid->destructing = true;
       std::unique_lock<std::mutex> lock(*grid->mtx);
       grid->cv.wait(lock, [grid]()
                     { return grid->isUpdateVBOFinished; });

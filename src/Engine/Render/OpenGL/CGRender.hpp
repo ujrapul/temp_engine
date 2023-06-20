@@ -1,5 +1,4 @@
-
-#include "X11Render.hpp"
+#pragma once
 
 #include "Camera.hpp"
 #include "Drawable.hpp"

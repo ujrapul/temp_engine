@@ -305,7 +305,7 @@ namespace Game::Scene::GameLevel
 
     void DrawUpdate(Temp::Scene::Data *data)
     {
-      Grid::UpdateUVOffsets(data, gameData.grid);
+      Grid::DrawUpdate(data, gameData.grid);
       TextBox::UpdateTextRender(data, &gameData.player1NumbersTextBox);
       TextBox::UpdateTextRender(data, &gameData.player2NumbersTextBox);
       TextBox::UpdateTextRender(data, &gameData.numbersLeftTextBox);
