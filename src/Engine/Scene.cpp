@@ -23,29 +23,29 @@ namespace Temp
       }
     }
 
-    void Construct(Data &data)
+    void Construct(Data &scene)
     {
-      Coordinator::Init(data.coordinator);
+      Coordinator::Init(scene.coordinator);
     }
 
-    void Destruct(Data &data)
+    void Destruct(Data &scene)
     {
-      Coordinator::Destruct(data.coordinator);
+      Coordinator::Destruct(scene.coordinator);
     }
 
-    Entity CreateEntity(Data &data)
+    Entity CreateEntity(Data &scene)
     {
-      return Coordinator::CreateEntity(data.coordinator);
+      return Coordinator::CreateEntity(scene.coordinator);
     }
 
-    void DestroyEntity(Data &data, Entity entity)
+    void DestroyEntity(Data &scene, Entity entity)
     {
-      Coordinator::DestroyEntity(data.coordinator, entity);
+      Coordinator::DestroyEntity(scene.coordinator, entity);
     }
 
-    Math::Vec2f &GetPosition(Data &data, Entity entity)
+    Math::Vec2f &GetPosition(Data &scene, Entity entity)
     {
-      return Coordinator::GetPosition(data.coordinator, entity);
+      return Coordinator::GetPosition(scene.coordinator, entity);
     }
 
     void EnqueueRender(Data &scene, RenderFunction func, void *data)
@@ -55,35 +55,35 @@ namespace Temp
       scene.renderQueue.push({func, data});
     }
 
-    void Draw(Data &data)
+    void Draw(Data &scene)
     {
-      DequeueRender(data);
-      switch (data.renderState)
+      DequeueRender(scene);
+      switch (scene.renderState)
       {
       case State::ENTER:
       {
-        std::unique_lock<std::mutex> lock(data.mtx);
-        data.DrawConstructFunc(data);
-        data.renderState = State::RUN;
-        data.state = Scene::State::RUN;
+        std::unique_lock<std::mutex> lock(scene.mtx);
+        scene.DrawConstructFunc(scene);
+        scene.renderState = State::RUN;
+        scene.state = Scene::State::RUN;
       }
       break;
       case State::RUN:
       {
-        auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(data);
+        auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(scene);
         for (size_t i = 0; i < drawableArray->mapping.size; ++i)
         {
           Component::Drawable::Draw(&drawableArray->array[i]);
         }
-        data.DrawUpdateFunc(data);
+        scene.DrawUpdateFunc(scene);
       }
       break;
       case State::LEAVE:
       {
-        std::unique_lock<std::mutex> lock(data.mtx);
-        data.renderState = State::MAX;
-        data.DrawDestructFunc(data);
-        data.cv.notify_one();
+        std::unique_lock<std::mutex> lock(scene.mtx);
+        scene.renderState = State::MAX;
+        scene.DrawDestructFunc(scene);
+        scene.cv.notify_one();
       }
       break;
       default:

@@ -18,9 +18,9 @@ namespace Temp::Scene
 
   inline void NoOpScene(struct Data &) {}
   inline void NoOpSceneUpdate(struct Data &, float) {}
-  void Construct(Data &data);
-  void Destruct(Data &data);
-  void Draw(Data &data);
+  void Construct(Data &scene);
+  void Destruct(Data &scene);
+  void Draw(Data &scene);
 
   typedef void (*RenderFunction)(Data &, void *);
 
@@ -48,44 +48,44 @@ namespace Temp::Scene
   };
 
   template <uint8_t T>
-  [[nodiscard]] constexpr Component::MapToComponentDataType<T> &Get(Data &data, Entity entity)
+  [[nodiscard]] constexpr Component::MapToComponentDataType<T> &Get(Data &scene, Entity entity)
   {
-    return Component::Container::Get<T>(data.coordinator.componentData, entity);
+    return Component::Container::Get<T>(scene.coordinator.componentData, entity);
   }
 
   template <uint8_t T>
-  [[nodiscard]] constexpr Entity GetEntityUsingIndex(Data &data, size_t index)
+  [[nodiscard]] constexpr Entity GetEntityUsingIndex(Data &scene, size_t index)
   {
-    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(data.coordinator.componentData.components[T])->mapping.indexToEntity[index];
+    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T])->mapping.indexToEntity[index];
   }
 
   template <uint8_t T>
-  [[nodiscard]] constexpr size_t GetComponentSize(Data &data)
+  [[nodiscard]] constexpr size_t GetComponentSize(Data &scene)
   {
-    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(data.coordinator.componentData.components[T])->mapping.size;
+    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T])->mapping.size;
   }
 
   template <uint8_t T>
-  [[nodiscard]] constexpr Component::ArrayData<Component::MapToComponentDataType<T>> *GetComponentArray(Data &data)
+  [[nodiscard]] constexpr Component::ArrayData<Component::MapToComponentDataType<T>> *GetComponentArray(Data &scene)
   {
-    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(data.coordinator.componentData.components[T]);
+    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T]);
   }
 
   template <uint8_t T>
-  constexpr void AddComponent(Data &data, Entity entity, Component::MapToComponentDataType<T> component)
+  constexpr void AddComponent(Data &scene, Entity entity, Component::MapToComponentDataType<T> component)
   {
-    Coordinator::AddComponent<T>(data.coordinator, entity, component);
+    Coordinator::AddComponent<T>(scene.coordinator, entity, component);
   }
 
   template <uint8_t T>
-  constexpr void AddComponent(Data &data, Entity entity)
+  constexpr void AddComponent(Data &scene, Entity entity)
   {
-    Coordinator::AddComponent<T>(data.coordinator, entity, Component::GetDefaultValue<T>());
+    Coordinator::AddComponent<T>(scene.coordinator, entity, Component::GetDefaultValue<T>());
   }
 
-  Entity CreateEntity(Data &data);
-  void DestroyEntity(Data &data, Entity entity);
-  Math::Vec2f &GetPosition(Data &data, Entity entity);
+  Entity CreateEntity(Data &scene);
+  void DestroyEntity(Data &scene, Entity entity);
+  Math::Vec2f &GetPosition(Data &scene, Entity entity);
   void EnqueueRender(Scene::Data &scene, RenderFunction func, void *data);
   void ClearRender(Scene::Data &scene);
 }
