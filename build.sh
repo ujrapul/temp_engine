@@ -17,7 +17,7 @@ fi
   unameOut="$(uname -s)"
   case "${unameOut}" in
     Linux*)     if [ "$1" = "release" ] || [ "$1" = "Release" ]; then
-	    	  cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..;
+	    	  cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Ninja ..;
 		else
 		  cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja ..;
 		fi

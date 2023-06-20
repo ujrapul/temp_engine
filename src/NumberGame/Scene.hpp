@@ -14,7 +14,7 @@ namespace Game::Scene
       Temp::Entity entity{};
     };
     
-    void addScore(Temp::Entity player, Temp::Scene::Data* data, int value);
-    int getScore(Temp::Entity player, Temp::Scene::Data* data);
+    void addScore(Temp::Entity player, Temp::Scene::Data& data, int value);
+    int getScore(Temp::Entity player, Temp::Scene::Data& data);
   }
 }

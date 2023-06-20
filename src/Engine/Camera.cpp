@@ -60,7 +60,7 @@ namespace Temp::Camera
       };
     }
 
-    void UpdateCamera(Scene::Data * /*scene*/, void * /*data*/)
+    void UpdateCamera(Scene::Data & /*scene*/, void * /*data*/)
     {
       using namespace Temp::Render;
 
@@ -99,21 +99,21 @@ namespace Temp::Camera
     return FontUBO;
   }
 
-  void UpdateOrthoScale(Scene::Data *scene, float _orthoScale)
+  void UpdateOrthoScale(Scene::Data &scene, float _orthoScale)
   {
     orthoScale = _orthoScale;
     orthoProjection = std::move(OrthoProjection());
     Temp::Scene::EnqueueRender(scene, UpdateCamera, nullptr);
   }
 
-  void UpdateFontOrthoScale(Scene::Data *scene, float _orthoScale)
+  void UpdateFontOrthoScale(Scene::Data &scene, float _orthoScale)
   {
     fontOrthoScale = _orthoScale;
     fontOrthoProjection = std::move(FontOrthoProjection());
     Temp::Scene::EnqueueRender(scene, UpdateCamera, nullptr);
   }
 
-  void UpdateCameraAspect(Scene::Data *scene, float _width, float _height)
+  void UpdateCameraAspect(Scene::Data &scene, float _width, float _height)
   {
     width = _width;
     height = _height;
@@ -145,7 +145,7 @@ namespace Temp::Camera
     return height;
   }
 
-  void UpdateFov(Scene::Data *scene, float _fov)
+  void UpdateFov(Scene::Data &scene, float _fov)
   {
     fov = _fov;
     perspProjection = Math::Mat4::perspective(Math::ToRadians(fov), aspect, 0.1, 100);

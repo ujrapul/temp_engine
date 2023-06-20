@@ -4,6 +4,7 @@
 #include <iostream>
 #include <functional>
 #include <mutex>
+#include <condition_variable>
 
 namespace Temp::Scene
 {
@@ -15,18 +16,17 @@ namespace Temp::Scene
     MAX = 3
   };
 
-  inline void NoOpScene(struct Data *) {}
-  inline void NoOpSceneUpdate(struct Data *, float) {}
-  void Construct(Data *data);
-  void Destruct(Data *data);
-  void Draw(Data *data);
+  inline void NoOpScene(struct Data &) {}
+  inline void NoOpSceneUpdate(struct Data &, float) {}
+  void Construct(Data &data);
+  void Destruct(Data &data);
+  void Draw(Data &data);
 
-  typedef std::function<void(Data *, void *)> RenderFunction;
+  typedef void (*RenderFunction)(Data &, void *);
 
   struct RenderData
   {
     RenderFunction func;
-    struct Scene::Data *scene;
     void *data;
   };
 
@@ -37,13 +37,14 @@ namespace Temp::Scene
     State state{State::ENTER};
     State renderState{State::MAX};
     Data *nextScene{nullptr};
-    void (*Construct)(Scene::Data *){Construct};
-    void (*Update)(Scene::Data *, float){NoOpSceneUpdate};
-    void (*DestructFunc)(Scene::Data *){Destruct};
-    void (*DrawConstructFunc)(Scene::Data *){NoOpScene};
-    void (*DrawDestructFunc)(Scene::Data *){NoOpScene};
-    void (*DrawUpdateFunc)(Scene::Data *){NoOpScene};
+    void (*Construct)(Scene::Data &){Construct};
+    void (*Update)(Scene::Data &, float){NoOpSceneUpdate};
+    void (*DestructFunc)(Scene::Data &){Destruct};
+    void (*DrawConstructFunc)(Scene::Data &){NoOpScene};
+    void (*DrawDestructFunc)(Scene::Data &){NoOpScene};
+    void (*DrawUpdateFunc)(Scene::Data &){NoOpScene};
     std::mutex mtx{};
+    std::condition_variable cv{};
   };
 
   template <uint8_t T>
@@ -85,6 +86,6 @@ namespace Temp::Scene
   Entity CreateEntity(Data &data);
   void DestroyEntity(Data &data, Entity entity);
   Math::Vec2f &GetPosition(Data &data, Entity entity);
-  void EnqueueRender(Scene::Data *scene, RenderFunction func, void *data);
-  void ClearRender(Scene::Data *scene);
+  void EnqueueRender(Scene::Data &scene, RenderFunction func, void *data);
+  void ClearRender(Scene::Data &scene);
 }

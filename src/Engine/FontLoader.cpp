@@ -1,6 +1,7 @@
 #include "FontLoader.hpp"
 
 #include "OpenGLWrapper.hpp"
+#include "Math.hpp"
 #include <iostream>
 #include <filesystem>
 #include <array>
@@ -11,41 +12,6 @@
 
 namespace Temp::Font
 {
-  constexpr double abs(double x)
-  {
-    if (x < 0)
-    {
-      return -x;
-    }
-    return x;
-  }
-  
-  constexpr double sqrt(double x) {
-    if (x == 0 || x == 1) {
-      return x;
-    }
-    
-    double guess = x / 2;
-    double prevGuess;
-    
-    do {
-      prevGuess = guess;
-      guess = (guess + x / guess) / 2;
-    } while (abs(guess - prevGuess) >= 0.00001);  // Adjust the precision as needed
-    
-    return guess;
-  }
-  
-  constexpr int ceil(double x) {
-    int result = static_cast<int>(x);
-    return (result < x) ? (result + 1) : result;
-  }
-  
-  constexpr int floor(double x) {
-    int result = static_cast<int>(x);
-    return (result > x) ? (result - 1) : result;
-  }
-  
   void LoadFont()
   {
     FT_Library ft = nullptr;
@@ -77,8 +43,8 @@ namespace Temp::Font
     Render::OpenGLWrapper::SetUnpackAlignment(1);
     
     constexpr uint32_t asciiNum = 128;
-    constexpr uint32_t atlasTileWidth = floor(sqrt(asciiNum));
-    constexpr uint32_t atlasTileHeight = ceil(sqrt(asciiNum));
+    constexpr uint32_t atlasTileWidth = Math::Floor(Math::Sqrt(asciiNum));
+    constexpr uint32_t atlasTileHeight = Math::Ceil(Math::Sqrt(asciiNum));
     constexpr uint32_t atlasWidth = fontSize * atlasTileWidth;
     constexpr uint32_t atlasHeight = fontSize * atlasTileHeight;
     constexpr uint32_t atlasSize = atlasWidth * atlasHeight;

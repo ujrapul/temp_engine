@@ -36,34 +36,42 @@ namespace Temp::Engine
         continue;
       }
 
-      // Process events in the renderer
-      Render::Run(engine);
       switch (currentScene->state)
       {
       case Scene::State::ENTER:
-        Temp::Scene::ClearRender(currentScene);
-        currentScene->Construct(currentScene);
+      {
+        Temp::Scene::ClearRender(*currentScene);
+        std::unique_lock<std::mutex> lock(currentScene->mtx);
+        currentScene->Construct(*currentScene);
         engine.currentScene = currentScene;
         currentScene->state = Scene::State::MAX;
         currentScene->renderState = Scene::State::ENTER;
-        break;
+      }
+      break;
       case Scene::State::RUN:
-        currentScene->Update(currentScene, deltaTime);
+        currentScene->Update(*currentScene, deltaTime);
         break;
       case Scene::State::LEAVE:
+      {
+        Temp::Scene::ClearRender(*currentScene);
+        std::unique_lock<std::mutex> lock(currentScene->mtx);
         currentScene->renderState = Scene::State::LEAVE;
-        Temp::Scene::ClearRender(currentScene);
-        currentScene->DestructFunc(currentScene);
+        currentScene->cv.wait(lock, [currentScene]()
+                              { return currentScene->renderState == Scene::State::MAX; });
+        currentScene->DestructFunc(*currentScene);
         currentScene->state = Scene::State::ENTER;
         currentScene = currentScene->nextScene;
         engine.currentScene = currentScene;
         if (currentScene)
           currentScene->state = Scene::State::ENTER;
-        break;
+      }
+      break;
       default:
         break;
       }
 
+      // Process events in the renderer
+      Render::Run(engine);
       Input::Process(engine.keyEventData);
     }
 
@@ -92,7 +100,7 @@ namespace Temp::Engine
 
   void EnqueueGlobalRender(Data &engine, RenderFunction func, void *data)
   {
-    std::scoped_lock<std::mutex> lock(engine.mtx);
+    std::unique_lock<std::mutex> lock(engine.mtx);
     engine.renderQueue.push({func, data});
   }
 
@@ -103,7 +111,7 @@ namespace Temp::Engine
       return;
     }
 
-    std::scoped_lock<std::mutex> lock(engine.mtx);
+    std::unique_lock<std::mutex> lock(engine.mtx);
     auto render = engine.renderQueue.front();
     render.func(render.data);
     engine.renderQueue.pop();

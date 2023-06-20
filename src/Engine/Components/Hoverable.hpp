@@ -9,11 +9,13 @@ namespace Temp::Scene
 // May change in the future.
 namespace Temp::Component::Hoverable
 {
-  constexpr void NoOp(Scene::Data *, struct Data *) {}
+  constexpr void NoOp(Scene::Data &, struct Data *) {}
 
   struct Data
   {
-    void (*ClickCallback)(Scene::Data *, Data *){NoOp};
+    void (*Click)(Scene::Data &, Data *){NoOp};
+    void (*Hover)(Scene::Data &, Data *){NoOp};
+    void *callbackData{nullptr};
     float x{};
     float y{};
     float width{};
@@ -27,14 +29,5 @@ namespace Temp::Component::Hoverable
     auto viewSpaceCoords = Temp::Camera::ConvertToFontOrthoViewSpace(x, y);
     return viewSpaceCoords.x >= hoverable->x && viewSpaceCoords.x <= hoverable->x + hoverable->width &&
            viewSpaceCoords.y >= hoverable->y && viewSpaceCoords.y <= hoverable->y + hoverable->height;
-  }
-
-  constexpr void Hover(Data * /*hoverable*/)
-  {
-  }
-
-  constexpr void Click(Scene::Data *scene, Data *hoverable)
-  {
-    hoverable->ClickCallback(scene, hoverable);
   }
 };

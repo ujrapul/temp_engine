@@ -3,9 +3,14 @@
 #include "Entity.hpp"
 #include "FontLoader.hpp"
 #include "OpenGLWrapper.hpp"
-#include "Scene.hpp"
+#include "Drawable.hpp"
 #include "gl.h"
 #include <string>
+
+namespace Temp::Scene
+{
+  struct Data;
+}
 
 // NOTE: Don't use inline global mutexes, it'll stall multiple instances of the same object
 namespace Temp::TextBox
@@ -17,36 +22,30 @@ namespace Temp::TextBox
     float y{};
     float scale{};
     Entity entity{};
+    bool renderText{false};
+    std::mutex *mtx{new std::mutex()};
   };
 
-  inline void UpdateRender(Scene::Data *scene, Data *data)
-  {
-    using namespace Temp::Render;
+  void ConstructRender(Scene::Data &scene, Data *grid);
+  void Construct(Scene::Data &scene, Data *grid);
+  void UpdateText(Scene::Data &scene, Data *grid, const std::string &newText);
+  void UpdateRender(Scene::Data &scene, Data *grid);
 
-    auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
-
-    OpenGLWrapper::UpdateVBO(drawable.VBO, drawable.vertices.data(), drawable.vertices.size(), GL_DYNAMIC_DRAW);
-    OpenGLWrapper::UpdateEBO(drawable.EBO, drawable.indices.data(), drawable.indices.size(), GL_DYNAMIC_DRAW);
-  }
-
-  void ConstructRender(Scene::Data *scene, Data *data);
-  void ConstructRenderVoid(Scene::Data *scene, void *data);
-
-  constexpr void PopulateVerticesIndices(Component::Drawable::Data &drawable, Data *data)
+  constexpr void PopulateVerticesIndices(Component::Drawable::Data &drawable, Data *grid)
   {
     drawable.vertices.clear();
     drawable.indices.clear();
-    drawable.vertices.reserve(data->text.length() * 16);
-    drawable.indices.reserve(data->text.length() * 6);
+    drawable.vertices.reserve(grid->text.length() * 16);
+    drawable.indices.reserve(grid->text.length() * 6);
 
-    float x = data->x;
-    float y = data->y;
-    float scale = data->scale;
+    float x = grid->x;
+    float y = grid->y;
+    float scale = grid->scale;
 
     // iterate through all characters
-    for (unsigned int i = 0; i < data->text.length(); ++i)
+    for (unsigned int i = 0; i < grid->text.length(); ++i)
     {
-      auto c = data->text[i];
+      auto c = grid->text[i];
       Font::Character ch = Font::Characters[c];
 
       float xpos = x + ch.bearing.x * scale;
@@ -78,20 +77,5 @@ namespace Temp::TextBox
       // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
       x += (ch.advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
     }
-  }
-
-  void Construct(Scene::Data *scene, Data *data);
-
-  constexpr void UpdateText(Scene::Data *scene, Data *data, const std::string &newText)
-  {
-    Scene::Get<Temp::Component::Type::TEXT>(*scene, data->entity) = newText;
-    data->text = newText;
-    auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(*scene, data->entity);
-    PopulateVerticesIndices(drawable, data);
-  }
-
-  inline void UpdateTextRender(Scene::Data *scene, Data *data)
-  {
-    UpdateRender(scene, data);
   }
 }

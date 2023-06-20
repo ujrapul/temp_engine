@@ -13,21 +13,21 @@ namespace Temp::TextButton
     TextBox::Data textBox{};
   };
 
-  inline void Construct(Scene::Data *scene, Data *data, Component::Hoverable::Data hoverable)
+  inline void Construct(Scene::Data &scene, Data *data, Component::Hoverable::Data hoverable)
   {
-    data->entity = Scene::CreateEntity(*scene);
-    Scene::AddComponent<Component::Type::HOVERABLE>(*scene, data->entity, std::move(hoverable));
+    data->entity = Scene::CreateEntity(scene);
+    Scene::AddComponent<Component::Type::HOVERABLE>(scene, data->entity, std::move(hoverable));
 
     TextBox::Construct(scene, &data->textBox);
   }
 
-  inline void ConstructRender(Scene::Data *scene, Data *data)
+  inline void ConstructRender(Scene::Data &scene, Data *data)
   {
     TextBox::ConstructRender(scene, &data->textBox);
   }
 
-  inline void UpdateRender(Scene::Data *scene, Data *data)
+  inline void UpdateRender(Scene::Data &scene, Data *data)
   {
-    TextBox::UpdateTextRender(scene, &data->textBox);
+    TextBox::UpdateRender(scene, &data->textBox);
   }
 }

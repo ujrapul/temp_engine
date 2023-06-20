@@ -1,6 +1,4 @@
 #include "Grid.hpp"
-#include "Math.hpp"
-#include "FontLoader.hpp"
 #include "Components/ComponentType.hpp"
 
 namespace Game::Grid
@@ -51,15 +49,15 @@ namespace Game::Grid
     }
   }
 
-  void Construct(Temp::Scene::Data *data, Data *grid)
+  void Construct(Temp::Scene::Data &data, Data *grid)
   {
     using namespace Temp;
     using namespace Temp::Render;
 
-    grid->entity = Temp::Scene::CreateEntity(*data);
-    Temp::Scene::AddComponent<Temp::Component::Type::DRAWABLE>(*data, grid->entity, {});
+    grid->entity = Temp::Scene::CreateEntity(data);
+    Temp::Scene::AddComponent<Temp::Component::Type::DRAWABLE>(data, grid->entity, {});
 
-    auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(*data, grid->entity);
+    auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(data, grid->entity);
 
     drawable.numInstances = grid->gridSize * grid->gridSize;
 
@@ -75,7 +73,7 @@ namespace Game::Grid
     }
   }
 
-  void ConstructRender(Temp::Scene::Data *data, Data *grid)
+  void ConstructRender(Temp::Scene::Data &data, Data *grid)
   {
     using namespace Temp;
     using namespace Temp::Render;
@@ -90,7 +88,7 @@ namespace Game::Grid
       grid->gridUVOffsets.push_back(Font::Characters[value].top);
     }
 
-    auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(*data, grid->entity);
+    auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(data, grid->entity);
 
     drawable.vertices = Vertices();
     drawable.indices = Indices();
@@ -118,29 +116,29 @@ namespace Game::Grid
     OpenGLWrapper::Set1IntShaderProperty(drawable.shaderProgram, "texture1", 0);
   }
 
-  void DrawUpdate(Temp::Scene::Data * /*data*/, Data *grid)
+  // Add one layer of indirection so that the function isn't called before construction occurs
+  void DrawUpdate(Temp::Scene::Data &/*data*/, Data *grid)
   {
     using namespace Temp;
     using namespace Temp::Render;
 
-    // This is needed because UpdateVBO can take a long time on large grids
-    // This kind of measure shouldn't be needed in production code so long as the operable data set is small
-    {
-      std::lock_guard<std::mutex> lock(*grid->mtx);
-      grid->isUpdateVBOFinished = false;
+    std::unique_lock<std::mutex> lock(*grid->mtx);
 
-      OpenGLWrapper::UpdateVBO(grid->uvOffsetVBO, grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
-      grid->isUpdateVBOFinished = true;
+    if (!grid->updateVBO)
+    {
+      return;
     }
-    grid->cv.notify_one();
+
+    OpenGLWrapper::UpdateVBO(grid->uvOffsetVBO, grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
+    grid->updateVBO = false;
   }
 
-  void UpdateNumbers(Temp::Scene::Data *sceneData, Data *grid, Temp::Entity player, int currentValue)
+  void UpdateNumbers(Temp::Scene::Data &sceneData, Data *grid, Temp::Entity player, int currentValue)
   {
     using namespace Temp;
     using namespace Temp::Render;
 
-    std::lock_guard<std::mutex> lock(*grid->mtx);
+    std::unique_lock<std::mutex> lock(*grid->mtx);
 
     for (size_t i = 0; i < grid->gridValues.size(); ++i)
     {
@@ -153,15 +151,12 @@ namespace Game::Grid
       grid->gridUVOffsets[i * 2] = Font::Characters[value].left;
       grid->gridUVOffsets[i * 2 + 1] = Font::Characters[value].top;
     }
+
+    grid->updateVBO = true;
   }
 
   void Destruct(Data *grid)
   {
-    {
-      std::unique_lock<std::mutex> lock(*grid->mtx);
-      grid->cv.wait(lock, [grid]()
-                    { return grid->isUpdateVBOFinished; });
-    }
     delete grid->mtx;
   }
 }

@@ -15,14 +15,14 @@ namespace Game::Scene
   
   namespace Player
   {
-    void addScore(Temp::Entity player, Temp::Scene::Data* data, int value)
+    void addScore(Temp::Entity player, Temp::Scene::Data& data, int value)
     {
-      Temp::Scene::Get<Game::Component::Type::SCORE>(*data, player) += value;
+      Temp::Scene::Get<Game::Component::Type::SCORE>(data, player) += value;
     }
     
-    int getScore(Temp::Entity player, Temp::Scene::Data* data)
+    int getScore(Temp::Entity player, Temp::Scene::Data& data)
     {
-      return Temp::Scene::Get<Game::Component::Type::SCORE>(*data, player);
+      return Temp::Scene::Get<Game::Component::Type::SCORE>(data, player);
     }
   }
 }

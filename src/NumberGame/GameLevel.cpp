@@ -72,7 +72,7 @@ namespace Game::Scene::GameLevel
       replay = true;
     }
 
-    void UpdateText(Temp::Scene::Data *sceneData, int currentValue)
+    void UpdateText(Temp::Scene::Data &sceneData, int currentValue)
     {
       std::string appendText = std::to_string(currentValue);
       if (gameData.numbersLeft > 2)
@@ -109,13 +109,13 @@ namespace Game::Scene::GameLevel
                           gameData.player1Turn ? "Player 2's Turn" : "Player 1's Turn");
     }
 
-    void UpdateNumbers(Temp::Scene::Data *sceneData, Entity player, int currentValue)
+    void UpdateNumbers(Temp::Scene::Data &sceneData, Entity player, int currentValue)
     {
       Grid::UpdateNumbers(sceneData, gameData.grid, player, currentValue);
       UpdateText(sceneData, currentValue);
     }
 
-    bool PrintBoard(Temp::Scene::Data *data, float /*deltaTime*/)
+    bool PrintBoard(Temp::Scene::Data &data, float /*deltaTime*/)
     {
       if (gameData.numbersLeft == 0)
       {
@@ -144,12 +144,12 @@ namespace Game::Scene::GameLevel
         gameData.numbersUnused[gameData.currentNumber] = -1;
         if (gameData.player1Turn)
         {
-          GetCollectedValue(*data, gameData.players[0].entity).push_back(gameData.currentNumber + '0');
+          GetCollectedValue(data, gameData.players[0].entity).push_back(gameData.currentNumber + '0');
           UpdateNumbers(data, gameData.players[0].entity, gameData.currentNumber);
         }
         else
         {
-          GetCollectedValue(*data, gameData.players[1].entity).push_back(gameData.currentNumber + '0');
+          GetCollectedValue(data, gameData.players[1].entity).push_back(gameData.currentNumber + '0');
           UpdateNumbers(data, gameData.players[1].entity, gameData.currentNumber);
         }
         --gameData.numbersLeft;
@@ -161,7 +161,7 @@ namespace Game::Scene::GameLevel
       return false;
     }
 
-    void Construct(Temp::Scene::Data *data)
+    void Construct(Temp::Scene::Data &data)
     {
       Temp::Camera::ResetView();
       Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid->gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
@@ -174,7 +174,7 @@ namespace Game::Scene::GameLevel
       player2Score = 0;
       replay = false;
 
-      Coordinator::Init(data->coordinator);
+      Coordinator::Init(data.coordinator);
 
       gameData.grid->gridSize = 2000;
 
@@ -186,14 +186,14 @@ namespace Game::Scene::GameLevel
       Temp::TextBox::Construct(data, &gameData.numbersLeftTextBox);
       Grid::Construct(data, gameData.grid);
 
-      Entity Player1 = Temp::Scene::CreateEntity(*data);
-      Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(*data, Player1, {});
-      Temp::Scene::AddComponent<Component::Type::SCORE>(*data, Player1, {});
+      Entity Player1 = Temp::Scene::CreateEntity(data);
+      Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(data, Player1, {});
+      Temp::Scene::AddComponent<Component::Type::SCORE>(data, Player1, {});
       gameData.players[0].entity = Player1;
 
-      Entity Player2 = Temp::Scene::CreateEntity(*data);
-      Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(*data, Player2, {});
-      Temp::Scene::AddComponent<Component::Type::SCORE>(*data, Player2, {});
+      Entity Player2 = Temp::Scene::CreateEntity(data);
+      Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(data, Player2, {});
+      Temp::Scene::AddComponent<Component::Type::SCORE>(data, Player2, {});
       gameData.players[1].entity = Player2;
 
       Temp::Camera::TranslateView({0.75, 0.5, 0});
@@ -210,9 +210,9 @@ namespace Game::Scene::GameLevel
       Temp::Input::AddCallback(inputCallback, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_9);
     }
 
-    void Construct2(Temp::Scene::Data *data)
+    void Construct2(Temp::Scene::Data &data)
     {
-      Coordinator::Init(data->coordinator);
+      Coordinator::Init(data.coordinator);
       switch (playerWinState)
       {
       case 0:
@@ -247,7 +247,7 @@ namespace Game::Scene::GameLevel
       Temp::Input::AddCallback(inputCallback2, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_9);
     }
 
-    void Update(Temp::Scene::Data *data, float deltaTime)
+    void Update(Temp::Scene::Data &data, float deltaTime)
     {
       if (PrintBoard(data, deltaTime))
       {
@@ -261,11 +261,11 @@ namespace Game::Scene::GameLevel
         Temp::Input::RemoveCallback(inputCallback, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_7);
         Temp::Input::RemoveCallback(inputCallback, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_8);
         Temp::Input::RemoveCallback(inputCallback, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_9);
-        data->state = Temp::Scene::State::LEAVE;
+        data.state = Temp::Scene::State::LEAVE;
       }
     }
 
-    void Update2(Temp::Scene::Data *data, float /*deltaTime*/)
+    void Update2(Temp::Scene::Data &data, float /*deltaTime*/)
     {
       if (replay)
       {
@@ -279,11 +279,11 @@ namespace Game::Scene::GameLevel
         Temp::Input::RemoveCallback(inputCallback2, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_7);
         Temp::Input::RemoveCallback(inputCallback2, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_8);
         Temp::Input::RemoveCallback(inputCallback2, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_9);
-        data->state = Temp::Scene::State::LEAVE;
+        data.state = Temp::Scene::State::LEAVE;
       }
     }
 
-    void DrawConstruct(Temp::Scene::Data *data)
+    void DrawConstruct(Temp::Scene::Data &data)
     {
       Grid::ConstructRender(data, gameData.grid);
       Temp::TextBox::ConstructRender(data, &gameData.playerTurnTextBox);
@@ -294,7 +294,7 @@ namespace Game::Scene::GameLevel
       Temp::TextBox::ConstructRender(data, &gameData.numbersLeftTextBox);
     }
 
-    void DrawConstruct2(Temp::Scene::Data *data)
+    void DrawConstruct2(Temp::Scene::Data &data)
     {
       Temp::TextBox::ConstructRender(data, &gameData2.playerWinTextBox);
       Temp::TextBox::ConstructRender(data, &gameData2.player1ScoreTextBox);
@@ -303,23 +303,23 @@ namespace Game::Scene::GameLevel
       Temp::TextBox::ConstructRender(data, &gameData2.replayTextBox);
     }
 
-    void DrawUpdate(Temp::Scene::Data *data)
+    void DrawUpdate(Temp::Scene::Data &data)
     {
       Grid::DrawUpdate(data, gameData.grid);
-      TextBox::UpdateTextRender(data, &gameData.player1NumbersTextBox);
-      TextBox::UpdateTextRender(data, &gameData.player2NumbersTextBox);
-      TextBox::UpdateTextRender(data, &gameData.numbersLeftTextBox);
-      TextBox::UpdateTextRender(data, &gameData.playerTurnTextBox);
+      TextBox::UpdateRender(data, &gameData.player1NumbersTextBox);
+      TextBox::UpdateRender(data, &gameData.player2NumbersTextBox);
+      TextBox::UpdateRender(data, &gameData.numbersLeftTextBox);
+      TextBox::UpdateRender(data, &gameData.playerTurnTextBox);
       Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid->gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
     }
 
-    void DrawUpdate2(Temp::Scene::Data *data)
+    void DrawUpdate2(Temp::Scene::Data &data)
     {
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
     }
 
-    void Destruct(Temp::Scene::Data *data)
+    void Destruct(Temp::Scene::Data &data)
     {
       Temp::Scene::Destruct(data);
       Grid::Destruct(gameData.grid);

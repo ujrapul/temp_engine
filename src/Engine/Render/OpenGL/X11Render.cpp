@@ -89,7 +89,7 @@ namespace Temp::Render
         Engine::DequeueGlobalRender(engine);
         if (engine.currentScene) [[likely]]
         {
-          Temp::Scene::Draw(engine.currentScene);
+          Temp::Scene::Draw(*engine.currentScene);
         }
 
         glXSwapBuffers(display, window);
@@ -275,7 +275,7 @@ namespace Temp::Render
             auto *hoverable = &hoverableArray->array[i];
             if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
             {
-              Component::Hoverable::Hover(hoverable);
+              hoverable->Hover(*scene, hoverable);
             }
           }
         }
@@ -301,7 +301,7 @@ namespace Temp::Render
             auto *hoverable = &hoverableArray->array[i];
             if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
             {
-              Component::Hoverable::Click(scene, hoverable);
+              hoverable->Click(*scene, hoverable);
             }
           }
         }

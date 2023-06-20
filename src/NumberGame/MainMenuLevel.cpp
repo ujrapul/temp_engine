@@ -24,17 +24,17 @@ namespace Game::Scene::MainMenuLevel
 
     Data gameData{};
 
-    void PlayCallback(Temp::Scene::Data *scene, Temp::Component::Hoverable::Data *)
+    void PlayCallback(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data *)
     {
-      scene->state = Temp::Scene::State::LEAVE;
+      scene.state = Temp::Scene::State::LEAVE;
     }
 
-    void QuitCallback(Temp::Scene::Data *, Temp::Component::Hoverable::Data *)
+    void QuitCallback(Temp::Scene::Data &, Temp::Component::Hoverable::Data *)
     {
       Engine::Quit(Engine::engine);
     }
 
-    void Construct(Temp::Scene::Data *data)
+    void Construct(Temp::Scene::Data &data)
     {
       gameData = {};
 
@@ -43,27 +43,27 @@ namespace Game::Scene::MainMenuLevel
       Temp::Scene::Construct(data);
 
       TextBox::Construct(data, &gameData.gameTextBox);
-      Temp::Component::Hoverable::Data hoverable{PlayCallback, -20, 0, 9, 4};
-      Temp::Component::Hoverable::Data hoverable2{QuitCallback, -20, -7, 9, 4};
-      TextButton::Construct(data, &gameData.playButton, hoverable);
-      TextButton::Construct(data, &gameData.quitButton, hoverable2);
+      Temp::Component::Hoverable::Data playHoverable{PlayCallback, Temp::Component::Hoverable::NoOp, nullptr, -20, 0, 9, 4};
+      Temp::Component::Hoverable::Data quitHoverable{QuitCallback, Temp::Component::Hoverable::NoOp, nullptr, -20, -7, 9, 4};
+      TextButton::Construct(data, &gameData.playButton, playHoverable);
+      TextButton::Construct(data, &gameData.quitButton, quitHoverable);
     }
 
-    void Update(Temp::Scene::Data *, float)
+    void Update(Temp::Scene::Data &, float)
     {
     }
 
-    void Destruct(Temp::Scene::Data *data)
+    void Destruct(Temp::Scene::Data &data)
     {
       Temp::Scene::Destruct(data);
     }
 
-    void DrawUpdate(Temp::Scene::Data *data)
+    void DrawUpdate(Temp::Scene::Data &data)
     {
       Temp::Camera::UpdateFontOrthoScale(data, 0.15 * (720.f / Temp::Camera::GetHeight()));
     }
 
-    void DrawConstruct(Temp::Scene::Data *data)
+    void DrawConstruct(Temp::Scene::Data &data)
     {
       Temp::TextBox::ConstructRender(data, &gameData.gameTextBox);
       Temp::TextButton::ConstructRender(data, &gameData.playButton);

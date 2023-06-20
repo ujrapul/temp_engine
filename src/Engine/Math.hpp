@@ -12,6 +12,46 @@ namespace Temp::Math
 {
   constexpr float PI = 3.141592653589793238f;
 
+  constexpr double Abs(double x)
+  {
+    if (x < 0)
+    {
+      return -x;
+    }
+    return x;
+  }
+
+  constexpr double Sqrt(double x)
+  {
+    if (x == 0 || x == 1)
+    {
+      return x;
+    }
+
+    double guess = x / 2;
+    double prevGuess;
+
+    do
+    {
+      prevGuess = guess;
+      guess = (guess + x / guess) / 2;
+    } while (abs(guess - prevGuess) >= 0.00001); // Adjust the precision as needed
+
+    return guess;
+  }
+
+  constexpr int Ceil(double x)
+  {
+    int result = static_cast<int>(x);
+    return (result < x) ? (result + 1) : result;
+  }
+
+  constexpr int Floor(double x)
+  {
+    int result = static_cast<int>(x);
+    return (result > x) ? (result - 1) : result;
+  }
+
   template <typename T>
   struct Vec2
   {
@@ -104,7 +144,7 @@ namespace Temp::Math
     }
   };
 
-  using Vec2f  = Vec2<float>;
+  using Vec2f = Vec2<float>;
   using Vec2ui = Vec2<unsigned int>;
   using Vec2i = Vec2<int>;
 
