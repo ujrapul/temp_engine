@@ -177,15 +177,15 @@ if(APPLE)
   )
 endif()
 
-# target_compile_options(${TARGET_TEST_GAME} PRIVATE
-#   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-#   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
-# )
-# target_compile_options(${TARGET_TEST_GAME_2} PRIVATE
-#   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-#   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
-# )
-# target_compile_options(${TARGET_NUMBER_GAME} PRIVATE
-#   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-#   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
-# )
+target_compile_options(${TARGET_TEST_GAME} PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/w>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-w>
+)
+target_compile_options(${TARGET_TEST_GAME_2} PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/w>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-w>
+)
+target_compile_options(${TARGET_NUMBER_GAME} PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+)

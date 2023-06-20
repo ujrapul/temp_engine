@@ -161,8 +161,6 @@ namespace Game::Scene::GameLevel
       return false;
     }
 
-    void Draw(Temp::Scene::Data *data);
-
     void Construct(Temp::Scene::Data *data)
     {
       Temp::Camera::ResetView();
@@ -249,10 +247,6 @@ namespace Game::Scene::GameLevel
       Temp::Input::AddCallback(inputCallback2, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_9);
     }
 
-    void NoOp(Temp::Scene::Data *)
-    {
-    }
-
     void Update(Temp::Scene::Data *data, float deltaTime)
     {
       if (PrintBoard(data, deltaTime))
@@ -287,12 +281,6 @@ namespace Game::Scene::GameLevel
         Temp::Input::RemoveCallback(inputCallback2, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_9);
         data->state = Temp::Scene::State::LEAVE;
       }
-    }
-
-    void Draw2(Temp::Scene::Data *data)
-    {
-      Temp::Scene::Draw(data);
-      Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
     }
 
     void DrawConstruct(Temp::Scene::Data *data)

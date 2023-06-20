@@ -19,7 +19,7 @@ namespace Temp::TextBox
     Entity entity{};
   };
 
-  constexpr void UpdateRender(Scene::Data *scene, Data *data)
+  inline void UpdateRender(Scene::Data *scene, Data *data)
   {
     using namespace Temp::Render;
 
@@ -90,7 +90,7 @@ namespace Temp::TextBox
     PopulateVerticesIndices(drawable, data);
   }
 
-  constexpr void UpdateTextRender(Scene::Data *scene, Data *data)
+  inline void UpdateTextRender(Scene::Data *scene, Data *data)
   {
     UpdateRender(scene, data);
   }

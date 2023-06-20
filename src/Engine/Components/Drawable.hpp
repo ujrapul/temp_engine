@@ -29,7 +29,7 @@ namespace Temp::Component::Drawable
     data->model = data->model.scale(scale);
   }
 
-  constexpr void Update(Data *data)
+  inline void Update(Data *data)
   {
     using namespace Temp::Render;
 

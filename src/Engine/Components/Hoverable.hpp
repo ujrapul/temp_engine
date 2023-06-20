@@ -22,7 +22,7 @@ namespace Temp::Component::Hoverable
 
   // TOD0: Might need to revisit this for other widgets
   //       For now this is assuming the origin is at the lower left-hand corner (this is the case for TextBoxes)
-  constexpr bool IsInside(Data *hoverable, float x, float y)
+  inline bool IsInside(Data *hoverable, float x, float y)
   {
     auto viewSpaceCoords = Temp::Camera::ConvertToFontOrthoViewSpace(x, y);
     return viewSpaceCoords.x >= hoverable->x && viewSpaceCoords.x <= hoverable->x + hoverable->width &&

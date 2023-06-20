@@ -70,12 +70,12 @@ namespace Temp::Render::OpenGLWrapper
     return globalShaders[shader].data();
   }
 
-  constexpr GLuint CreateVertexShader(int shader)
+  inline GLuint CreateVertexShader(int shader)
   {
     return CreateShader(GetShader(shader * 2), GL_VERTEX_SHADER);
   }
 
-  constexpr GLuint CreateFragmentShader(int shader)
+  inline GLuint CreateFragmentShader(int shader)
   {
     // We add a '1' since shaders are compiled in two sets.
     return CreateShader(GetShader(shader * 2 + 1), GL_FRAGMENT_SHADER);
@@ -301,7 +301,7 @@ namespace Temp::Render::OpenGLWrapper
     glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
   }
 
-  constexpr GLuint GenerateFontTexture(FT_Face face)
+  inline GLuint GenerateFontTexture(FT_Face face)
   {
     return CreateTexture(GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer, GL_CLAMP_TO_EDGE);
   }

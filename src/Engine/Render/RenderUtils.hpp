@@ -202,7 +202,7 @@ namespace Temp::Render
     OpenGLWrapper::DrawArrays(cube.VAO, 180);
   }
 
-  constexpr void Clean(Square &square)
+  inline void Clean(Square &square)
   {
     OpenGLWrapper::CleanArrays(square.VAO);
     OpenGLWrapper::CleanBuffer(square.VBO);
@@ -210,7 +210,7 @@ namespace Temp::Render
     OpenGLWrapper::CleanShader(square.shaderProgram);
   }
 
-  constexpr void Clean(Cube &cube)
+  inline void Clean(Cube &cube)
   {
     OpenGLWrapper::CleanArrays(cube.VAO);
     OpenGLWrapper::CleanBuffer(cube.VBO);

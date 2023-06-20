@@ -48,13 +48,13 @@ namespace Game::Grid
       return indices;
     }
 
-    constexpr void UpdateUVOffsetsNoOp(Temp::Scene::Data * /*data*/, Data * /*grid*/)
+    constexpr void UpdateUVOffsetsNoOp(Data * /*grid*/)
     {
     }
 
-    void (*UpdateUVOffsetsFunc)(Temp::Scene::Data *, Data *grid){UpdateUVOffsetsNoOp};
+    void (*UpdateUVOffsetsFunc)(Data *grid){UpdateUVOffsetsNoOp};
 
-    inline void UpdateUVOffsetsProper(Temp::Scene::Data *data, Data *grid)
+    inline void UpdateUVOffsetsProper(Data *grid)
     {
       using namespace Temp;
       using namespace Temp::Render;
@@ -152,9 +152,9 @@ namespace Game::Grid
   }
 
   // Add one layer of indirection so that the function isn't called before construction occurs
-  void UpdateUVOffsets(Temp::Scene::Data *data, Data *grid)
+  void UpdateUVOffsets(Temp::Scene::Data */*data*/, Data *grid)
   {
-    UpdateUVOffsetsFunc(data, grid);
+    UpdateUVOffsetsFunc(grid);
   }
 
   void UpdateNumbers(Temp::Scene::Data *sceneData, Data *grid, Temp::Entity player, int currentValue)
