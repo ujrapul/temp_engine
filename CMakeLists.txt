@@ -11,6 +11,10 @@ if (LINUX)
   find_package(X11 REQUIRED)
 endif()
 
+if (APPLE)
+  enable_language(OBJCXX)
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -69,7 +73,7 @@ elseif (LINUX)
   )
 elseif (APPLE)
   list (APPEND ENGINE_HEADER
-    src/Engine/Render/OpenGL/CGRender.hpp
+    src/Engine/Render/OpenGL/NSRender.hpp
   )
 endif()
 set ( ENGINE_SRC
@@ -90,14 +94,22 @@ set ( ENGINE_SRC
   src/Engine/stb_image.cpp # TODO: When you become more knowledgable try writing your own image loading system
 )
 if (WIN32)
-  list (APPEND ENGINE_HEADER
+  list (APPEND ENGINE_SRC
     src/Engine/Render/glad/wgl.c
   )
 elseif (LINUX)
-  list (APPEND ENGINE_HEADER
+  list (APPEND ENGINE_SRC
     src/Engine/Render/glad/glx.c
     src/Engine/Render/OpenGL/X11Render.cpp
   )
+elseif (APPLE)
+  list (APPEND ENGINE_SRC
+    # Add your Objective-C and C++ source files
+    src/Engine/Render/OpenGL/NSRender.mm
+  )
+  # Set the compiler flags for Objective-C and C++
+  #set_source_files_properties(${ENGINE_SRC} PROPERTIES
+  #  COMPILE_FLAGS "-x objective-c++"
 endif()
 set ( TEST_GAME_HEADER
   src/TestGame/Entry.hpp
@@ -174,8 +186,16 @@ if(APPLE)
   target_link_libraries(${TARGET_ENGINE} PRIVATE
   "-framework CoreFoundation"
   "-framework CoreGraphics"
+  "-framework AppKit"
+  "-framework OpenGL"
+  "-framework Cocoa"
   )
+  set_target_properties(${TARGET_NUMBER_GAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic")
+  set_target_properties(${TARGET_NUMBER_GAME} PROPERTIES XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "32SB9VAM46")
+  set_target_properties(${TARGET_NUMBER_GAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
 endif()
+
+target_compile_definitions(${TARGET_ENGINE} PUBLIC GL_SILENCE_DEPRECATION)
 
 target_compile_options(${TARGET_TEST_GAME} PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/w>

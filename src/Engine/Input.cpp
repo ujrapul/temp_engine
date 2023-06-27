@@ -1,4 +1,6 @@
 #include "Input.hpp"
+#include "Scene.hpp"
+
 #include <iostream>
 #include <algorithm>
 #ifdef __linux__
@@ -10,6 +12,8 @@
 #include <fstream>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#elif __APPLE__
+#include "NSRender.hpp"
 #endif
 
 // #define test_bit(bit, array)    ((array)[(bit)/8] & (1 << ((bit)%8)))
@@ -18,73 +22,42 @@ namespace
 {
 #ifdef __APPLE__
   CGEventFlags lastFlags = 0;
-
+  CFRunLoopRef cfRunLoop{};
+  
   constexpr void MacInputHandle(Temp::Input::KeyEventData &data)
   {
     // Create an event tap to retrieve keypresses.
-    CGEventMask eventMask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged);
+    CGEventMask eventMask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged) | CGEventMaskBit(kCGEventMouseMoved) | CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventRightMouseDown) | CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventRightMouseUp) | CGEventMaskBit(kCGEventNull);
     CFMachPortRef eventTap = CGEventTapCreate(kCGSessionEventTap,
                                               kCGHeadInsertEventTap,
                                               kCGEventTapOptionDefault,
                                               eventMask, Temp::Input::CGEventCallback, std::addressof(data));
-
+    
     // Exit the program if unable to create the event tap.
     if (!eventTap)
     {
-      std::cerr << "ERROR: Unable to create event tap.\n";
+      std::cerr << "ERROR: Unable to create event tap for Mac Input.\n";
       return;
     }
-
+    
     // Create a run loop source and add enable the event tap.
     CFRunLoopSourceRef runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
     CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
     CGEventTapEnable(eventTap, true);
-
+    cfRunLoop = CFRunLoopGetCurrent();
+    
     CFRunLoopRun();
     
-    CFRunLoopRef runLoop = CFRunLoopGetCurrent();
-    CFRunLoopRemoveSource(runLoop, runLoopSource, kCFRunLoopDefaultMode);
-
+    CFRunLoopRemoveSource(cfRunLoop, runLoopSource, kCFRunLoopDefaultMode);
+    
     // Step 2: Invalidate the run loop source
     CFRunLoopSourceInvalidate(runLoopSource);
-
+    
     // Step 3: Release the run loop source
     CFRelease(runLoopSource);
   }
-#elif __linux__
-
-  std::vector<std::string> GetDevices()
-  {
-    const char *inputDeviceDir = "/dev/input";
-    std::vector<std::string> devices;
-
-    int fdIndex = 0;
-    DIR *dir = opendir(inputDeviceDir);
-    if (!dir)
-    {
-      std::cerr << "Failed to open input device directory: " << inputDeviceDir << std::endl;
-      return {};
-    }
-
-    std::string keyboardPath;
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != nullptr)
-    {
-      if (entry->d_name[0] != '.')
-      {
-        if (std::string(entry->d_name) != "by-id" && std::string(entry->d_name) != "by-path") {
-          devices.push_back(std::string(inputDeviceDir) + "/" + entry->d_name);
-        }
-        // fd[fdIndex++] = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
-      }
-    }
-
-    closedir(dir);
-    return devices;
-  }
-
 #endif
-
+  
   constexpr void ActivateCallBack(Temp::Input::KeyboardCode keyCode, Temp::Input::KeyEventData *data)
   {
     for (auto fn : data->keyEvents[static_cast<int>(keyCode)])
@@ -101,16 +74,15 @@ namespace Temp::Input
     std::queue<KeyboardCode> queue;
     std::mutex lock;
   };
-
+  
   void PushKeyQueue(KeyboardCode keyCode, KeyEventData *data)
   {
-    std::scoped_lock<std::mutex> lock(data->keyQueue->lock);
+    std::lock_guard<std::mutex> lock(data->keyQueue->lock);
     data->keyQueue->queue.push(keyCode);
   }
-
+  
   KeyboardCode PopKeyQueue(KeyEventData *data)
   {
-    std::scoped_lock<std::mutex> lock(data->keyQueue->lock);
     if (data->keyQueue->queue.size() == 0)
     {
       return KeyboardCode::KB_MAX;
@@ -119,7 +91,7 @@ namespace Temp::Input
     data->keyQueue->queue.pop();
     return keyCode;
   }
-
+  
   // USING AS REFERENCE
   // The following method converts the key code returned by each keypress as
   // a human readable key code in const char format.
@@ -127,128 +99,224 @@ namespace Temp::Input
   {
     switch (keyCode)
     {
-    case KeyboardCode::KB_Q:
-      return shift || caps ? "Q" : "q";
-    case KeyboardCode::KB_0:
-      return shift ? ")" : "0";
-    case KeyboardCode::KB_1:
-      return shift ? "!" : "1";
-    case KeyboardCode::KB_2:
-      return shift ? "@" : "2";
-    case KeyboardCode::KB_3:
-      return shift ? "#" : "3";
-    case KeyboardCode::KB_4:
-      return shift ? "$" : "4";
-    case KeyboardCode::KB_5:
-      return shift ? "%" : "5";
-    case KeyboardCode::KB_6:
-      return shift ? "^" : "6";
-    case KeyboardCode::KB_7:
-      return shift ? "&" : "7";
-    case KeyboardCode::KB_8:
-      return shift ? "*" : "8";
-    case KeyboardCode::KB_9:
-      return shift ? "(" : "9";
-    default:
-      break;
+      case KeyboardCode::KB_Q:
+        return shift || caps ? "Q" : "q";
+      case KeyboardCode::KB_0:
+        return shift ? ")" : "0";
+      case KeyboardCode::KB_1:
+        return shift ? "!" : "1";
+      case KeyboardCode::KB_2:
+        return shift ? "@" : "2";
+      case KeyboardCode::KB_3:
+        return shift ? "#" : "3";
+      case KeyboardCode::KB_4:
+        return shift ? "$" : "4";
+      case KeyboardCode::KB_5:
+        return shift ? "%" : "5";
+      case KeyboardCode::KB_6:
+        return shift ? "^" : "6";
+      case KeyboardCode::KB_7:
+        return shift ? "&" : "7";
+      case KeyboardCode::KB_8:
+        return shift ? "*" : "8";
+      case KeyboardCode::KB_9:
+        return shift ? "(" : "9";
+      default:
+        break;
     }
     return "[unknown]";
   }
-
+  
 #ifdef __APPLE__
   CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *data)
   {
-    if (type != kCGEventKeyDown && type != kCGEventFlagsChanged)
-    {
-      return event;
-    }
-
-    CGEventFlags flags = CGEventGetFlags(event);
-
-    // Retrieve the incoming keycode.
-    CGKeyCode keyCode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
-
-    // Calculate key up/down.
-    bool down = false;
-    if (type == kCGEventFlagsChanged)
-    {
-      switch (keyCode)
+    auto* keyEventData = static_cast<KeyEventData *>(data);
+    
+    switch (type) {
+      case kCGEventKeyDown:
       {
-      case 54: // [right-cmd]
-      case 55: // [left-cmd]
-        down = (flags & kCGEventFlagMaskCommand) && !(lastFlags & kCGEventFlagMaskCommand);
+        CGKeyCode keyCode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
+        PushKeyQueue(static_cast<KeyboardCode>(keyCode), keyEventData);
+      }
         break;
-      case 56: // [left-shift]
-      case 60: // [right-shift]
-        down = (flags & kCGEventFlagMaskShift) && !(lastFlags & kCGEventFlagMaskShift);
+      case kCGEventMouseMoved:
+      {
+        CGPoint currentMousePosition = CGEventGetLocation(event);
+        // For some reason the window space is twice that of the screen
+        Math::Vec2f windowOrigin = Temp::Render::GetWindowOrigin() / 2.f;
+        Math::Vec2f windowSize = Temp::Render::GetWindowSize();
+        Math::Vec2f screenSize = Temp::Render::GetScreenSize();
+
+        // Need to substract the title bar from screenSize as well
+        float distanceHeight = screenSize.y - windowSize.y;
+
+        int mouseX = currentMousePosition.x - windowOrigin.x;
+        int mouseY = currentMousePosition.y - distanceHeight + windowOrigin.y;
+
+        if (mouseX < 0 || mouseY < 0 || mouseX > windowSize.x || mouseY > windowSize.y)
+        {
+          break;
+        }
+//        std::cout << mouseX << " " << mouseY << std::endl;
+
+//        std::lock_guard<std::mutex> engineLock(Temp::Engine::engine.mtx);
+        auto *scene = Temp::Engine::engine.currentScene;
+        if (!scene)
+        {
+          break;
+        }
+
+        std::lock_guard<std::mutex> sceneLock(scene->mtx);
+        if (scene->state == Scene::State::RUN)
+        {
+          auto *hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
+          for (size_t i = 0; i < hoverableArray->mapping.size; ++i)
+          {
+            auto &hoverable = hoverableArray->array[i];
+            if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
+            {
+              hoverable.Hover(*scene, hoverable);
+            }
+          }
+        }
+      }
         break;
-      case 58: // [left-option]
-      case 61: // [right-option]
-        down = (flags & kCGEventFlagMaskAlternate) && !(lastFlags & kCGEventFlagMaskAlternate);
-        break;
-      case 59: // [left-ctrl]
-      case 62: // [right-ctrl]
-        down = (flags & kCGEventFlagMaskControl) && !(lastFlags & kCGEventFlagMaskControl);
-        break;
-      case 57: // [caps]
-        down = (flags & kCGEventFlagMaskAlphaShift) && !(lastFlags & kCGEventFlagMaskAlphaShift);
+      case kCGEventLeftMouseDown:
+      {
+        CGPoint currentMousePosition = CGEventGetLocation(event);
+        // For some reason the window space is twice that of the screen
+        Math::Vec2f windowOrigin = Temp::Render::GetWindowOrigin() / 2.f;
+        Math::Vec2f windowSize = Temp::Render::GetWindowSize();
+        Math::Vec2f screenSize = Temp::Render::GetScreenSize();
+
+        float distanceHeight = screenSize.y - windowSize.y;
+
+        int mouseX = currentMousePosition.x - windowOrigin.x;
+        int mouseY = currentMousePosition.y - distanceHeight + windowOrigin.y;
+        
+        if (mouseX < 0 || mouseY < 0 || mouseX > windowSize.x || mouseY > windowSize.y)
+        {
+          break;
+        }
+
+//        std::lock_guard<std::mutex> engineLock(Temp::Engine::engine.mtx);
+        auto *scene = Temp::Engine::engine.currentScene;
+        if (!scene)
+        {
+          break;
+        }
+
+        std::lock_guard<std::mutex> sceneLock(scene->mtx);
+        if (scene->state == Scene::State::RUN)
+        {
+          auto *hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
+          for (size_t i = 0; i < hoverableArray->mapping.size; ++i)
+          {
+            auto &hoverable = hoverableArray->array[i];
+            if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
+            {
+              hoverable.Click(*scene, hoverable);
+            }
+          }
+        }
+      }
         break;
       default:
         break;
-      }
     }
-    else if (type == kCGEventKeyDown)
-    {
-      down = true;
-    }
-    lastFlags = flags;
-
-    // Only log key down events.
-    if (!down)
-    {
-      return event;
-    }
-
-    // Print the human readable key to the logfile.
-//    bool shift = flags & kCGEventFlagMaskShift;
-//    bool caps = flags & kCGEventFlagMaskAlphaShift;
-
-    //      std::cout << "Input received: " << convertKeyCode(keyCode, shift, caps) << std::endl;
-    //      MacActivateCallBack(keyCode, static_cast<KeyEventData*>(data));
-    PushKeyQueue(static_cast<KeyboardCode>(keyCode), static_cast<KeyEventData *>(data));
-
+    
+//    if (type != kCGEventKeyDown && type != kCGEventFlagsChanged)
+//    {
+//      return event;
+//    }
+//
+//    CGEventFlags flags = CGEventGetFlags(event);
+//
+//    // Retrieve the incoming keycode.
+//    CGKeyCode keyCode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
+//
+//    // Calculate key up/down.
+//    bool down = false;
+//    if (type == kCGEventFlagsChanged)
+//    {
+//      switch (keyCode)
+//      {
+//        case 54: // [right-cmd]
+//        case 55: // [left-cmd]
+//          down = (flags & kCGEventFlagMaskCommand) && !(lastFlags & kCGEventFlagMaskCommand);
+//          break;
+//        case 56: // [left-shift]
+//        case 60: // [right-shift]
+//          down = (flags & kCGEventFlagMaskShift) && !(lastFlags & kCGEventFlagMaskShift);
+//          break;
+//        case 58: // [left-option]
+//        case 61: // [right-option]
+//          down = (flags & kCGEventFlagMaskAlternate) && !(lastFlags & kCGEventFlagMaskAlternate);
+//          break;
+//        case 59: // [left-ctrl]
+//        case 62: // [right-ctrl]
+//          down = (flags & kCGEventFlagMaskControl) && !(lastFlags & kCGEventFlagMaskControl);
+//          break;
+//        case 57: // [caps]
+//          down = (flags & kCGEventFlagMaskAlphaShift) && !(lastFlags & kCGEventFlagMaskAlphaShift);
+//          break;
+//        default:
+//          break;
+//      }
+//    }
+//    else if (type == kCGEventKeyDown)
+//    {
+//      down = true;
+//    }
+//    lastFlags = flags;
+//
+//    // Only log key down events.
+//    if (!down)
+//    {
+//      return event;
+//    }
+//
+//    // Print the human readable key to the logfile.
+//    //    bool shift = flags & kCGEventFlagMaskShift;
+//    //    bool caps = flags & kCGEventFlagMaskAlphaShift;
+//
+//    //      std::cout << "Input received: " << convertKeyCode(keyCode, shift, caps) << std::endl;
+//    //      MacActivateCallBack(keyCode, static_cast<KeyEventData*>(data));
+//    PushKeyQueue(static_cast<KeyboardCode>(keyCode), keyEventData);
+    
     return event;
   }
 #endif
-
+  
   KeyEventData Construct()
   {
     KeyEventData out;
     out.keyQueue = new KeyQueue();
     return out;
   }
-
+  
   void Destruct(KeyEventData &data)
   {
     delete data.keyQueue;
   }
-
+  
   void HandleThread(KeyEventData &data)
   {
 #ifdef __APPLE__
     MacInputHandle(data);
 #endif
   }
-
+  
   void Process(KeyEventData &data)
   {
+    std::lock_guard<std::mutex> lock(data.keyQueue->lock);
     KeyboardCode keyCode = PopKeyQueue(&data);
     if (keyCode != KeyboardCode::KB_MAX)
     {
       ActivateCallBack(keyCode, &data);
     }
   }
-
+  
   void AddCallback(void (*FnPtr)(KeyboardCode), KeyEventData &data, KeyboardCode keyCode)
   {
     std::vector<void (*)(KeyboardCode)> &keyEvents = data.keyEvents[static_cast<int>(keyCode)];
@@ -258,7 +326,7 @@ namespace Temp::Input
     }
     keyEvents.push_back(FnPtr);
   }
-
+  
   void RemoveCallback(void (*FnPtr)(KeyboardCode), KeyEventData &data, KeyboardCode keyCode)
   {
     std::vector<void (*)(KeyboardCode)> &keyEvents = data.keyEvents[static_cast<int>(keyCode)];
@@ -267,5 +335,10 @@ namespace Temp::Input
     {
       keyEvents.erase(iterator);
     }
+  }
+  
+  void EndInput()
+  {
+    CFRunLoopStop(cfRunLoop);
   }
 }

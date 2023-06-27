@@ -35,7 +35,7 @@ namespace Temp::Math
     {
       prevGuess = guess;
       guess = (guess + x / guess) / 2;
-    } while (abs(guess - prevGuess) >= 0.00001); // Adjust the precision as needed
+    } while (Abs(guess - prevGuess) >= 0.00001); // Adjust the precision as needed
 
     return guess;
   }
@@ -683,8 +683,6 @@ namespace Temp::Math
     // Matrix-vector multiplication
     inline Vec4f operator*(const Vec4f &vec) const
     {
-      Vec4f result;
-
       __m128 dot0 = _mm_mul_ps(rows[0].simdData, vec.simdData);
       __m128 dot1 = _mm_mul_ps(rows[1].simdData, vec.simdData);
       __m128 dot2 = _mm_mul_ps(rows[2].simdData, vec.simdData);

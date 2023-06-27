@@ -87,7 +87,7 @@ namespace Game
       {
         Temp::Scene::Data *scene = new Temp::Scene::Data();
         Coordinator::Init(scene->coordinator);
-        scene->Construct = Construct1;
+        scene->ConstructFunc = Construct1;
         scene->Update = Update1;
         scene->DestructFunc = Destruct;
         return scene;
@@ -97,7 +97,7 @@ namespace Game
       {
         Temp::Scene::Data *scene = new Temp::Scene::Data();
         Coordinator::Init(scene->coordinator);
-        scene->Construct = Construct2;
+        scene->ConstructFunc = Construct2;
         scene->Update = Update2;
         scene->DestructFunc = Destruct;
         return scene;

@@ -20,11 +20,11 @@ namespace Temp
       uint32_t livingEntityCount{};
     };
     
-    void InitData(Data& data);
-    [[nodiscard]] Entity CreateEntity(Data& data);
-    void DestroyEntity(Data& data, Entity entity);
-    void SetSignature(SignatureArray& signatures, Entity entity, Signature signature);
-    [[nodiscard]] Signature GetSignature(SignatureArray& signatures, Entity entity);
-    void Destruct(Data& data);
+    void InitData(Data& entityManager);
+    [[nodiscard]] Entity CreateEntity(Data& entityManager);
+    void DestroyEntity(Data& entityManager, Entity entity);
+    void SetSignature(Data& entityManager, Entity entity, Signature signature);
+    [[nodiscard]] Signature GetSignature(Data& entityManager, Entity entity);
+    void Destruct(Data& entityManager);
   }
 }

@@ -201,6 +201,7 @@ namespace Temp::Render
     return initialized;
   }
 
+  // TODO: Try to thread this
   void Run(Engine::Data &engine)
   {
     while (XPending(display))

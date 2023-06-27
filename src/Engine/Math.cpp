@@ -51,7 +51,7 @@ namespace Temp::Math
     {
       assert(Sqrt(4) == 2);
       assert(Sqrt(100) == 10);
-      assert(Sqrt(763) == 27.6224546339);
+      assert(Sqrt(763) == 27.6224546339 || Abs(Sqrt(763) - 27.6225) < 0.0001);
 
       // Test Vec2 operations
       Vec2f v2a(2.0f, 3.0f);

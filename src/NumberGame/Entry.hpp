@@ -42,8 +42,6 @@ namespace Game
       Input::AddCallback(Exit, engine.keyEventData, Temp::Input::KeyboardCode::KB_Q);
 
       Temp::Engine::Run(engine, windowName, 1280, 720);
-
-      Temp::Engine::Destroy(engine);
     }
   }
 }

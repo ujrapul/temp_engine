@@ -7,32 +7,32 @@ namespace Temp
 {
   namespace Coordinator
   {
-    Entity CreateEntity(Data &data)
+    Entity CreateEntity(Data &coordinator)
     {
-      return EntityManager::CreateEntity(data.entityData);
+      return EntityManager::CreateEntity(coordinator.entityData);
     }
 
-    void DestroyEntity(Data &data, Entity entity)
+    void DestroyEntity(Data &coordinator, Entity entity)
     {
-      Component::Container::EntityDestroyed(data.componentData, entity);
-      EntityManager::DestroyEntity(data.entityData, entity);
+      Component::Container::EntityDestroyed(coordinator.componentData, entity);
+      EntityManager::DestroyEntity(coordinator.entityData, entity);
     }
 
-    void Init(Data &data)
+    void Init(Data &coordinator)
     {
-      EntityManager::InitData(data.entityData);
-      Component::Container::Init(data.componentData);
+      EntityManager::InitData(coordinator.entityData);
+      Component::Container::Init(coordinator.componentData);
     }
 
-    void Destruct(Data &data)
+    void Destruct(Data &coordinator)
     {
-      Component::Container::Destruct(data.componentData);
-      EntityManager::Destruct(data.entityData);
+      Component::Container::Destruct(coordinator.componentData);
+      EntityManager::Destruct(coordinator.entityData);
     }
 
-    Math::Vec2f &GetPosition(Data &data, Entity entity)
+    Math::Vec2f &GetPosition(Data &coordinator, Entity entity)
     {
-      return Component::Container::Get<Component::Type::POSITION2D>(data.componentData, entity);
+      return Component::Container::Get<Component::Type::POSITION2D>(coordinator.componentData, entity);
     }
   }
 }

@@ -12,29 +12,31 @@ namespace Temp::Coordinator
     Component::Container::Data componentData;
   };
 
-  [[nodiscard]] Entity CreateEntity(Data &data);
-  void DestroyEntity(Data &data, Entity entity);
-  void Init(Data &data);
-  void Destruct(Data &data);
-  [[nodiscard]] Math::Vec2f &GetPosition(Data &data, Entity entity);
+  [[nodiscard]] Entity CreateEntity(Data &coordinator);
+  void DestroyEntity(Data &coordinator, Entity entity);
+  void Init(Data &coordinator);
+  void Destruct(Data &coordinator);
+  [[nodiscard]] Math::Vec2f &GetPosition(Data &coordinator, Entity entity);
 
   template <uint8_t T>
-  constexpr void AddComponent(Data &data, Entity entity, Component::MapToComponentDataType<T> component)
+  constexpr void AddComponent(Data &coordinator, Entity entity, Component::MapToComponentDataType<T> component)
   {
-    Signature sig = EntityManager::GetSignature(data.entityData.signatures, entity);
+    Signature sig = EntityManager::GetSignature(coordinator.entityData, entity);
     sig.set(T);
-    EntityManager::SetSignature(data.entityData.signatures,
+    EntityManager::SetSignature(coordinator.entityData,
                                 entity,
                                 sig);
-    Component::Container::Set<T>(data.componentData,
+    Component::Container::Set<T>(coordinator.componentData,
                                  entity,
                                  component);
   }
 
   template <typename T>
-  constexpr void UpdateComponent(Data &data, Entity entity, T component, uint8_t type)
+  constexpr void UpdateComponent(Data &coordinator, Entity entity, T component, uint8_t type)
   {
-    if (EntityManager::GetSignature(data.entityData.signatures, entity).test(type))
-      Component::Container::Get<T>(data, entity) = component;
+    if (EntityManager::GetSignature(coordinator.entityData, entity).test(type))
+    {
+      Component::Container::Get<T>(coordinator, entity) = component;
+    }
   }
 }

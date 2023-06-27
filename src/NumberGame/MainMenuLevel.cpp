@@ -24,12 +24,12 @@ namespace Game::Scene::MainMenuLevel
 
     Data gameData{};
 
-    void PlayCallback(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data *)
+    void PlayCallback(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &)
     {
       scene.state = Temp::Scene::State::LEAVE;
     }
 
-    void QuitCallback(Temp::Scene::Data &, Temp::Component::Hoverable::Data *)
+    void QuitCallback(Temp::Scene::Data &, Temp::Component::Hoverable::Data &)
     {
       Engine::Quit(Engine::engine);
     }
@@ -74,7 +74,7 @@ namespace Game::Scene::MainMenuLevel
   Temp::Scene::Data *Create()
   {
     Temp::Scene::Data *scene = new Temp::Scene::Data();
-    scene->Construct = Construct;
+    scene->ConstructFunc = Construct;
     scene->Update = Update;
     scene->DestructFunc = Destruct;
     scene->DrawConstructFunc = DrawConstruct;

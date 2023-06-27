@@ -1,7 +1,11 @@
 #pragma once
 
 #include "Math.hpp"
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
 #include "gl.h"
+#endif
 #include <unordered_map>
 
 namespace Temp::Font
@@ -23,7 +27,7 @@ namespace Temp::Font
   };
 
   // TODO: Turn into an accessor function
-  inline std::unordered_map<char, Character> Characters;
+  inline std::unordered_map<char, Character> Characters{};
 
   void LoadFont();
 }

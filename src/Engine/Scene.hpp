@@ -37,14 +37,15 @@ namespace Temp::Scene
     State state{State::ENTER};
     State renderState{State::MAX};
     Data *nextScene{nullptr};
-    void (*Construct)(Scene::Data &){Construct};
+    std::mutex mtx{};
+    std::mutex queueMtx{};
+    std::condition_variable cv{};
+    void (*ConstructFunc)(Scene::Data &){Construct};
     void (*Update)(Scene::Data &, float){NoOpSceneUpdate};
     void (*DestructFunc)(Scene::Data &){Destruct};
     void (*DrawConstructFunc)(Scene::Data &){NoOpScene};
     void (*DrawDestructFunc)(Scene::Data &){NoOpScene};
     void (*DrawUpdateFunc)(Scene::Data &){NoOpScene};
-    std::mutex mtx{};
-    std::condition_variable cv{};
   };
 
   template <uint8_t T>

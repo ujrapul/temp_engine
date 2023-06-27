@@ -8,12 +8,7 @@ namespace Temp
     {
       void DequeueRender(Scene::Data &scene)
       {
-        if (scene.renderQueue.empty())
-        {
-          return;
-        }
-
-        // std::unique_lock<std::mutex> lock(scene->mtx);
+        std::unique_lock<std::mutex> lock(scene.queueMtx);
         while (!scene.renderQueue.empty())
         {
           auto render = scene.renderQueue.front();
@@ -50,8 +45,7 @@ namespace Temp
 
     void EnqueueRender(Data &scene, RenderFunction func, void *data)
     {
-      // TODO: Figure out how to fix deadlocks related to this and dequeue
-      // std::unique_lock<std::mutex> lock(scene->mtx);
+      std::unique_lock<std::mutex> lock(scene.queueMtx);
       scene.renderQueue.push({func, data});
     }
 
@@ -73,7 +67,7 @@ namespace Temp
         auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(scene);
         for (size_t i = 0; i < drawableArray->mapping.size; ++i)
         {
-          Component::Drawable::Draw(&drawableArray->array[i]);
+          Component::Drawable::Draw(drawableArray->array[i]);
         }
         scene.DrawUpdateFunc(scene);
       }
@@ -83,6 +77,7 @@ namespace Temp
         std::unique_lock<std::mutex> lock(scene.mtx);
         scene.renderState = State::MAX;
         scene.DrawDestructFunc(scene);
+        lock.unlock();
         scene.cv.notify_one();
       }
       break;
@@ -93,7 +88,7 @@ namespace Temp
 
     void ClearRender(Data &scene)
     {
-      // std::unique_lock<std::mutex> lock(scene->mtx);
+      std::unique_lock<std::mutex> lock(scene.queueMtx);
       scene.renderQueue = {};
     }
   }

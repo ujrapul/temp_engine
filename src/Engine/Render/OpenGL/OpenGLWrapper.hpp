@@ -2,7 +2,11 @@
 
 #include "EngineUtils.hpp"
 #include "Math.hpp"
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
 #include "gl.h"
+#endif
 #include "stb_image.h"
 #include <ft2build.h>
 #include <iostream>

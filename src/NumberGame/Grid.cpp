@@ -93,7 +93,7 @@ namespace Game::Grid
     drawable.vertices = Vertices();
     drawable.indices = Indices();
 
-    Temp::Component::Drawable::Construct(&drawable, Temp::Render::OpenGLWrapper::ShaderIdx::GRID);
+    Temp::Component::Drawable::Construct(drawable, Temp::Render::OpenGLWrapper::ShaderIdx::GRID);
 
     grid->uvVBO = OpenGLWrapper::CreateVBO(TexCoords().data(), TexCoords().size());
     OpenGLWrapper::SetVertexAttribArray(1, 2, 2, 0);

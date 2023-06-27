@@ -51,7 +51,10 @@ namespace Temp::Font
     uint32_t xOffset = 0;
     uint32_t yOffset = 0;
     
-    std::array<unsigned char, atlasSize> pixels{};
+    // We used a gigantic array before which came out to be around 2 mil+ items...
+    // Don't do that...
+    std::vector<unsigned char> pixels;
+    pixels.resize(atlasSize);
     
     GLuint texture = Render::OpenGLWrapper::CreateTexture(GL_RED, atlasWidth, atlasHeight, pixels.data(), GL_CLAMP_TO_EDGE);
     

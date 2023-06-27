@@ -176,7 +176,7 @@ namespace Game::Scene::GameLevel
 
       Coordinator::Init(data.coordinator);
 
-      gameData.grid->gridSize = 2000;
+      gameData.grid->gridSize = 100;
 
       Temp::TextBox::Construct(data, &gameData.playerTurnTextBox);
       Temp::TextBox::Construct(data, &gameData.player1TextBox);
@@ -330,7 +330,7 @@ namespace Game::Scene::GameLevel
   Temp::Scene::Data *Create(Temp::Input::KeyEventData &keyEventData)
   {
     Temp::Scene::Data *scene = new Temp::Scene::Data();
-    scene->Construct = Construct;
+    scene->ConstructFunc = Construct;
     scene->Update = Update;
     scene->DrawConstructFunc = DrawConstruct;
     scene->DrawUpdateFunc = DrawUpdate;
@@ -346,7 +346,7 @@ namespace Game::Scene::GameLevel
   Temp::Scene::Data *Create2(Temp::Input::KeyEventData & /*keyEventData*/)
   {
     Temp::Scene::Data *scene = new Temp::Scene::Data();
-    scene->Construct = Construct2;
+    scene->ConstructFunc = Construct2;
     scene->Update = Update2;
     scene->DrawConstructFunc = DrawConstruct2;
     scene->DrawUpdateFunc = DrawUpdate2;
