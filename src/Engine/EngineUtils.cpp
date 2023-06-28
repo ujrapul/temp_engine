@@ -1,5 +1,7 @@
 #include "EngineUtils.hpp"
+#ifdef __APPLE__
 #include <mach-o/dyld.h>
+#endif
 
 namespace Temp
 {

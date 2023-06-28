@@ -41,6 +41,6 @@ namespace Temp
     void Quit(Data &engine);
     void EnqueueGlobalRender(Data& engine, RenderFunction func, void *data);
     void DequeueGlobalRender(Data& engine);
-    bool IsActive(Data &engine);
+    bool IsActive(const Data &engine);
   }
 }

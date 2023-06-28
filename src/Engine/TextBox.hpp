@@ -27,9 +27,8 @@ namespace Temp::TextBox
     std::mutex *mtx{new std::mutex()};
   };
   
-  void ConstructRender(Scene::Data &scene, Data *grid);
-  void Construct(Scene::Data &scene, Data *grid);
-  void UpdateText(Scene::Data &scene, Data *grid, const std::string &newText);
-  void UpdateRender(Scene::Data &scene, Data *grid);
-  std::tuple<std::vector<float>, std::vector<unsigned int>> PopulateVerticesIndices(Data *grid);
+  void ConstructRender(Scene::Data &scene, Data &textBox);
+  void Construct(Scene::Data &scene, Data &textBox);
+  void UpdateText(Scene::Data &scene, Data &textBox, const std::string &newText);
+  void UpdateRender(Scene::Data &scene, Data &textBox);
 }

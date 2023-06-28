@@ -61,21 +61,27 @@ namespace Temp::Scene
   }
 
   template <uint8_t T>
-  [[nodiscard]] constexpr Entity GetEntityUsingIndex(Data &scene, size_t index)
+  [[nodiscard]] constexpr Component::ArrayData<Component::MapToComponentDataType<T>> &GetComponentArray(Data &scene)
   {
-    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T])->mapping.indexToEntity[index];
+    return *static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T]);
   }
 
   template <uint8_t T>
-  [[nodiscard]] constexpr size_t GetComponentSize(Data &scene)
+  [[nodiscard]] constexpr const Component::ArrayData<Component::MapToComponentDataType<T>> &GetComponentArray(const Data &scene)
   {
-    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T])->mapping.size;
+    return *static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T]);
   }
 
   template <uint8_t T>
-  [[nodiscard]] constexpr Component::ArrayData<Component::MapToComponentDataType<T>> *GetComponentArray(Data &scene)
+  [[nodiscard]] constexpr Entity GetEntityUsingIndex(const Data &scene, size_t index)
   {
-    return static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T]);
+    return GetComponentArray<T>(scene).mapping.indexToEntity[index];
+  }
+
+  template <uint8_t T>
+  [[nodiscard]] constexpr size_t GetComponentSize(const Data &scene)
+  {
+    return GetComponentArray<T>(scene).mapping.size;
   }
 
   template <uint8_t T>
@@ -92,7 +98,7 @@ namespace Temp::Scene
 
   Entity CreateEntity(Data &scene);
   void DestroyEntity(Data &scene, Entity entity);
-  Math::Vec2f &GetPosition(Data &scene, Entity entity);
+  const Math::Vec2f &GetPosition(const Data &scene, Entity entity);
   void EnqueueRender(Scene::Data &scene, RenderFunction func, void *data);
   void ClearRender(Scene::Data &scene);
 }

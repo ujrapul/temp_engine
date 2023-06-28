@@ -82,13 +82,13 @@ namespace Game::Scene::GameLevel
       if (gameData.player1Turn)
       {
         TextBox::UpdateText(sceneData,
-                            &gameData.player1NumbersTextBox,
+                            gameData.player1NumbersTextBox,
                             gameData.player1NumbersTextBox.text + appendText);
       }
       else
       {
         TextBox::UpdateText(sceneData,
-                            &gameData.player2NumbersTextBox,
+                            gameData.player2NumbersTextBox,
                             gameData.player2NumbersTextBox.text + appendText);
       }
 
@@ -102,10 +102,10 @@ namespace Game::Scene::GameLevel
         }
       }
       TextBox::UpdateText(sceneData,
-                          &gameData.numbersLeftTextBox,
+                          gameData.numbersLeftTextBox,
                           numbersLeftText);
       TextBox::UpdateText(sceneData,
-                          &gameData.playerTurnTextBox,
+                          gameData.playerTurnTextBox,
                           gameData.player1Turn ? "Player 2's Turn" : "Player 1's Turn");
     }
 
@@ -178,12 +178,12 @@ namespace Game::Scene::GameLevel
 
       gameData.grid->gridSize = 100;
 
-      Temp::TextBox::Construct(data, &gameData.playerTurnTextBox);
-      Temp::TextBox::Construct(data, &gameData.player1TextBox);
-      Temp::TextBox::Construct(data, &gameData.player1NumbersTextBox);
-      Temp::TextBox::Construct(data, &gameData.player2TextBox);
-      Temp::TextBox::Construct(data, &gameData.player2NumbersTextBox);
-      Temp::TextBox::Construct(data, &gameData.numbersLeftTextBox);
+      Temp::TextBox::Construct(data, gameData.playerTurnTextBox);
+      Temp::TextBox::Construct(data, gameData.player1TextBox);
+      Temp::TextBox::Construct(data, gameData.player1NumbersTextBox);
+      Temp::TextBox::Construct(data, gameData.player2TextBox);
+      Temp::TextBox::Construct(data, gameData.player2NumbersTextBox);
+      Temp::TextBox::Construct(data, gameData.numbersLeftTextBox);
       Grid::Construct(data, gameData.grid);
 
       Entity Player1 = Temp::Scene::CreateEntity(data);
@@ -229,11 +229,11 @@ namespace Game::Scene::GameLevel
       };
       gameData2.player1ScoreTextBox.text += std::to_string(player1Score);
       gameData2.player2ScoreTextBox.text += std::to_string(player2Score);
-      Temp::TextBox::Construct(data, &gameData2.playerWinTextBox);
-      Temp::TextBox::Construct(data, &gameData2.player1ScoreTextBox);
-      Temp::TextBox::Construct(data, &gameData2.player2ScoreTextBox);
-      Temp::TextBox::Construct(data, &gameData2.quitTextBox);
-      Temp::TextBox::Construct(data, &gameData2.replayTextBox);
+      Temp::TextBox::Construct(data, gameData2.playerWinTextBox);
+      Temp::TextBox::Construct(data, gameData2.player1ScoreTextBox);
+      Temp::TextBox::Construct(data, gameData2.player2ScoreTextBox);
+      Temp::TextBox::Construct(data, gameData2.quitTextBox);
+      Temp::TextBox::Construct(data, gameData2.replayTextBox);
 
       Temp::Input::AddCallback(inputCallback2, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_0);
       Temp::Input::AddCallback(inputCallback2, *keyEventDataPtr, Temp::Input::KeyboardCode::KB_1);
@@ -286,30 +286,30 @@ namespace Game::Scene::GameLevel
     void DrawConstruct(Temp::Scene::Data &data)
     {
       Grid::ConstructRender(data, gameData.grid);
-      Temp::TextBox::ConstructRender(data, &gameData.playerTurnTextBox);
-      Temp::TextBox::ConstructRender(data, &gameData.player1TextBox);
-      Temp::TextBox::ConstructRender(data, &gameData.player1NumbersTextBox);
-      Temp::TextBox::ConstructRender(data, &gameData.player2TextBox);
-      Temp::TextBox::ConstructRender(data, &gameData.player2NumbersTextBox);
-      Temp::TextBox::ConstructRender(data, &gameData.numbersLeftTextBox);
+      Temp::TextBox::ConstructRender(data, gameData.playerTurnTextBox);
+      Temp::TextBox::ConstructRender(data, gameData.player1TextBox);
+      Temp::TextBox::ConstructRender(data, gameData.player1NumbersTextBox);
+      Temp::TextBox::ConstructRender(data, gameData.player2TextBox);
+      Temp::TextBox::ConstructRender(data, gameData.player2NumbersTextBox);
+      Temp::TextBox::ConstructRender(data, gameData.numbersLeftTextBox);
     }
 
     void DrawConstruct2(Temp::Scene::Data &data)
     {
-      Temp::TextBox::ConstructRender(data, &gameData2.playerWinTextBox);
-      Temp::TextBox::ConstructRender(data, &gameData2.player1ScoreTextBox);
-      Temp::TextBox::ConstructRender(data, &gameData2.player2ScoreTextBox);
-      Temp::TextBox::ConstructRender(data, &gameData2.quitTextBox);
-      Temp::TextBox::ConstructRender(data, &gameData2.replayTextBox);
+      Temp::TextBox::ConstructRender(data, gameData2.playerWinTextBox);
+      Temp::TextBox::ConstructRender(data, gameData2.player1ScoreTextBox);
+      Temp::TextBox::ConstructRender(data, gameData2.player2ScoreTextBox);
+      Temp::TextBox::ConstructRender(data, gameData2.quitTextBox);
+      Temp::TextBox::ConstructRender(data, gameData2.replayTextBox);
     }
 
     void DrawUpdate(Temp::Scene::Data &data)
     {
       Grid::DrawUpdate(data, gameData.grid);
-      TextBox::UpdateRender(data, &gameData.player1NumbersTextBox);
-      TextBox::UpdateRender(data, &gameData.player2NumbersTextBox);
-      TextBox::UpdateRender(data, &gameData.numbersLeftTextBox);
-      TextBox::UpdateRender(data, &gameData.playerTurnTextBox);
+      TextBox::UpdateRender(data, gameData.player1NumbersTextBox);
+      TextBox::UpdateRender(data, gameData.player2NumbersTextBox);
+      TextBox::UpdateRender(data, gameData.numbersLeftTextBox);
+      TextBox::UpdateRender(data, gameData.playerTurnTextBox);
       Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid->gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
     }

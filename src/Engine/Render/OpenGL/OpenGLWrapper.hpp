@@ -41,7 +41,8 @@ namespace Temp::Render::OpenGLWrapper
   {
     // Create shader
     GLuint shader = glCreateShader(shaderType);
-    glShaderSource(shader, 2, shaderSource, nullptr);
+    constexpr int stringArrayCount = 3;
+    glShaderSource(shader, stringArrayCount, shaderSource, nullptr);
     glCompileShader(shader);
 
     // Check for shader compilation errors

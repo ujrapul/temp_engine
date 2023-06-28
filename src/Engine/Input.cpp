@@ -339,6 +339,8 @@ namespace Temp::Input
   
   void EndInput()
   {
+#ifdef __APPLE__
     CFRunLoopStop(cfRunLoop);
+#endif
   }
 }

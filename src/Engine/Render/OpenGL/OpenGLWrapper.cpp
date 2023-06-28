@@ -11,24 +11,34 @@ namespace Temp::Render::OpenGLWrapper
 {
   namespace
   {
+    const std::filesystem::path& GetShadersPath()
+    {
+      static auto shadersPath = ApplicationDirectory() / "Shaders";
+      return shadersPath;
+    }
 
+    const char *GetCommonShader()
+    {
+      static const char* common = LoadFileAsString(std::filesystem::path(GetShadersPath() / "Common.glsl").c_str());
+      return common;
+    }
   }
 
   void LoadShaders()
   {
-    std::filesystem::path shadersPath = ApplicationDirectory() / "Shaders";
+    const auto& shadersPath = GetShadersPath();
 
     static const char *VERT_HEADER = "#version 330\n#define VERTEX_SHADER\n";
     static const char *FRAG_HEADER = "#version 330\n#define FRAGMENT_SHADER\n";
-    globalShaders.insert(globalShaders.end(), {
-        {VERT_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Test.glsl").c_str())},
-        {FRAG_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Test.glsl").c_str())},
 
-        {VERT_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Text.glsl").c_str())},
-        {FRAG_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Text.glsl").c_str())},
+    static std::vector<const char *> shaderFiles = {"Test.glsl", "Text.glsl", "Grid.glsl"};
 
-        {VERT_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Grid.glsl").c_str())},
-        {FRAG_HEADER, LoadFileAsString(std::filesystem::path(shadersPath / "Grid.glsl").c_str())}});
+    for (const char* shaderFile : shaderFiles)
+    {
+      globalShaders.insert(globalShaders.end(), {
+        {VERT_HEADER, GetCommonShader(), LoadFileAsString(std::filesystem::path(shadersPath / shaderFile).c_str())},
+        {FRAG_HEADER, GetCommonShader(), LoadFileAsString(std::filesystem::path(shadersPath / shaderFile).c_str())}});
+    }
   }
 
   GLuint LoadTexture(const char *texturePath, int imageDataType)

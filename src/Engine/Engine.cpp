@@ -148,7 +148,7 @@ namespace Temp::Engine
     engine.renderQueue.pop();
   }
   
-  bool IsActive(Data &engine)
+  bool IsActive(const Data &engine)
   {
     return !engine.quit && currentScene;
   }

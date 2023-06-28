@@ -82,6 +82,7 @@ namespace Temp::Render
         }
         begin = clock();
 
+        // glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -270,13 +271,13 @@ namespace Temp::Render
         auto *scene = engine.currentScene;
         if (scene->state == Scene::State::RUN)
         {
-          auto *hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
-          for (size_t i = 0; i < hoverableArray->mapping.size; ++i)
+          auto &hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
+          for (size_t i = 0; i < hoverableArray.mapping.size; ++i)
           {
-            auto *hoverable = &hoverableArray->array[i];
+            auto &hoverable = hoverableArray.array[i];
             if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
             {
-              hoverable->Hover(*scene, hoverable);
+              hoverable.Hover(*scene, hoverable);
             }
           }
         }
@@ -296,13 +297,13 @@ namespace Temp::Render
         auto *scene = engine.currentScene;
         if (scene->state == Scene::State::RUN)
         {
-          auto *hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
-          for (size_t i = 0; i < hoverableArray->mapping.size; ++i)
+          auto &hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
+          for (size_t i = 0; i < hoverableArray.mapping.size; ++i)
           {
-            auto *hoverable = &hoverableArray->array[i];
+            auto &hoverable = hoverableArray.array[i];
             if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
             {
-              hoverable->Click(*scene, hoverable);
+              hoverable.Click(*scene, hoverable);
             }
           }
         }

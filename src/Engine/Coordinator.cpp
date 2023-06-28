@@ -30,7 +30,7 @@ namespace Temp
       EntityManager::Destruct(coordinator.entityData);
     }
 
-    Math::Vec2f &GetPosition(Data &coordinator, Entity entity)
+    const Math::Vec2f &GetPosition(const Data &coordinator, Entity entity)
     {
       return Component::Container::Get<Component::Type::POSITION2D>(coordinator.componentData, entity);
     }

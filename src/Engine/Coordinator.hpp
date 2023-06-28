@@ -16,7 +16,7 @@ namespace Temp::Coordinator
   void DestroyEntity(Data &coordinator, Entity entity);
   void Init(Data &coordinator);
   void Destruct(Data &coordinator);
-  [[nodiscard]] Math::Vec2f &GetPosition(Data &coordinator, Entity entity);
+  [[nodiscard]] const Math::Vec2f &GetPosition(const Data &coordinator, Entity entity);
 
   template <uint8_t T>
   constexpr void AddComponent(Data &coordinator, Entity entity, Component::MapToComponentDataType<T> component)

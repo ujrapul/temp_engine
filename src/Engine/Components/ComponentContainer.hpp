@@ -26,9 +26,15 @@ namespace Temp::Component::Container
   }
 
   template <uint8_t T>
-  [[nodiscard]] constexpr ArrayData<MapToComponentDataType<T>> *GetComponentArray(Data &data)
+  [[nodiscard]] constexpr ArrayData<MapToComponentDataType<T>> &GetComponentArray(Data &data)
   {
-    return static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]);
+    return *static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]);
+  }
+
+  template <uint8_t T>
+  [[nodiscard]] constexpr const ArrayData<MapToComponentDataType<T>> &GetComponentArray(const Data &data)
+  {
+    return *static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]);
   }
 
   template <uint8_t T>
@@ -36,8 +42,7 @@ namespace Temp::Component::Container
   {
     // This mess is only needed to make sure we don't need to reference the type twice
     // in the function (once for enum and another for assigned type)
-    return Component::Get(*static_cast<Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]),
-                          entity);
+    return Component::Get(GetComponentArray<T>(data), entity);
   }
 
   template <uint8_t T>
@@ -45,16 +50,13 @@ namespace Temp::Component::Container
   {
     // This mess is only needed to make sure we don't need to reference the type twice
     // in the function (once for enum and another for assigned type)
-    return Component::Get(*static_cast<Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]),
-                          entity);
+    return Component::Get(GetComponentArray<T>(data), entity);
   }
 
   template <uint8_t T>
   constexpr void Set(Data &data, Entity entity, const MapToComponentDataType<T> &component)
   {
-    Component::Set(*static_cast<Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]),
-                   entity,
-                   component);
+    Component::Set(GetComponentArray<T>(data), entity, component);
   }
 
   void Init(Data &data);

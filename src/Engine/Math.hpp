@@ -53,6 +53,18 @@ namespace Temp::Math
   }
 
   template <typename T>
+  constexpr T Max(T a, T b)
+  {
+    return a > b ? a : b;
+  }
+
+  template <typename T>
+  constexpr T Min(T a, T b)
+  {
+    return a < b ? a : b;
+  }
+
+  template <typename T>
   struct Vec2
   {
     union

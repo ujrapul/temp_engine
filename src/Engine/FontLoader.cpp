@@ -42,11 +42,12 @@ namespace Temp::Font
     
     Render::OpenGLWrapper::SetUnpackAlignment(1);
     
+    constexpr uint32_t padding = 16;
     constexpr uint32_t asciiNum = 128;
     constexpr uint32_t atlasTileWidth = Math::Floor(Math::Sqrt(asciiNum));
     constexpr uint32_t atlasTileHeight = Math::Ceil(Math::Sqrt(asciiNum));
-    constexpr uint32_t atlasWidth = fontSize * atlasTileWidth;
-    constexpr uint32_t atlasHeight = fontSize * atlasTileHeight;
+    constexpr uint32_t atlasWidth = (fontSize + padding * 2) * atlasTileWidth;
+    constexpr uint32_t atlasHeight = (fontSize + padding * 2) * atlasTileHeight;
     constexpr uint32_t atlasSize = atlasWidth * atlasHeight;
     uint32_t xOffset = 0;
     uint32_t yOffset = 0;
@@ -69,27 +70,27 @@ namespace Temp::Font
       auto textureWidth = face->glyph->bitmap.width;
       auto textureHeight = face->glyph->bitmap.rows;
       
-      Render::OpenGLWrapper::UpdateSubTexture(xOffset, yOffset, textureWidth, textureHeight, face->glyph->bitmap.buffer);
+      Render::OpenGLWrapper::UpdateSubTexture(xOffset + padding, yOffset + padding, textureWidth, textureHeight, face->glyph->bitmap.buffer);
       
       // now store character for later use
       Character character = {
-        {textureWidth, textureHeight},                             // size
+        {textureWidth + padding * 2, textureHeight + padding * 2},                             // size
         {face->glyph->bitmap_left, face->glyph->bitmap_top},       // bearing
-        face->glyph->advance.x,                                    // advance
+        face->glyph->advance.x + ((padding) << 6),                                    // advance
         texture,                                                   // texture id
         static_cast<float>(xOffset) / atlasWidth,                  // left
         static_cast<float>(xOffset + fontSize) / atlasWidth,       // right
         static_cast<float>(yOffset) / atlasHeight,                 // top
         static_cast<float>(yOffset + fontSize) / atlasHeight,      // bottom
-        static_cast<float>(xOffset + textureWidth) / atlasWidth,   // rectRight
-        static_cast<float>(yOffset + textureHeight) / atlasHeight, // rectBottom
+        static_cast<float>(xOffset + textureWidth + padding * 2) / atlasWidth,   // rectRight
+        static_cast<float>(yOffset + textureHeight + padding * 2) / atlasHeight, // rectBottom
         atlasWidth,
         atlasHeight};
       Characters[c] = character;
-      xOffset = (xOffset + fontSize) % atlasWidth;
+      xOffset = (xOffset + fontSize + padding * 2) % atlasWidth;
       if (xOffset == 0)
       {
-        yOffset = (yOffset + fontSize) % atlasWidth;
+        yOffset = (yOffset + fontSize + padding * 2) % atlasHeight;
       }
     }
     

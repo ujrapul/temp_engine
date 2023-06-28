@@ -38,7 +38,7 @@ namespace Temp
       Coordinator::DestroyEntity(scene.coordinator, entity);
     }
 
-    Math::Vec2f &GetPosition(Data &scene, Entity entity)
+    const Math::Vec2f &GetPosition(const Data &scene, Entity entity)
     {
       return Coordinator::GetPosition(scene.coordinator, entity);
     }
@@ -64,10 +64,10 @@ namespace Temp
       break;
       case State::RUN:
       {
-        auto *drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(scene);
-        for (size_t i = 0; i < drawableArray->mapping.size; ++i)
+        auto &drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(scene);
+        for (size_t i = 0; i < drawableArray.mapping.size; ++i)
         {
-          Component::Drawable::Draw(drawableArray->array[i]);
+          Component::Drawable::Draw(drawableArray.array[i]);
         }
         scene.DrawUpdateFunc(scene);
       }

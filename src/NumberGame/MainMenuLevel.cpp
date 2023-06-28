@@ -42,11 +42,11 @@ namespace Game::Scene::MainMenuLevel
 
       Temp::Scene::Construct(data);
 
-      TextBox::Construct(data, &gameData.gameTextBox);
+      TextBox::Construct(data, gameData.gameTextBox);
       Temp::Component::Hoverable::Data playHoverable{PlayCallback, Temp::Component::Hoverable::NoOp, nullptr, -20, 0, 9, 4};
       Temp::Component::Hoverable::Data quitHoverable{QuitCallback, Temp::Component::Hoverable::NoOp, nullptr, -20, -7, 9, 4};
-      TextButton::Construct(data, &gameData.playButton, playHoverable);
-      TextButton::Construct(data, &gameData.quitButton, quitHoverable);
+      TextButton::Construct(data, gameData.playButton, playHoverable);
+      TextButton::Construct(data, gameData.quitButton, quitHoverable);
     }
 
     void Update(Temp::Scene::Data &, float)
@@ -65,9 +65,9 @@ namespace Game::Scene::MainMenuLevel
 
     void DrawConstruct(Temp::Scene::Data &data)
     {
-      Temp::TextBox::ConstructRender(data, &gameData.gameTextBox);
-      Temp::TextButton::ConstructRender(data, &gameData.playButton);
-      Temp::TextButton::ConstructRender(data, &gameData.quitButton);
+      Temp::TextBox::ConstructRender(data, gameData.gameTextBox);
+      Temp::TextButton::ConstructRender(data, gameData.playButton);
+      Temp::TextButton::ConstructRender(data, gameData.quitButton);
     }
   }
 

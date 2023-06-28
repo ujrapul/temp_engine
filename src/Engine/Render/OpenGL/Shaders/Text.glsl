@@ -2,7 +2,7 @@
 
 #ifdef VERTEX_SHADER
 layout(location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
-out vec2 TexCoords;
+out vec2 texCoords;
 
 // Reference: https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL
 layout(std140) uniform FontMatrices {
@@ -15,19 +15,20 @@ layout(std140) uniform FontMatrices {
 
 void main() {
   gl_Position = projection * vec4(vertex.xy, 10.0, 1.0);
-  TexCoords = vertex.zw;
+  texCoords = vertex.zw;
 }
 #endif
 
 #ifdef FRAGMENT_SHADER
-in vec2 TexCoords;
+in vec2 texCoords;
 out vec4 color;
 
 uniform sampler2D text;
 
 void main() {
-  color = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
+  // color = vec4(1.0, 1.0, 1.0, texture(text, texCoords).r);
   // color = vec4(1.0, 1.0, 1.0, 1.0);
+  color = applyOutlineGlow(text, texCoords);
 
 }
 #endif

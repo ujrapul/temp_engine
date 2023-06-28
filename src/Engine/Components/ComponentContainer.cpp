@@ -23,7 +23,7 @@ namespace Temp::Component::Container
     template <uint8_t E>
     void EntityDestroyedEnum(Data &data, Entity entity)
     {
-      Component::EntityDestroyed(*GetComponentArray<E>(data), entity);
+      Component::EntityDestroyed(GetComponentArray<E>(data), entity);
     }
     
     template <uint8_t E>
