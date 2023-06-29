@@ -251,10 +251,21 @@ namespace Temp::Render::OpenGLWrapper
     glBindTexture(GL_TEXTURE_2D, texture);
   }
 
-  inline void Set1IntShaderProperty(GLuint shaderProgram, const char *property, int index)
+  inline void Set1IntShaderProperty(GLuint shaderProgram, const char *property, int value)
   {
     glUseProgram(shaderProgram);
-    glUniform1i(glGetUniformLocation(shaderProgram, property), index);
+    glUniform1i(glGetUniformLocation(shaderProgram, property), value);
+  }
+
+  inline void Set1FloatShaderProperty(GLuint shaderProgram, const char *property, float value)
+  {
+    glUseProgram(shaderProgram);
+    glUniform1f(glGetUniformLocation(shaderProgram, property), value);
+  }
+
+  inline void Set1BoolShaderProperty(GLuint shaderProgram, const char *property, bool value)
+  {
+    Set1IntShaderProperty(shaderProgram, property, value);
   }
 
   inline void Set4x4MatrixShaderProperty(GLuint shaderProgram, const char *property, float *matrix)

@@ -277,7 +277,11 @@ namespace Temp::Render
             auto &hoverable = hoverableArray.array[i];
             if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
             {
-              hoverable.Hover(*scene, hoverable);
+              Component::Hoverable::HoverableEnter(*scene, hoverable);
+            }
+            else
+            {
+              Component::Hoverable::HoverableLeave(*scene, hoverable);
             }
           }
         }

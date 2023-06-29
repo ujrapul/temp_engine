@@ -34,6 +34,18 @@ namespace Game::Scene::MainMenuLevel
       Engine::Quit(Engine::engine);
     }
 
+    void HoverEnter(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &hoverable)
+    {
+      auto *button = static_cast<TextButton::Data *>(hoverable.callbackData);
+      TextBox::EnableOutline(scene, button->textBox, true);
+    }
+
+    void HoverLeave(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &hoverable)
+    {
+      auto *button = static_cast<TextButton::Data *>(hoverable.callbackData);
+      TextBox::EnableOutline(scene, button->textBox, false);
+    }
+
     void Construct(Temp::Scene::Data &data)
     {
       gameData = {};
@@ -43,8 +55,8 @@ namespace Game::Scene::MainMenuLevel
       Temp::Scene::Construct(data);
 
       TextBox::Construct(data, gameData.gameTextBox);
-      Temp::Component::Hoverable::Data playHoverable{PlayCallback, Temp::Component::Hoverable::NoOp, nullptr, -20, 0, 9, 4};
-      Temp::Component::Hoverable::Data quitHoverable{QuitCallback, Temp::Component::Hoverable::NoOp, nullptr, -20, -7, 9, 4};
+      Temp::Component::Hoverable::Data playHoverable{PlayCallback, HoverEnter, HoverLeave, &gameData.playButton, -20, 0, 9, 4};
+      Temp::Component::Hoverable::Data quitHoverable{QuitCallback, HoverEnter, HoverLeave, &gameData.quitButton, -20, -7, 9, 4};
       TextButton::Construct(data, gameData.playButton, playHoverable);
       TextButton::Construct(data, gameData.quitButton, quitHoverable);
     }

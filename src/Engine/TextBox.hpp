@@ -24,6 +24,7 @@ namespace Temp::TextBox
     float scale{};
     Entity entity{};
     bool renderText{false};
+    bool enableOutline{false};
     std::mutex *mtx{new std::mutex()};
   };
   
@@ -31,4 +32,5 @@ namespace Temp::TextBox
   void Construct(Scene::Data &scene, Data &textBox);
   void UpdateText(Scene::Data &scene, Data &textBox, const std::string &newText);
   void UpdateRender(Scene::Data &scene, Data &textBox);
+  void EnableOutline(Scene::Data &scene, Data &textBox, bool enable);
 }

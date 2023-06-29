@@ -27,6 +27,7 @@ namespace Temp::Component::Drawable
     int indicesSize{0};
     bool visible{true};
     bool blockDraw{false};
+    bool disableDepth{false};
   };
 
   constexpr void Scale(Data &drawable, const Math::Vec3f scale)
@@ -103,10 +104,13 @@ namespace Temp::Component::Drawable
       return;
     }
 
+
+    glDepthMask(!drawable.disableDepth); // Don't write into the depth buffer
     glUseProgram(drawable.shaderProgram);
     OpenGLWrapper::BindTexture(GL_TEXTURE0, drawable.texture);
 
     // Bind the VAO and draw the triangle
     OpenGLWrapper::DrawElementsInstanced(drawable.VAO, (int)drawable.indices.size(), drawable.numInstances);
+    glDepthMask(GL_TRUE);
   }
 }

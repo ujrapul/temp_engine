@@ -105,7 +105,7 @@ namespace Temp::TextBox
     textBox.renderText = true;
   }
 
-  inline void UpdateRender(Scene::Data &scene, Data &textBox)
+  void UpdateRender(Scene::Data &scene, Data &textBox)
   {
     using namespace Temp::Render;
 
@@ -121,6 +121,7 @@ namespace Temp::TextBox
     auto &[vertices, indices] = newData[textBox.entity];
     drawable.vertices = std::move(vertices);
     drawable.indices = std::move(indices);
+    drawable.disableDepth = true;
 
     OpenGLWrapper::UpdateVBO(drawable.VBO, drawable.vertices.data(), drawable.vertices.size(), GL_DYNAMIC_DRAW);
     OpenGLWrapper::UpdateEBO(drawable.EBO, drawable.indices.data(), drawable.indices.size(), GL_DYNAMIC_DRAW);
@@ -128,6 +129,27 @@ namespace Temp::TextBox
     textBox.renderText = false;
 
     drawable.indicesSize = (int)drawable.indices.size();
+  }
+
+  struct EnableOutlineData
+  {
+    Data *textBox;
+    bool enable{false};
+  };
+
+  void RenderFunction(Scene::Data &scene, void *renderData)
+  {
+    auto *enableOutlineData = static_cast<EnableOutlineData *>(renderData);
+    auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, enableOutlineData->textBox->entity);
+    Render::OpenGLWrapper::Set1BoolShaderProperty(drawable.shaderProgram, "u_useOutline", enableOutlineData->enable);
+    Render::OpenGLWrapper::Set1FloatShaderProperty(drawable.shaderProgram, "u_thickness", enableOutlineData->enable ? 0.75 : 0.5);
+    // Render::OpenGLWrapper::Set1FloatShaderProperty(drawable.shaderProgram, "u_outline_thickness", enableOutlineData->enable ? 0.9 : 0.5);
+    delete enableOutlineData;
+  }
+
+  void EnableOutline(Scene::Data &scene, Data &textBox, bool enable)
+  {
+    Scene::EnqueueRender(scene, RenderFunction, new EnableOutlineData{&textBox, enable});
   }
 
   // TODO: Keeping here for reference to NOT do this.
