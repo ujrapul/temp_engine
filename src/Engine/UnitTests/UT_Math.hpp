@@ -7,45 +7,45 @@ namespace Temp::Math
   namespace UnitTests
   {
     // Function to compare floating-point values with a small epsilon
-    bool floatEquals(float a, float b, float epsilon = 0.0001f)
+    bool floatEquals(float a, float b)
     {
-      return std::abs(a - b) < epsilon;
+      return FloatEqual(a, b);
     }
 
     // Function to compare Vec2 objects
     bool vec2Equals(const Vec2f &v1, const Vec2f &v2)
     {
-      return floatEquals(v1.x, v2.x) && floatEquals(v1.y, v2.y);
+      return v1 == v2;
     }
 
     // Function to compare Vec3 objects
     bool vec3Equals(const Vec3f &v1, const Vec3f &v2)
     {
-      return floatEquals(v1.x, v2.x) && floatEquals(v1.y, v2.y) && floatEquals(v1.z, v2.z);
+      return v1 == v2;
     }
 
     // Function to compare Vec4 objects
     bool vec4Equals(const Vec4f &v1, const Vec4f &v2)
     {
-      return floatEquals(v1.x, v2.x) && floatEquals(v1.y, v2.y) && floatEquals(v1.z, v2.z) && floatEquals(v1.w, v2.w);
+      return v1 == v2;
     }
 
     // Function to compare Mat2 objects
     bool mat2Equals(const Mat2 &m1, const Mat2 &m2)
     {
-      return vec2Equals(m1.rows[0], m2.rows[0]) && vec2Equals(m1.rows[1], m2.rows[1]);
+      return m1 == m2;
     }
 
     // Function to compare Mat3 objects
     bool mat3Equals(const Mat3 &m1, const Mat3 &m2)
     {
-      return vec3Equals(m1.rows[0], m2.rows[0]) && vec3Equals(m1.rows[1], m2.rows[1]) && vec3Equals(m1.rows[2], m2.rows[2]);
+      return m1 == m2;
     }
 
     // Function to compare Mat4 objects
     bool mat4Equals(const Mat4 &m1, const Mat4 &m2)
     {
-      return vec4Equals(m1.rows[0], m2.rows[0]) && vec4Equals(m1.rows[1], m2.rows[1]) && vec4Equals(m1.rows[2], m2.rows[2]) && vec4Equals(m1.rows[3], m2.rows[3]);
+      return m1 == m2;
     }
 
     // Function to run the unit tests

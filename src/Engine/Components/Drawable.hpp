@@ -28,6 +28,8 @@ namespace Temp::Component::Drawable
     bool visible{true};
     bool blockDraw{false};
     bool disableDepth{false};
+    
+    bool operator==(const Data& other) const = default;
   };
 
   constexpr void Scale(Data &drawable, const Math::Vec3f scale)

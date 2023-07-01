@@ -22,6 +22,8 @@ namespace Temp::Component::Hoverable
     float width{};
     float height{};
     bool lastInside{false};
+    
+    constexpr bool operator==(const Data& other) const = default;
   };
 
   // TOD0: Might need to revisit this for other widgets

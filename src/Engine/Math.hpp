@@ -11,6 +11,7 @@
 namespace Temp::Math
 {
   constexpr float PI = 3.141592653589793238f;
+  constexpr float EPSILON = 0.0001f;
 
   constexpr double Abs(double x)
   {
@@ -62,6 +63,11 @@ namespace Temp::Math
   constexpr T Min(T a, T b)
   {
     return a < b ? a : b;
+  }
+  
+  constexpr bool FloatEqual(float a, float b)
+  {
+    return Abs(a - b) < EPSILON;
   }
 
   template <typename T>
@@ -127,6 +133,11 @@ namespace Temp::Math
     constexpr Vec2 operator/(T scalar) const
     {
       return {x / scalar, y / scalar};
+    }
+    
+    constexpr bool operator==(const Vec2& other) const
+    {
+      return FloatEqual(x, other.x) && FloatEqual(y, other.y);
     }
 
     // Dot product of two vectors
@@ -239,6 +250,11 @@ namespace Temp::Math
       return x * other.x + y * other.y + z * other.z;
     }
 
+    constexpr bool operator==(const Vec3& other) const
+    {
+      return FloatEqual(x, other.x) && FloatEqual(y, other.y) && FloatEqual(z, other.z);
+    }
+    
     // Cross product of two vectors
     constexpr Vec3 cross(const Vec3 &other) const
     {
@@ -349,6 +365,11 @@ namespace Temp::Math
     {
       return data[i];
     }
+    
+    constexpr bool operator==(const Vec4& other) const
+    {
+      return FloatEqual(x, other.x) && FloatEqual(y, other.y) && FloatEqual(z, other.z) && FloatEqual(w, other.w);
+    }
 
     // Dot product of two vectors
     inline T dot(const Vec4 &other) const
@@ -442,6 +463,15 @@ namespace Temp::Math
     {
       // Vector based dot product
       return _mm_add_ps(_mm_mul_ps(vec.simdData, rows[0].simdData), _mm_mul_ps(vec.simdData, rows[1].simdData));
+    }
+    
+    constexpr bool operator==(const Mat2& other) const
+    {
+      bool isEqual = true;
+      for (int i = 0; i < 2; ++i) {
+        isEqual &= rows[i] == other.rows[i];
+      }
+      return isEqual;
     }
 
     // Matrix transposition
@@ -550,6 +580,15 @@ namespace Temp::Math
           _mm_add_ps(_mm_mul_ps(row1, _mm_shuffle_ps(vecSimd, vecSimd, _MM_SHUFFLE(0, 0, 0, 0))),
                      _mm_mul_ps(row2, _mm_shuffle_ps(vecSimd, vecSimd, _MM_SHUFFLE(1, 1, 1, 1)))),
           _mm_mul_ps(row3, _mm_shuffle_ps(vecSimd, vecSimd, _MM_SHUFFLE(2, 2, 2, 2))));
+    }
+    
+    constexpr bool operator==(const Mat3& other) const
+    {
+      bool isEqual = true;
+      for (int i = 0; i < 3; ++i) {
+        isEqual &= rows[i] == other.rows[i];
+      }
+      return isEqual;
     }
 
     // Matrix transposition
@@ -709,6 +748,15 @@ namespace Temp::Math
     constexpr Vec4f &operator[](int i)
     {
       return rows[i];
+    }
+    
+    constexpr bool operator==(const Mat4& other) const
+    {
+      bool isEqual = true;
+      for (int i = 0; i < 4; ++i) {
+        isEqual &= rows[i] == other.rows[i];
+      }
+      return isEqual;
     }
 
     // Matrix transposition

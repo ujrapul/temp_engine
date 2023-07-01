@@ -9,7 +9,7 @@ namespace Temp::Component::Container
 
   struct Data
   {
-    std::array<void *, MAX> components;
+    std::array<void *, MAX> components{};
   };
 
   template <uint8_t T>
@@ -23,6 +23,7 @@ namespace Temp::Component::Container
   constexpr void Destruct(Data &data)
   {
     delete static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]);
+    data.components[T] = nullptr;
   }
 
   template <uint8_t T>

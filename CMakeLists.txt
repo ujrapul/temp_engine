@@ -67,6 +67,7 @@ set ( ENGINE_HEADER
 set ( ENGINE_UT_HEADER
   src/Engine/UnitTests/UT_Common.hpp
   src/Engine/UnitTests/UT_ComponentData.hpp
+  src/Engine/UnitTests/UT_ComponentContainer.hpp
   src/Engine/UnitTests/UT_Math.hpp
 )
 set ( ENGINE_UT_SOURCE
@@ -194,6 +195,7 @@ target_link_libraries(${TARGET_ENGINE} PRIVATE freetype)
 
 #target_link_libraries(${TARGET_TEST_GAME} ${TARGET_ENGINE})
 #target_link_libraries(${TARGET_TEST_GAME_2} ${TARGET_ENGINE})
+target_link_libraries(${TARGET_ENGINE_UNIT_TESTS} ${TARGET_ENGINE})
 target_link_libraries(${TARGET_NUMBER_GAME} ${TARGET_ENGINE})
 
 if(APPLE)
@@ -218,6 +220,10 @@ endif()
 #  $<$<CXX_COMPILER_ID:MSVC>:/w>
 #  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-w>
 #)
+target_compile_options(${TARGET_ENGINE_UNIT_TESTS} PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+)
 target_compile_options(${TARGET_NUMBER_GAME} PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>

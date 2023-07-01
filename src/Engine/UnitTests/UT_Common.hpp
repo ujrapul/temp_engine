@@ -14,7 +14,7 @@ namespace Temp
     bool operator==(const MockComponent& other) const = default;
   };
 
-  void Assert(const char* testName, bool value)
+  inline void Assert(const char* testName, bool value)
   {
     if (!value)
     {
