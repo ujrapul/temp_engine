@@ -1,5 +1,6 @@
 #include "Input.hpp"
 #include "Scene.hpp"
+#include "Event.hpp"
 
 #include <iostream>
 #include <algorithm>
@@ -140,51 +141,10 @@ namespace Temp::Input
       }
         break;
       case kCGEventMouseMoved:
-      {
-        CGPoint currentMousePosition = CGEventGetLocation(event);
-        // For some reason the window space is twice that of the screen
-        Math::Vec2f windowOrigin = Temp::Render::GetWindowOrigin() / 2.f;
-        Math::Vec2f windowSize = Temp::Render::GetWindowSize();
-        Math::Vec2f screenSize = Temp::Render::GetScreenSize();
-
-        // Need to substract the title bar from screenSize as well
-        float distanceHeight = screenSize.y - windowSize.y;
-
-        int mouseX = currentMousePosition.x - windowOrigin.x;
-        int mouseY = currentMousePosition.y - distanceHeight + windowOrigin.y;
-
-        if (mouseX < 0 || mouseY < 0 || mouseX > windowSize.x || mouseY > windowSize.y)
-        {
-          break;
-        }
-//        std::cout << mouseX << " " << mouseY << std::endl;
-
-//        std::lock_guard<std::mutex> engineLock(Temp::Engine::engine.mtx);
-        auto *scene = Temp::Engine::engine.currentScene;
-        if (!scene)
-        {
-          break;
-        }
-
-        std::lock_guard<std::mutex> sceneLock(scene->mtx);
-        if (scene->state == Scene::State::RUN)
-        {
-          auto *hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
-          for (size_t i = 0; i < hoverableArray->mapping.size; ++i)
-          {
-            auto &hoverable = hoverableArray->array[i];
-            if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
-            {
-              hoverable.Hover(*scene, hoverable);
-            }
-          }
-        }
-      }
-        break;
       case kCGEventLeftMouseDown:
       {
         CGPoint currentMousePosition = CGEventGetLocation(event);
-        // For some reason the window space is twice that of the screen
+
         Math::Vec2f windowOrigin = Temp::Render::GetWindowOrigin() / 2.f;
         Math::Vec2f windowSize = Temp::Render::GetWindowSize();
         Math::Vec2f screenSize = Temp::Render::GetScreenSize();
@@ -199,25 +159,16 @@ namespace Temp::Input
           break;
         }
 
-//        std::lock_guard<std::mutex> engineLock(Temp::Engine::engine.mtx);
-        auto *scene = Temp::Engine::engine.currentScene;
-        if (!scene)
+        switch (type)
         {
-          break;
-        }
-
-        std::lock_guard<std::mutex> sceneLock(scene->mtx);
-        if (scene->state == Scene::State::RUN)
-        {
-          auto *hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
-          for (size_t i = 0; i < hoverableArray->mapping.size; ++i)
-          {
-            auto &hoverable = hoverableArray->array[i];
-            if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
-            {
-              hoverable.Click(*scene, hoverable);
-            }
-          }
+          case kCGEventMouseMoved:
+            Event::Hover(mouseX, mouseY);
+            break;
+          case kCGEventLeftMouseDown:
+            Event::Click(mouseX, mouseY);
+            break;
+          default:
+            break;
         }
       }
         break;

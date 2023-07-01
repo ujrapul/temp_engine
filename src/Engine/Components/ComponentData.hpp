@@ -2,6 +2,7 @@
 
 #include "Engine/Entity.hpp"
 #include "Engine/Math.hpp"
+#include "Logger.hpp"
 #include <array>
 #include <cassert>
 #include <climits>
@@ -11,6 +12,9 @@ namespace Temp
 {
   namespace Component
   {
+    template<typename T>
+    inline T dummy{};
+    
     struct Mapping
     {
       // Value = Entity     | Index = Data Index
@@ -49,7 +53,7 @@ namespace Temp
 
       std::scoped_lock<std::mutex> lock(data.mtx);
       if (data.mapping.entityToIndex[entity] < MAX_ENTITIES) {
-        data.array[entity] = component;
+        data.array[data.mapping.entityToIndex[entity]] = component;
       } else {
         // Put new entry at end and update the maps
         std::size_t newIndex = data.mapping.size;
@@ -79,6 +83,8 @@ namespace Temp
       data.mapping.indexToEntity[indexOfLastElement] = UINT_MAX;
       
       --data.mapping.size;
+      
+      data.array[data.mapping.size] = {};
     }
 
     template<typename T>
@@ -86,7 +92,12 @@ namespace Temp
     {
       assert(entity < MAX_ENTITIES && "Retrieving non-existent component.");
 
-      return data.array[data.mapping.entityToIndex[entity]];
+      if (data.mapping.entityToIndex[entity] < MAX_ENTITIES)
+      {
+        return data.array[data.mapping.entityToIndex[entity]];
+      }
+      Logger::Log("Warning! Accessing invalid entity!");
+      return dummy<T>;
     }
     
     template<typename T>
@@ -94,7 +105,12 @@ namespace Temp
     {
       assert(entity < MAX_ENTITIES && "Retrieving non-existent component.");
 
-      return data.array[data.mapping.entityToIndex[entity]];
+      if (data.mapping.entityToIndex[entity] < MAX_ENTITIES)
+      {
+        return data.array[data.mapping.entityToIndex[entity]];
+      }
+      Logger::Log("Warning! Accessing invalid entity!");
+      return dummy<T>;
     }
     
     template<typename T>

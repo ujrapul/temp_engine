@@ -5,6 +5,7 @@
 #include "FontLoader.hpp"
 #include "OpenGLWrapper.hpp"
 #include "Scene.hpp"
+#include "Event.hpp"
 
 #import <Foundation/Foundation.h>
 #import <OpenGL/gl3.h>
@@ -15,82 +16,39 @@
 
 namespace
 {
-  std::thread renderThread{};
-  
-  bool renderQuit = false;
-  bool initialized = false;
-  
-  int windowWidth{};
-  int windowHeight{};
-  
-  bool limitFps{false};
-  bool isInFullScreen{false};
-  float fps60{0.0166666 * 2};
-  float fps30{0.0333333 * 2};
-  
   NSOpenGLView* nsOpenGLView{nullptr};
   NSApplication *application{nullptr};
   NSWindow *window{nullptr};
   Temp::Engine::Data* engine{nullptr};
-  
-  void Resize(void *)
-  {
-    // TODO: Look into why glViewport here is causing the view to become larger
-    // Might be something to do with the NSOpenGLView that's taking care of the
-    // transformations for us.
-    //    glViewport(windowWidth / 2.f, windowHeight / 2.f, windowWidth, windowHeight);
-  }
+//
+//  void Resize(void *)
+//  {
+//    // TODO: Look into why glViewport here is causing the view to become larger
+//    // Might be something to do with the NSOpenGLView that's taking care of the
+//    // transformations for us.
+//    //    glViewport(windowWidth / 2.f, windowHeight / 2.f, windowWidth, windowHeight);
+//  }
 }
 
 void RenderThread()
 {
   // Get the OpenGL context
   NSOpenGLContext *openGLContext = nsOpenGLView.openGLContext;
-  
   // Make the OpenGL context current
   [openGLContext makeCurrentContext];
   
-  std::cout << glGetString(GL_VERSION) << std::endl;
-  
-  glEnable(GL_DEPTH_TEST);
-  
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  
-  Temp::Font::LoadFont();
-  Temp::Render::OpenGLWrapper::LoadShaders();
-  
-  initialized = true;
-  
-  Resize(nullptr);
-  
-  float time = 0;
-  
-  clock_t begin{clock()};
+  Temp::Event::RenderSetup();
+
   // Main rendering loop
-  while (!renderQuit)
+  while (!Temp::Event::EventData.renderQuit)
   {
-    clock_t end{clock()};
-    if (limitFps && ((float)(end - begin) / CLOCKS_PER_SEC) < fps60)
-    {
-      continue;
-    }
-    begin = clock();
-    
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    // Avoid using the Render Queue for real-time updates to avoid flickering!
-    Temp::Engine::DequeueGlobalRender(*engine);
-    if (engine->currentScene) [[likely]]
-    {
-      Temp::Scene::Draw(*engine->currentScene);
-    }
+    Temp::Event::RenderRun();
     // Swap buffers
     [openGLContext flushBuffer];
   }
   
   // TODO: Clean up resources
+  Temp::Event::RenderClean();
 }
 
 @interface WindowDelegate : NSObject <NSWindowDelegate>
@@ -102,15 +60,15 @@ void RenderThread()
   // Perform custom handling for resize event
   NSRect contentRect = [window contentRectForFrameRect:window.frame];
   NSSize contentSize = contentRect.size;
-  windowWidth = contentSize.width;
-  windowHeight = contentSize.height;
+  Temp::Event::EventData.windowWidth = contentSize.width;
+  Temp::Event::EventData.windowHeight = contentSize.height;
   
-  Temp::Camera::UpdateCameraAspect(*engine, windowWidth, windowHeight);
-  Temp::Engine::EnqueueGlobalRender(*engine, Resize, nullptr);
+  Temp::Camera::UpdateCameraAspect(*engine, Temp::Event::EventData.windowWidth, Temp::Event::EventData.windowHeight);
+//  Temp::Engine::EnqueueGlobalRender(*engine, Resize, nullptr);
 }
 
 - (void)windowDidEnterFullScreen:(NSNotification *)notification {
-  isInFullScreen = true;
+  Temp::Event::EventData.isInFullScreen = true;
 }
 
 @end
@@ -151,7 +109,7 @@ void RenderThread()
     //  NSOpenGLContext *openGLContext = [[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
     
     // Create the OpenGL view
-    NSRect windowRect = NSMakeRect(0, 0, windowWidth, windowHeight);
+    NSRect windowRect = NSMakeRect(0, 0, Temp::Event::EventData.windowWidth, Temp::Event::EventData.windowHeight);
     nsOpenGLView = [[[NSOpenGLView alloc] initWithFrame:windowRect pixelFormat:pixelFormat] autorelease];
     
     // Create the window and set the content view
@@ -183,7 +141,7 @@ void RenderThread()
     // Run the main event loop
     //  [NSApp run];
     
-    Temp::Engine::Start(*self.engine, self.windowName, windowWidth, windowHeight);
+    Temp::Engine::Start(*self.engine, self.windowName, Temp::Event::EventData.windowWidth, Temp::Event::EventData.windowHeight);
     
     // Run the custom event loop
     while (Temp::Engine::IsActive(*self.engine)) {
@@ -203,8 +161,8 @@ void RenderThread()
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
-  if (isInFullScreen) {
-    isInFullScreen = false;
+  if (Temp::Event::EventData.isInFullScreen) {
+    Temp::Event::EventData.isInFullScreen = false;
     return;
   }
 
@@ -224,8 +182,8 @@ void CreateDisplay(const char *windowName, int windowX, int windowY, Temp::Engin
   @autoreleasepool {
     // Create the application instance
     application = [[NSApplication sharedApplication] autorelease];
-    windowWidth = windowX;
-    windowHeight = windowY;
+    Temp::Event::EventData.windowWidth = windowX;
+    Temp::Event::EventData.windowHeight = windowY;
     
     // Create the application delegate
     AppDelegate *appDelegate = [[[AppDelegate alloc] init] autorelease];
@@ -243,12 +201,12 @@ namespace Temp::Render
   void Initialize(const char *windowName, int windowX, int windowY, Temp::Engine::Data &engine)
   {
     Temp::Camera::UpdateCameraAspect(engine, windowX, windowY);
-    renderThread = std::thread(RenderThread);
+    Temp::Event::EventData.renderThread = std::thread(RenderThread);
   }
   
   bool IsInitialized()
   {
-    return initialized;
+    return Temp::Event::EventData.renderInitialized;
   }
   
   void Run(Temp::Engine::Data &engine, const char *windowName, int windowX, int windowY)
@@ -264,8 +222,8 @@ namespace Temp::Render
   
   void Destroy()
   {
-    renderQuit = true;
-    renderThread.join();
+    Temp::Event::EventData.renderQuit = true;
+    Temp::Event::EventData.renderThread.join();
   }
   
   Math::Vec2f GetWindowOrigin()

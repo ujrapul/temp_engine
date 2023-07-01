@@ -104,7 +104,6 @@ namespace Temp::Component::Drawable
       return;
     }
 
-
     glDepthMask(!drawable.disableDepth); // Don't write into the depth buffer
     glUseProgram(drawable.shaderProgram);
     OpenGLWrapper::BindTexture(GL_TEXTURE0, drawable.texture);

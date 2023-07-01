@@ -21,8 +21,6 @@ namespace Game
 
       Camera::SetProjection(Camera::Projection::ORTHOGRAPHIC);
 
-      Math::UnitTests::Run();
-
       auto &engine = Temp::Engine::engine;
 
       Engine::Construct(engine);

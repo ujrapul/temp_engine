@@ -8,6 +8,7 @@
 #include "OpenGLWrapper.hpp"
 #include "RenderUtils.hpp"
 #include "Scene.hpp"
+#include "Event.hpp"
 #include "gl.h"
 #include "glx.h"
 #include <X11/Xlib.h>
@@ -32,23 +33,6 @@ namespace Temp::Render
     XVisualInfo *visualInfo{};
     Colormap colormap{};
 
-    std::thread renderThread{};
-
-    bool quit = false;
-    bool initialized = false;
-
-    int windowWidth{};
-    int windowHeight{};
-
-    bool limitFps{false};
-    float fps60{0.0166666 * 2};
-    float fps30{0.0333333 * 2};
-
-    void Resize(void *)
-    {
-      glViewport(0, 0, windowWidth, windowHeight);
-    }
-
     void RenderThread(Engine::Data &engine)
     {
       // Make the OpenGL context current for the rendering thread
@@ -57,52 +41,23 @@ namespace Temp::Render
       // Vertical Sync | Set to 1 to Enable | 0 to disable
       glXSwapIntervalEXT(display, window, 0);
 
-      glEnable(GL_DEPTH_TEST);
-
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-      Font::LoadFont();
-      OpenGLWrapper::LoadShaders();
-
-      initialized = true;
-
-      Resize(nullptr);
-
-      float time = 0;
-
-      clock_t begin{clock()};
+      Event::RenderStart();
       // Main rendering loop
-      while (!quit)
+      while (!Event::EventData.renderQuit)
       {
-        clock_t end{clock()};
-        if (limitFps && ((float)(end - begin) / CLOCKS_PER_SEC) < fps60)
-        {
-          continue;
-        }
-        begin = clock();
-
-        // glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Avoid using the Render Queue for real-time updates to avoid flickering!
-        Engine::DequeueGlobalRender(engine);
-        if (engine.currentScene) [[likely]]
-        {
-          Temp::Scene::Draw(*engine.currentScene);
-        }
+        Event::RenderRun();
 
         glXSwapBuffers(display, window);
       }
 
       // TODO: Clean up resources
+      Event::RenderClean();
     }
 
     void CreateDisplay(const char *windowName, int windowX, int windowY)
     {
-      windowWidth = windowX;
-      windowHeight = windowY;
+      Event::EventData.windowWidth = windowX;
+      Event::EventData.windowHeight = windowY;
 
       // Open the X11 display
       display = XOpenDisplay(NULL);
@@ -194,12 +149,7 @@ namespace Temp::Render
   {
     CreateDisplay(windowName, windowX, windowY);
     Camera::UpdateCameraAspect(engine, windowX, windowY);
-    renderThread = std::thread(RenderThread, std::ref(engine));
-  }
-
-  bool IsInitialized()
-  {
-    return initialized;
+    Event::EventData.renderThread = std::thread(RenderThread, std::ref(engine));
   }
 
   // TODO: Try to thread this
@@ -249,6 +199,8 @@ namespace Temp::Render
 
         int currentWidth = windowAttributes.width;
         int currentHeight = windowAttributes.height;
+        int &windowWidth = Event::EventData.windowWidth;
+        int &windoHeight = Event::EventData.windowHeight;
 
         if (currentWidth != windowWidth || currentHeight != windowHeight)
         {
@@ -256,7 +208,7 @@ namespace Temp::Render
           windowWidth = currentWidth;
           windowHeight = currentHeight;
 
-          Engine::EnqueueGlobalRender(engine, Resize, nullptr);
+          Engine::EnqueueGlobalRender(engine, Event::Resize, nullptr);
         }
       }
       break;
@@ -268,23 +220,7 @@ namespace Temp::Render
         int mouseX = xev.xbutton.x - windowAttributes.x;
         int mouseY = xev.xbutton.y - windowAttributes.y;
 
-        auto *scene = engine.currentScene;
-        if (scene->state == Scene::State::RUN)
-        {
-          auto &hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
-          for (size_t i = 0; i < hoverableArray.mapping.size; ++i)
-          {
-            auto &hoverable = hoverableArray.array[i];
-            if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
-            {
-              Component::Hoverable::HoverableEnter(*scene, hoverable);
-            }
-            else
-            {
-              Component::Hoverable::HoverableLeave(*scene, hoverable);
-            }
-          }
-        }
+        Event::Hover(mouseX, mouseY);
       }
       break;
       case ButtonPress:
@@ -296,20 +232,9 @@ namespace Temp::Render
         int mouseY = xev.xbutton.y - windowAttributes.y;
         int button = xev.xbutton.button;
 
-        Window childWindow;
-
-        auto *scene = engine.currentScene;
-        if (scene->state == Scene::State::RUN)
+        if (button == 0)
         {
-          auto &hoverableArray = Scene::GetComponentArray<Component::Type::HOVERABLE>(*scene);
-          for (size_t i = 0; i < hoverableArray.mapping.size; ++i)
-          {
-            auto &hoverable = hoverableArray.array[i];
-            if (Component::Hoverable::IsInside(hoverable, mouseX, mouseY))
-            {
-              hoverable.Click(*scene, hoverable);
-            }
-          }
+          Event::Click(mouseX, mouseY);
         }
       }
       break;
@@ -321,7 +246,7 @@ namespace Temp::Render
 
   void Destroy()
   {
-    quit = true;
+    Event::EventData.renderQuit = true;
     renderThread.join();
 
     // Cleanup

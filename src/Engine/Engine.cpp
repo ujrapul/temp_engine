@@ -1,6 +1,7 @@
 #include "Engine.hpp"
 #include "Scene.hpp"
 #include "Camera.hpp"
+#include "Event.hpp"
 #include <chrono>
 #include <thread>
 #ifdef __linux__
@@ -49,7 +50,7 @@ namespace Temp::Engine
     deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(stop - start).count();
     start = stop;
 
-    if (!Render::IsInitialized())
+    if (!Event::EventData.renderInitialized)
     {
       return;
     }

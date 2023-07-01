@@ -1020,12 +1020,6 @@ namespace Temp::Math
   {
     return degrees * PI / 180.f;
   }
-
-  namespace UnitTests
-  {
-    // Function to run the unit tests
-    void Run();
-  }
 }
 
 #pragma GCC diagnostic pop
