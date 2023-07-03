@@ -6,9 +6,7 @@
 #include "GameLevel.hpp"
 #include "MainMenuLevel.hpp"
 
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+#include "lua.hpp"
 
 extern "C" {
   static int l_cppfunction(lua_State *L) {
@@ -75,7 +73,7 @@ namespace Game
         cerr << lua_tostring(L, -1) << endl;
         lua_pop(L,1);
       }
-      
+
       cout << "** Read a global var from Lua into C++" << endl;
       lua_getglobal(L, "luavar");
       double luavar = lua_tonumber(L,-1);

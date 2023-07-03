@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.26.0)
 project(TEMP_ENGINE)
 
+include(ExternalProject)
+
 if (UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
@@ -142,84 +144,6 @@ set ( NUMBER_GAME_HEADER
   src/NumberGame/Scene.hpp
 )
 
-set ( LUA_SOURCE_LIST
-  src/Engine/Dependencies/lua/lapi.c
-  src/Engine/Dependencies/lua/lapi.h
-  src/Engine/Dependencies/lua/lauxlib.c
-  src/Engine/Dependencies/lua/lauxlib.h
-  src/Engine/Dependencies/lua/lbaselib.c
-  src/Engine/Dependencies/lua/lcode.c
-  src/Engine/Dependencies/lua/lcode.h
-  src/Engine/Dependencies/lua/lcorolib.c
-  src/Engine/Dependencies/lua/lctype.c
-  src/Engine/Dependencies/lua/lctype.h
-  src/Engine/Dependencies/lua/lapi.c
-  src/Engine/Dependencies/lua/lapi.h
-  src/Engine/Dependencies/lua/lauxlib.c
-  src/Engine/Dependencies/lua/lauxlib.h
-  src/Engine/Dependencies/lua/lbaselib.c
-  src/Engine/Dependencies/lua/lcode.c
-  src/Engine/Dependencies/lua/lcode.h
-  src/Engine/Dependencies/lua/lcorolib.c
-  src/Engine/Dependencies/lua/lctype.c
-  src/Engine/Dependencies/lua/lctype.h
-  src/Engine/Dependencies/lua/ldblib.c
-  src/Engine/Dependencies/lua/ldebug.c
-  src/Engine/Dependencies/lua/ldebug.h
-  src/Engine/Dependencies/lua/ldo.c
-  src/Engine/Dependencies/lua/ldo.h
-  src/Engine/Dependencies/lua/ldump.c
-  src/Engine/Dependencies/lua/lfunc.c
-  src/Engine/Dependencies/lua/lfunc.h
-  src/Engine/Dependencies/lua/lgc.c
-  src/Engine/Dependencies/lua/lgc.h
-  src/Engine/Dependencies/lua/linit.c
-  src/Engine/Dependencies/lua/liolib.c
-  src/Engine/Dependencies/lua/ljumptab.h
-  src/Engine/Dependencies/lua/llex.c
-  src/Engine/Dependencies/lua/llex.h
-  src/Engine/Dependencies/lua/llimits.h
-  src/Engine/Dependencies/lua/lmathlib.c
-  src/Engine/Dependencies/lua/lmem.c
-  src/Engine/Dependencies/lua/lmem.h
-  src/Engine/Dependencies/lua/loadlib.c
-  src/Engine/Dependencies/lua/lobject.c
-  src/Engine/Dependencies/lua/lobject.h
-  src/Engine/Dependencies/lua/lopcodes.c
-  src/Engine/Dependencies/lua/lopcodes.h
-  src/Engine/Dependencies/lua/lopnames.h
-  src/Engine/Dependencies/lua/loslib.c
-  src/Engine/Dependencies/lua/lparser.c
-  src/Engine/Dependencies/lua/lparser.h
-  src/Engine/Dependencies/lua/lprefix.h
-  src/Engine/Dependencies/lua/lstate.c
-  src/Engine/Dependencies/lua/lstate.h
-  src/Engine/Dependencies/lua/lstring.c
-  src/Engine/Dependencies/lua/lstring.h
-  src/Engine/Dependencies/lua/lstrlib.c
-  src/Engine/Dependencies/lua/ltable.c
-  src/Engine/Dependencies/lua/ltable.h
-  src/Engine/Dependencies/lua/ltablib.c
-  src/Engine/Dependencies/lua/ltests.c
-  src/Engine/Dependencies/lua/ltests.h
-  src/Engine/Dependencies/lua/ltm.c
-  src/Engine/Dependencies/lua/ltm.h
-  src/Engine/Dependencies/lua/lua.c
-  src/Engine/Dependencies/lua/lua.h
-  src/Engine/Dependencies/lua/luaconf.h
-  src/Engine/Dependencies/lua/lualib.h
-  src/Engine/Dependencies/lua/lundump.c
-  src/Engine/Dependencies/lua/lundump.h
-  src/Engine/Dependencies/lua/lutf8lib.c
-  src/Engine/Dependencies/lua/lvm.c
-  src/Engine/Dependencies/lua/lvm.h
-  src/Engine/Dependencies/lua/lzio.c
-  src/Engine/Dependencies/lua/lzio.h
-  src/Engine/Dependencies/lua/onelua.c
-)
-
-set_source_files_properties(${LUA_SOURCE_LIST} PROPERTIES LANGUAGE CXX)
-
 set(TARGET_TEST_GAME TestGame)
 set(TARGET_TEST_GAME_2 TestGame2)
 set(TARGET_NUMBER_GAME NumberGame)
@@ -258,7 +182,7 @@ include_directories(
   src/Engine/Render/OpenGL/Shaders
   src/Engine/Dependencies
   src/Engine/Dependencies/stbimage
-  src/Engine/Dependencies/lua
+  src/Engine/Dependencies/LuaJIT/src
   src/NumberGame
   src/NumberGame/Components
   src/TestGame
@@ -269,6 +193,30 @@ target_link_libraries(${TARGET_ENGINE} PRIVATE ${OPENGL_LIBRARIES})
 if (LINUX)
   target_link_libraries(${TARGET_ENGINE} PRIVATE X11)
 endif()
+
+# Set the path to LuaJIT source directory
+set(LUAJIT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Dependencies/LuaJIT")  # Update the path to the LuaJIT source directory
+
+# Set the path to LuaJIT build directory
+set(LUAJIT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/LuaJIT")  # Update the path to the desired LuaJIT build directory
+
+# Configure and build LuaJIT using Makefile
+ExternalProject_Add(
+    LuaJIT
+    PREFIX ${LUAJIT_BINARY_DIR}
+    SOURCE_DIR ${LUAJIT_SOURCE_DIR}
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND make
+    INSTALL_COMMAND ""
+    BUILD_IN_SOURCE true
+)
+
+# Include LuaJIT headers
+include_directories(${LUAJIT_BINARY_DIR}/src)  # Update the path to the LuaJIT headers
+
+# Link with LuaJIT library
+add_dependencies(${TARGET_ENGINE} LuaJIT)
+target_link_libraries(${TARGET_ENGINE} PRIVATE ${LUAJIT_SOURCE_DIR}/src/libluajit.a)  # Update the path to the LuaJIT library
 
 # TODO: When you become more knowledgable try writing your own font loading system
 add_subdirectory(src/Engine/Dependencies/freetype)
