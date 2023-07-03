@@ -4,3 +4,4 @@
 [submodule "src/Engine/Dependencies/LuaJIT"]
 	path = src/Engine/Dependencies/LuaJIT
 	url = https://github.com/LuaJIT/LuaJIT.git
+	ignore = untracked
