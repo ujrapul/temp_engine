@@ -1,3 +1,6 @@
 [submodule "src/Engine/Dependencies/freetype"]
 	path = src/Engine/Dependencies/freetype
 	url = https://github.com/freetype/freetype.git
+[submodule "src/Engine/Dependencies/lua"]
+	path = src/Engine/Dependencies/lua
+	url = https://github.com/lua/lua.git
