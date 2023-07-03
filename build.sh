@@ -28,12 +28,20 @@ fi
                   cp -rf ../src/Engine/Fonts Release
                   cp -rf ../src/Engine/Render/OpenGL/Shaders Release
                   cp -rf ../src/Engine/Images Release
+		  cp -rf ../src/Engine/LuaScripts Release
                   cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Xcode ..;
                 else
                   mkdir Debug
-                  cp -rf ../src/Engine/Fonts Debug
-                  cp -rf ../src/Engine/Render/OpenGL/Shaders Debug
-                  cp -rf ../src/Engine/Images Debug
+                  #cp -rf ../src/Engine/Fonts Debug
+                  #cp -rf ../src/Engine/Render/OpenGL/Shaders Debug
+                  #cp -rf ../src/Engine/Images Debug
+		  rm -rf Debug/Fonts
+		  rm -rf Debug/Shaders
+		  rm -rf Debug/Images
+                  ln -sf $PWD/../src/Engine/Fonts Debug
+                  ln -sf $PWD/../src/Engine/Render/OpenGL/Shaders Debug
+                  ln -sf $PWD/../src/Engine/Images Debug
+		  ln -sf $PWD/../src/Engine/LuaScripts Debug
                   cmake -DCMAKE_BUILD_TYPE=Debug -G Xcode ..;
                 fi
                 xcodebuild -scheme TempEngine build;

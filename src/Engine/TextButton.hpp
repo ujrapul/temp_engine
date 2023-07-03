@@ -17,6 +17,10 @@ namespace Temp::TextButton
   {
     textButton.entity = Scene::CreateEntity(scene);
     Scene::AddComponent<Component::Type::HOVERABLE>(scene, textButton.entity, std::move(hoverable));
+    Scene::AddComponent<Component::Type::LUABLE>(scene, textButton.entity, {"LuaScripts/Test.lua"});
+    
+    const auto& luable = Scene::Get<Component::Type::LUABLE>(scene, textButton.entity);
+    Component::Luable::LoadScript(luable);
 
     TextBox::Construct(scene, textButton.textBox);
   }
@@ -29,6 +33,17 @@ namespace Temp::TextButton
   inline void UpdateRender(Scene::Data &scene, Data &textButton)
   {
     TextBox::UpdateRender(scene, textButton.textBox);
+  }
+  
+  inline void Update(float deltaTime)
+  {
+    static float time = 0;
+    time += deltaTime;
+    if (time > 1.f)
+    {
+      Component::Luable::ExecFunction("myluafunction");
+      time = 0;
+    }
   }
   
   inline void DrawDestruct(Scene::Data &scene, Data &textButton)

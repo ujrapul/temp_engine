@@ -3,6 +3,8 @@ project(TEMP_ENGINE)
 
 include(ExternalProject)
 
+add_compile_definitions("$<$<CONFIG:DEBUG>:-DDEBUG>")
+
 if (UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
@@ -45,6 +47,7 @@ set ( ENGINE_HEADER
   src/Engine/Components/ComponentType.hpp
   src/Engine/Components/Drawable.hpp
   src/Engine/Components/Hoverable.hpp
+  src/Engine/Components/Luable.hpp
   src/Engine/Coordinator.hpp
   src/Engine/Engine.hpp
   src/Engine/EngineUtils.hpp
@@ -201,26 +204,37 @@ set(LUAJIT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Dependencies/LuaJI
 set(LUAJIT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/LuaJIT")  # Update the path to the desired LuaJIT build directory
 
 # Configure and build LuaJIT using Makefile
+if(UNIX)
+  set (LUA_BUILD_CMD make)
+else()
+  set (LUA_BUILD_CMD msvcbuild.bat)
+endif()
 ExternalProject_Add(
     LuaJIT
     PREFIX ${LUAJIT_BINARY_DIR}
     SOURCE_DIR ${LUAJIT_SOURCE_DIR}
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND make
+    BUILD_COMMAND ${LUA_BUILD_CMD}
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE true
 )
 
 # Include LuaJIT headers
-include_directories(${LUAJIT_BINARY_DIR}/src)  # Update the path to the LuaJIT headers
+include_directories(SYSTEM ${LUAJIT_BINARY_DIR}/src)  # Update the path to the LuaJIT headers
+set_target_properties(LuaJIT PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:LuaJIT,INTERFACE_INCLUDE_DIRECTORIES>)
 
 # Link with LuaJIT library
 add_dependencies(${TARGET_ENGINE} LuaJIT)
-target_link_libraries(${TARGET_ENGINE} PRIVATE ${LUAJIT_SOURCE_DIR}/src/libluajit.a)  # Update the path to the LuaJIT library
+if(UNIX)
+  target_link_libraries(${TARGET_ENGINE} PRIVATE ${LUAJIT_SOURCE_DIR}/src/libluajit.a)
+else()
+  target_link_libraries(${TARGET_ENGINE} PRIVATE ${LUAJIT_SOURCE_DIR}/src/libluajit.lib)
+endif()
 
 # TODO: When you become more knowledgable try writing your own font loading system
 add_subdirectory(src/Engine/Dependencies/freetype)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Dependencies/freetype/include)
+include_directories(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Dependencies/freetype/include)
+set_target_properties(freetype PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:freetype,INTERFACE_INCLUDE_DIRECTORIES>)
 target_link_libraries(${TARGET_ENGINE} PRIVATE freetype)
 
 #target_link_libraries(${TARGET_TEST_GAME} ${TARGET_ENGINE})

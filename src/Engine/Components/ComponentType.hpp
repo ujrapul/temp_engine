@@ -2,6 +2,7 @@
 
 #include "Drawable.hpp"
 #include "Hoverable.hpp"
+#include "Luable.hpp"
 
 namespace Temp::Component
 {
@@ -14,6 +15,7 @@ namespace Temp::Component
       SCALE,
       TEXT,
       HOVERABLE,
+      LUABLE,
       MAX
     };
   }
@@ -24,7 +26,8 @@ namespace Temp::Component
   template <> struct MapToComponentDataType_t<Type::SCALE> { using type = float; };
   template <> struct MapToComponentDataType_t<Type::TEXT> { using type = std::string; };
   template <> struct MapToComponentDataType_t<Type::HOVERABLE> { using type = Hoverable::Data; };
-  
+  template <> struct MapToComponentDataType_t<Type::LUABLE> { using type = Luable::Data; };
+
   template <uint8_t T> using MapToComponentDataType = typename MapToComponentDataType_t<T>::type;
   
   template <uint8_t T> constexpr MapToComponentDataType<T> GetDefaultValue() { return {}; }

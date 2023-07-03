@@ -4,6 +4,8 @@
 #include <vector>
 #include <functional>
 
+struct lua_State;
+
 namespace Temp
 {
   namespace Scene
@@ -27,6 +29,7 @@ namespace Temp
       std::queue<RenderData> renderQueue{};
       Input::KeyEventData keyEventData{};
       Scene::Data *currentScene{nullptr};
+      lua_State* lua{nullptr};
       std::mutex mtx{};
       bool quit{false};
     };

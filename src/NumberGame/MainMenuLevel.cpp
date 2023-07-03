@@ -61,8 +61,9 @@ namespace Game::Scene::MainMenuLevel
       TextButton::Construct(scene, gameData.quitButton, quitHoverable);
     }
 
-    void Update(Temp::Scene::Data &, float)
+    void Update(Temp::Scene::Data &, float deltaTime)
     {
+      Temp::TextButton::Update(deltaTime);
     }
 
     void Destruct(Temp::Scene::Data &scene)

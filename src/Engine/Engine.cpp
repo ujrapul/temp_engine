@@ -2,8 +2,10 @@
 #include "Scene.hpp"
 #include "Camera.hpp"
 #include "Event.hpp"
+#include "Luable.hpp"
 #include <chrono>
 #include <thread>
+#include <filesystem>
 #ifdef __linux__
 #include "Render/OpenGL/X11Render.hpp"
 #elif __APPLE__
@@ -17,6 +19,10 @@ namespace Temp::Engine
     // Exists only because I'm lazy
     Scene::Data *currentScene{nullptr};
     std::thread inputThread{};
+#ifdef DEBUG
+    std::thread luaThread{};
+    std::vector<Component::Luable::Data*> hotReloadLuables;
+#endif
     
     void RunLinux(Data &engine, const char *windowName, int windowX, int windowY)
     {
@@ -29,7 +35,34 @@ namespace Temp::Engine
 
       Destroy(engine);
     }
+    
+#ifdef DEBUG
+    void LuaThread(Data& engine)
+    {
+      while (currentScene && !engine.quit)
+      {
+        {
+          std::lock_guard<std::mutex> sceneLock(currentScene->mtx);
+          if (currentScene->state == Scene::State::RUN)
+          {
+            auto &luableArray = Scene::GetComponentArray<Component::Type::LUABLE>(*currentScene);
+            for (size_t i = 0; i < luableArray.mapping.size; ++i)
+            {
+              auto &luable = luableArray.array[i];
+              auto time = std::filesystem::last_write_time(luable.path);
+              if (time != luable.time)
+              {
+                luable.time = time;
+                hotReloadLuables.push_back(&luable);
+              }
+            }
+          }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
+    }
   }
+#endif
   
   void Start(Data &engine, const char *windowName, int windowX, int windowY)
   {
@@ -39,6 +72,13 @@ namespace Temp::Engine
 
 #ifndef __linux__
     inputThread = std::thread(Input::HandleThread, std::ref(engine.keyEventData));
+#endif
+    
+    engine.lua = luaL_newstate();
+    luaL_openlibs(engine.lua);
+    
+#ifdef DEBUG
+    luaThread = std::thread(LuaThread, std::ref(engine));
 #endif
   }
   
@@ -88,6 +128,21 @@ namespace Temp::Engine
     default:
       break;
     }
+    
+#ifdef DEBUG
+    // Hot Reload Lua Scripts
+    {
+      std::lock_guard<std::mutex> lock(engine.mtx);
+      if (hotReloadLuables.size() > 0)
+      {
+        for (const auto* luable : hotReloadLuables)
+        {
+          Component::Luable::LoadScript(*luable);
+        }
+        hotReloadLuables.clear();
+      }
+    }
+#endif
 
     // Process events in the renderer
     Render::Run(engine);
@@ -110,6 +165,9 @@ namespace Temp::Engine
     Input::EndInput();
     inputThread.join();
 #endif
+#ifdef DEBUG
+    luaThread.join();
+#endif
     Render::Destroy();
     // For now the games should handle clean up of scenes
     for (Scene::Data *scene : engine.scenes)
@@ -118,6 +176,7 @@ namespace Temp::Engine
     }
     engine.scenes.clear();
     Input::Destruct(engine.keyEventData);
+    lua_close(engine.lua);
   }
 
   void Construct(Data &engine)

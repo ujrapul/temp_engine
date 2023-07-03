@@ -1,8 +1,9 @@
-print("Hello from Lua")
-print("Lua code is capable of reading the value set from C++", cppvar)
-luavar = cppvar * 3
+-- print("Hello from Lua")
+-- print("Lua code is capable of reading the value set from C++", cppvar)
+-- luavar = cppvar * 3
 
 function myluafunction(times)
+  print("GOT HERE wfe;f !")
   return string.rep("(-)", times)
 end
 
