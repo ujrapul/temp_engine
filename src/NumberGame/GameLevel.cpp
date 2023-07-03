@@ -285,22 +285,22 @@ namespace Game::Scene::GameLevel
 
     void DrawConstruct(Temp::Scene::Data &data)
     {
-      Grid::ConstructRender(data, gameData.grid);
-      Temp::TextBox::ConstructRender(data, gameData.playerTurnTextBox);
-      Temp::TextBox::ConstructRender(data, gameData.player1TextBox);
-      Temp::TextBox::ConstructRender(data, gameData.player1NumbersTextBox);
-      Temp::TextBox::ConstructRender(data, gameData.player2TextBox);
-      Temp::TextBox::ConstructRender(data, gameData.player2NumbersTextBox);
-      Temp::TextBox::ConstructRender(data, gameData.numbersLeftTextBox);
+      Grid::DrawConstruct(data, gameData.grid);
+      Temp::TextBox::DrawConstruct(data, gameData.playerTurnTextBox);
+      Temp::TextBox::DrawConstruct(data, gameData.player1TextBox);
+      Temp::TextBox::DrawConstruct(data, gameData.player1NumbersTextBox);
+      Temp::TextBox::DrawConstruct(data, gameData.player2TextBox);
+      Temp::TextBox::DrawConstruct(data, gameData.player2NumbersTextBox);
+      Temp::TextBox::DrawConstruct(data, gameData.numbersLeftTextBox);
     }
 
     void DrawConstruct2(Temp::Scene::Data &data)
     {
-      Temp::TextBox::ConstructRender(data, gameData2.playerWinTextBox);
-      Temp::TextBox::ConstructRender(data, gameData2.player1ScoreTextBox);
-      Temp::TextBox::ConstructRender(data, gameData2.player2ScoreTextBox);
-      Temp::TextBox::ConstructRender(data, gameData2.quitTextBox);
-      Temp::TextBox::ConstructRender(data, gameData2.replayTextBox);
+      Temp::TextBox::DrawConstruct(data, gameData2.playerWinTextBox);
+      Temp::TextBox::DrawConstruct(data, gameData2.player1ScoreTextBox);
+      Temp::TextBox::DrawConstruct(data, gameData2.player2ScoreTextBox);
+      Temp::TextBox::DrawConstruct(data, gameData2.quitTextBox);
+      Temp::TextBox::DrawConstruct(data, gameData2.replayTextBox);
     }
 
     void DrawUpdate(Temp::Scene::Data &data)

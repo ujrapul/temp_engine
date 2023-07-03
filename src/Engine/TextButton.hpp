@@ -21,9 +21,9 @@ namespace Temp::TextButton
     TextBox::Construct(scene, textButton.textBox);
   }
 
-  inline void ConstructRender(Scene::Data &scene, Data &textButton)
+  inline void DrawConstruct(Scene::Data &scene, Data &textButton)
   {
-    TextBox::ConstructRender(scene, textButton.textBox);
+    TextBox::DrawConstruct(scene, textButton.textBox);
   }
 
   inline void UpdateRender(Scene::Data &scene, Data &textButton)

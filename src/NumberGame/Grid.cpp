@@ -73,7 +73,7 @@ namespace Game::Grid
     }
   }
 
-  void ConstructRender(Temp::Scene::Data &data, Data *grid)
+  void DrawConstruct(Temp::Scene::Data &data, Data *grid)
   {
     using namespace Temp;
     using namespace Temp::Render;

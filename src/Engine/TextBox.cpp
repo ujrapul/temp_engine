@@ -65,7 +65,7 @@ namespace Temp::TextBox
     }
   }
 
-  void ConstructRender(Scene::Data &scene, Data &textBox)
+  void DrawConstruct(Scene::Data &scene, Data &textBox)
   {
     using namespace Temp::Render;
 

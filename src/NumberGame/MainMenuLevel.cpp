@@ -77,9 +77,9 @@ namespace Game::Scene::MainMenuLevel
 
     void DrawConstruct(Temp::Scene::Data &scene)
     {
-      Temp::TextBox::ConstructRender(scene, gameData.gameTextBox);
-      Temp::TextButton::ConstructRender(scene, gameData.playButton);
-      Temp::TextButton::ConstructRender(scene, gameData.quitButton);
+      Temp::TextBox::DrawConstruct(scene, gameData.gameTextBox);
+      Temp::TextButton::DrawConstruct(scene, gameData.playButton);
+      Temp::TextButton::DrawConstruct(scene, gameData.quitButton);
     }
     
     void DrawDestruct(Temp::Scene::Data &scene)
