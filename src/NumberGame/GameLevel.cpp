@@ -325,6 +325,26 @@ namespace Game::Scene::GameLevel
       Grid::Destruct(gameData.grid);
       delete gameData.grid;
     }
+    
+    void DrawDestruct(Temp::Scene::Data &data)
+    {
+      Grid::DrawDestruct(data, gameData.grid);
+      Temp::TextBox::DrawDestruct(data, gameData.playerTurnTextBox);
+      Temp::TextBox::DrawDestruct(data, gameData.player1TextBox);
+      Temp::TextBox::DrawDestruct(data, gameData.player1NumbersTextBox);
+      Temp::TextBox::DrawDestruct(data, gameData.player2TextBox);
+      Temp::TextBox::DrawDestruct(data, gameData.player2NumbersTextBox);
+      Temp::TextBox::DrawDestruct(data, gameData.numbersLeftTextBox);
+    }
+    
+    void DrawDestruct2(Temp::Scene::Data &data)
+    {
+      Temp::TextBox::DrawDestruct(data, gameData2.playerWinTextBox);
+      Temp::TextBox::DrawDestruct(data, gameData2.player1ScoreTextBox);
+      Temp::TextBox::DrawDestruct(data, gameData2.player2ScoreTextBox);
+      Temp::TextBox::DrawDestruct(data, gameData2.quitTextBox);
+      Temp::TextBox::DrawDestruct(data, gameData2.replayTextBox);
+    }
   }
 
   Temp::Scene::Data *Create(Temp::Input::KeyEventData &keyEventData)
@@ -335,6 +355,7 @@ namespace Game::Scene::GameLevel
     scene->DrawConstructFunc = DrawConstruct;
     scene->DrawUpdateFunc = DrawUpdate;
     scene->DestructFunc = Destruct;
+    scene->DrawDestructFunc = DrawDestruct;
 
     keyEventDataPtr = &keyEventData;
 
@@ -350,6 +371,7 @@ namespace Game::Scene::GameLevel
     scene->Update = Update2;
     scene->DrawConstructFunc = DrawConstruct2;
     scene->DrawUpdateFunc = DrawUpdate2;
+    scene->DrawDestructFunc = DrawDestruct2;
 
     return scene;
   }

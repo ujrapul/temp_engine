@@ -9,9 +9,6 @@
 // TODO: Clean up resources, VAO, VBO, EBO, texture, shaderProgram etc.
 namespace Temp::Component::Drawable
 {
-  inline std::mutex mtx{};
-  inline std::condition_variable cv{};
-
   struct Data
   {
     std::vector<float> vertices{};
@@ -32,7 +29,7 @@ namespace Temp::Component::Drawable
     bool operator==(const Data& other) const = default;
   };
 
-  constexpr void Scale(Data &drawable, const Math::Vec3f scale)
+  constexpr void Scale(Data &drawable, const Math::Vec3f& scale)
   {
     drawable.model = drawable.model.scale(scale);
   }
@@ -113,5 +110,15 @@ namespace Temp::Component::Drawable
     // Bind the VAO and draw the triangle
     OpenGLWrapper::DrawElementsInstanced(drawable.VAO, (int)drawable.indices.size(), drawable.numInstances);
     glDepthMask(GL_TRUE);
+  }
+  
+  inline void Destruct(Data& drawable)
+  {
+    using namespace Temp::Render::OpenGLWrapper;
+
+    CleanArrays(drawable.VAO);
+    CleanBuffer(drawable.VBO);
+    CleanBuffer(drawable.EBO);
+    CleanShader(drawable.shaderProgram);
   }
 }

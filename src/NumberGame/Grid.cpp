@@ -159,4 +159,10 @@ namespace Game::Grid
   {
     delete grid->mtx;
   }
+  
+  void DrawDestruct(Temp::Scene::Data &data, Data *grid)
+  {
+    auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(data, grid->entity);
+    Temp::Component::Drawable::Destruct(drawable);
+  }
 }

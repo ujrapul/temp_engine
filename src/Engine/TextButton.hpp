@@ -13,21 +13,26 @@ namespace Temp::TextButton
     TextBox::Data textBox{};
   };
 
-  inline void Construct(Scene::Data &scene, Data &data, Component::Hoverable::Data hoverable)
+  inline void Construct(Scene::Data &scene, Data &textButton, Component::Hoverable::Data hoverable)
   {
-    data.entity = Scene::CreateEntity(scene);
-    Scene::AddComponent<Component::Type::HOVERABLE>(scene, data.entity, std::move(hoverable));
+    textButton.entity = Scene::CreateEntity(scene);
+    Scene::AddComponent<Component::Type::HOVERABLE>(scene, textButton.entity, std::move(hoverable));
 
-    TextBox::Construct(scene, data.textBox);
+    TextBox::Construct(scene, textButton.textBox);
   }
 
-  inline void ConstructRender(Scene::Data &scene, Data &data)
+  inline void ConstructRender(Scene::Data &scene, Data &textButton)
   {
-    TextBox::ConstructRender(scene, data.textBox);
+    TextBox::ConstructRender(scene, textButton.textBox);
   }
 
-  inline void UpdateRender(Scene::Data &scene, Data &data)
+  inline void UpdateRender(Scene::Data &scene, Data &textButton)
   {
-    TextBox::UpdateRender(scene, data.textBox);
+    TextBox::UpdateRender(scene, textButton.textBox);
+  }
+  
+  inline void DrawDestruct(Scene::Data &scene, Data &textButton)
+  {
+    TextBox::DrawDestruct(scene, textButton.textBox);
   }
 }

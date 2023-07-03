@@ -46,40 +46,47 @@ namespace Game::Scene::MainMenuLevel
       TextBox::EnableOutline(scene, button->textBox, false);
     }
 
-    void Construct(Temp::Scene::Data &data)
+    void Construct(Temp::Scene::Data &scene)
     {
       gameData = {};
 
       Temp::Camera::ResetView();
 
-      Temp::Scene::Construct(data);
+      Temp::Scene::Construct(scene);
 
-      TextBox::Construct(data, gameData.gameTextBox);
+      TextBox::Construct(scene, gameData.gameTextBox);
       Temp::Component::Hoverable::Data playHoverable{PlayCallback, HoverEnter, HoverLeave, &gameData.playButton, -20, 0, 9, 4};
       Temp::Component::Hoverable::Data quitHoverable{QuitCallback, HoverEnter, HoverLeave, &gameData.quitButton, -20, -7, 9, 4};
-      TextButton::Construct(data, gameData.playButton, playHoverable);
-      TextButton::Construct(data, gameData.quitButton, quitHoverable);
+      TextButton::Construct(scene, gameData.playButton, playHoverable);
+      TextButton::Construct(scene, gameData.quitButton, quitHoverable);
     }
 
     void Update(Temp::Scene::Data &, float)
     {
     }
 
-    void Destruct(Temp::Scene::Data &data)
+    void Destruct(Temp::Scene::Data &scene)
     {
-      Temp::Scene::Destruct(data);
+      Temp::Scene::Destruct(scene);
     }
 
-    void DrawUpdate(Temp::Scene::Data &data)
+    void DrawUpdate(Temp::Scene::Data &scene)
     {
-      Temp::Camera::UpdateFontOrthoScale(data, 0.15 * (720.f / Temp::Camera::GetHeight()));
+      Temp::Camera::UpdateFontOrthoScale(scene, 0.15 * (720.f / Temp::Camera::GetHeight()));
     }
 
-    void DrawConstruct(Temp::Scene::Data &data)
+    void DrawConstruct(Temp::Scene::Data &scene)
     {
-      Temp::TextBox::ConstructRender(data, gameData.gameTextBox);
-      Temp::TextButton::ConstructRender(data, gameData.playButton);
-      Temp::TextButton::ConstructRender(data, gameData.quitButton);
+      Temp::TextBox::ConstructRender(scene, gameData.gameTextBox);
+      Temp::TextButton::ConstructRender(scene, gameData.playButton);
+      Temp::TextButton::ConstructRender(scene, gameData.quitButton);
+    }
+    
+    void DrawDestruct(Temp::Scene::Data &scene)
+    {
+      Temp::TextBox::DrawDestruct(scene, gameData.gameTextBox);
+      Temp::TextButton::DrawDestruct(scene, gameData.playButton);
+      Temp::TextButton::DrawDestruct(scene, gameData.quitButton);
     }
   }
 
@@ -91,6 +98,7 @@ namespace Game::Scene::MainMenuLevel
     scene->DestructFunc = Destruct;
     scene->DrawConstructFunc = DrawConstruct;
     scene->DrawUpdateFunc = DrawUpdate;
+    scene->DrawDestructFunc = DrawDestruct;
 
     return scene;
   }

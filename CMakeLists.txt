@@ -68,6 +68,8 @@ set ( ENGINE_UT_HEADER
   src/Engine/UnitTests/UT_Common.hpp
   src/Engine/UnitTests/UT_ComponentData.hpp
   src/Engine/UnitTests/UT_ComponentContainer.hpp
+  src/Engine/UnitTests/UT_Event.hpp
+  src/Engine/UnitTests/UT_Hoverable.hpp
   src/Engine/UnitTests/UT_Math.hpp
 )
 set ( ENGINE_UT_SOURCE
@@ -209,6 +211,7 @@ if(APPLE)
   set_target_properties(${TARGET_NUMBER_GAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic")
   set_target_properties(${TARGET_NUMBER_GAME} PROPERTIES XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "32SB9VAM46")
   set_target_properties(${TARGET_NUMBER_GAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
+  target_compile_definitions(${TARGET_ENGINE_UNIT_TESTS} PUBLIC GL_SILENCE_DEPRECATION)
   target_compile_definitions(${TARGET_ENGINE} PUBLIC GL_SILENCE_DEPRECATION)
 endif()
 

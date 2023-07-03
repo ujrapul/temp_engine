@@ -33,4 +33,5 @@ namespace Temp::TextBox
   void UpdateText(Scene::Data &scene, Data &textBox, const std::string &newText);
   void UpdateRender(Scene::Data &scene, Data &textBox);
   void EnableOutline(Scene::Data &scene, Data &textBox, bool enable);
+  void DrawDestruct(Scene::Data &scene, Data &textBox);
 }

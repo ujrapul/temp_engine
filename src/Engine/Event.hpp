@@ -3,6 +3,8 @@
 #include "Engine.hpp"
 #include "Hoverable.hpp"
 #include "FontLoader.hpp"
+#include "Logger.hpp"
+#include "Scene.hpp"
 #include <thread>
 
 namespace Temp::Event
@@ -82,7 +84,7 @@ namespace Temp::Event
   
   inline void RenderSetup()
   {
-    std::cout << glGetString(GL_VERSION) << std::endl;
+    Logger::Log(glGetString(GL_VERSION));
     
     glEnable(GL_DEPTH_TEST);
     
@@ -95,10 +97,8 @@ namespace Temp::Event
     EventData.renderInitialized = true;
     
     Resize(nullptr);
-    
-    float time = 0;
-    
-    clock_t begin{clock()};
+  
+    EventData.renderBegin = clock();
   }
   
   inline void RenderRun()

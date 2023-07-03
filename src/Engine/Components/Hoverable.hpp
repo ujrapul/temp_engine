@@ -17,10 +17,10 @@ namespace Temp::Component::Hoverable
     void (*HoverEnter)(Scene::Data &, Data &){NoOp};
     void (*HoverLeave)(Scene::Data &, Data &){NoOp};
     void *callbackData{nullptr};
-    float x{};
-    float y{};
-    float width{};
-    float height{};
+    float x{0};
+    float y{0};
+    float width{0};
+    float height{0};
     bool lastInside{false};
     
     constexpr bool operator==(const Data& other) const = default;

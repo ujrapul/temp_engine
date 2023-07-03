@@ -151,6 +151,12 @@ namespace Temp::TextBox
   {
     Scene::EnqueueRender(scene, RenderFunction, new EnableOutlineData{&textBox, enable});
   }
+  
+  void DrawDestruct(Scene::Data &scene, Data &textBox)
+  {
+    auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
+    Component::Drawable::Destruct(drawable);
+  }
 
   // TODO: Keeping here for reference to NOT do this.
   // Avoid using the Render Queue for real-time updates to avoid flickering

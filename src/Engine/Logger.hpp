@@ -15,18 +15,25 @@ namespace Temp::Logger
   struct LogInterface
   {
     virtual void Log(const char* text) const = 0;
+    virtual void Log(const unsigned char* text) const = 0;
     virtual void Log(const std::string& text) const = 0;
   };
   
   struct Noop : LogInterface
   {
     inline void Log(const char*) const override{}
+    inline void Log(const unsigned char*) const override{}
     inline void Log(const std::string&) const override{}
   };
 
   struct Cout : LogInterface
   {
     inline void Log(const char* text) const override
+    {
+      std::cout << text << "\n";
+    }
+    
+    virtual void Log(const unsigned char* text) const override
     {
       std::cout << text << "\n";
     }
@@ -51,6 +58,11 @@ namespace Temp::Logger
   }
 
   inline void Log(const char* text)
+  {
+    GetLogger().Log(text);
+  }
+  
+  inline void Log(const unsigned char* text)
   {
     GetLogger().Log(text);
   }
