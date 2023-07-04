@@ -165,4 +165,10 @@ namespace Game::Grid
     auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(data, grid->entity);
     Temp::Component::Drawable::Destruct(drawable);
   }
+  
+  void DrawReload(Temp::Scene::Data &data, Data *grid)
+  {
+    DrawDestruct(data, grid);
+    DrawConstruct(data, grid);
+  }
 }

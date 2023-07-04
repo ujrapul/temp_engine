@@ -50,4 +50,9 @@ namespace Temp::TextButton
   {
     TextBox::DrawDestruct(scene, textButton.textBox);
   }
+  
+  inline void DrawReload(Scene::Data &scene, Data &textButton, int shaderIdx)
+  {
+    TextBox::DrawReload(scene, textButton.textBox, shaderIdx);
+  }
 }

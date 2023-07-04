@@ -30,4 +30,5 @@ namespace Game::Grid
   void UpdateNumbers(Temp::Scene::Data &sceneData, Data *grid, Temp::Entity player, int currentValue);
   void Destruct(Data *grid);
   void DrawDestruct(Temp::Scene::Data &data, Data *grid);
+  void DrawReload(Temp::Scene::Data &data, Data *grid);
 }

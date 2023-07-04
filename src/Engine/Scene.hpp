@@ -5,6 +5,7 @@
 #include <functional>
 #include <mutex>
 #include <condition_variable>
+#include <unordered_set>
 
 namespace Temp::Scene
 {
@@ -18,6 +19,7 @@ namespace Temp::Scene
 
   inline void NoOpScene(struct Data &) {}
   inline void NoOpSceneUpdate(struct Data &, float) {}
+  inline void NoOpSceneDrawReload(struct Data &, int) {}
   void Construct(Data &scene);
   void Destruct(Data &scene);
   void Draw(Data &scene);
@@ -40,12 +42,20 @@ namespace Temp::Scene
     std::mutex mtx{};
     std::mutex queueMtx{};
     std::condition_variable cv{};
+#ifdef DEBUG
+    std::mutex reloadMtx{};
+    std::unordered_set<int> shadersToReload{};
+#endif
     void (*ConstructFunc)(Scene::Data &){Construct};
     void (*Update)(Scene::Data &, float){NoOpSceneUpdate};
     void (*DestructFunc)(Scene::Data &){Destruct};
     void (*DrawConstructFunc)(Scene::Data &){NoOpScene};
     void (*DrawDestructFunc)(Scene::Data &){NoOpScene};
     void (*DrawUpdateFunc)(Scene::Data &){NoOpScene};
+#ifdef DEBUG
+    void (*DrawReloadFunc)(Scene::Data &, int){NoOpSceneDrawReload};
+#endif
+
   };
 
   template <uint8_t T>

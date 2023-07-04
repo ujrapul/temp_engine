@@ -20,7 +20,7 @@ namespace Temp::Engine
     Scene::Data *currentScene{nullptr};
     std::thread inputThread{};
 #ifdef DEBUG
-    std::thread luaThread{};
+    std::thread hotReloadThread{};
     std::vector<Component::Luable::Data*> hotReloadLuables;
 #endif
     
@@ -37,7 +37,7 @@ namespace Temp::Engine
     }
     
 #ifdef DEBUG
-    void LuaThread(Data& engine)
+    void HotReloadThread(Data& engine)
     {
       while (currentScene && !engine.quit)
       {
@@ -54,6 +54,24 @@ namespace Temp::Engine
               {
                 luable.time = time;
                 hotReloadLuables.push_back(&luable);
+              }
+            }
+          }
+        }
+        // TODO: Need to reload the state of the shader as well, including all uniforms
+        {
+          std::lock_guard<std::mutex> lock(currentScene->reloadMtx);
+          if (currentScene->renderState == Scene::State::RUN)
+          {
+            auto &drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*currentScene);
+            for (size_t i = 0; i < drawableArray.mapping.size; ++i)
+            {
+              auto &drawable = drawableArray.array[i];
+              auto time = std::filesystem::last_write_time(drawable.shaderPath);
+              if (time != drawable.time)
+              {
+                drawable.time = time;
+                currentScene->shadersToReload.insert(drawable.shaderIdx);
               }
             }
           }
@@ -78,7 +96,7 @@ namespace Temp::Engine
     luaL_openlibs(engine.lua);
     
 #ifdef DEBUG
-    luaThread = std::thread(LuaThread, std::ref(engine));
+    hotReloadThread = std::thread(HotReloadThread, std::ref(engine));
 #endif
   }
   
@@ -160,13 +178,14 @@ namespace Temp::Engine
 
   void Destroy(Data &engine)
   {
+    engine.quit = true;
 #ifndef __linux__
     // TODO: Add a mutex here
     Input::EndInput();
     inputThread.join();
 #endif
 #ifdef DEBUG
-    luaThread.join();
+    hotReloadThread.join();
 #endif
     Render::Destroy();
     // For now the games should handle clean up of scenes

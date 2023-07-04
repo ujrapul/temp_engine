@@ -34,6 +34,18 @@ namespace Temp::Render::OpenGLWrapper
       MAX
     };
   };
+  
+  inline const std::vector<const char*>& ShaderFiles()
+  {
+    static std::vector<const char *> out = {"Test.glsl", "Text.glsl", "Grid.glsl"};
+    return out;
+  }
+  
+  inline const std::filesystem::path& GetShadersPath()
+  {
+    static auto shadersPath = ApplicationDirectory() / "Shaders";
+    return shadersPath;
+  }
 
   void LoadShaders();
 

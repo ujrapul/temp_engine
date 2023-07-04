@@ -11,12 +11,6 @@ namespace Temp::Render::OpenGLWrapper
 {
   namespace
   {
-    const std::filesystem::path& GetShadersPath()
-    {
-      static auto shadersPath = ApplicationDirectory() / "Shaders";
-      return shadersPath;
-    }
-
     const char *GetCommonShader()
     {
       static const char* common = LoadFileAsString(std::filesystem::path(GetShadersPath() / "Common.glsl").c_str());
@@ -31,9 +25,8 @@ namespace Temp::Render::OpenGLWrapper
     static const char *VERT_HEADER = "#version 330\n#define VERTEX_SHADER\n";
     static const char *FRAG_HEADER = "#version 330\n#define FRAGMENT_SHADER\n";
 
-    static std::vector<const char *> shaderFiles = {"Test.glsl", "Text.glsl", "Grid.glsl"};
-
-    for (const char* shaderFile : shaderFiles)
+    globalShaders.clear();
+    for (const char* shaderFile : ShaderFiles())
     {
       globalShaders.insert(globalShaders.end(), {
         {VERT_HEADER, GetCommonShader(), LoadFileAsString(std::filesystem::path(shadersPath / shaderFile).c_str())},

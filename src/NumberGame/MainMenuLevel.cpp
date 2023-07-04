@@ -89,6 +89,13 @@ namespace Game::Scene::MainMenuLevel
       Temp::TextButton::DrawDestruct(scene, gameData.playButton);
       Temp::TextButton::DrawDestruct(scene, gameData.quitButton);
     }
+    
+    void DrawReload(Temp::Scene::Data &scene, int shaderIdx)
+    {
+      Temp::TextBox::DrawReload(scene, gameData.gameTextBox, shaderIdx);
+      Temp::TextButton::DrawReload(scene, gameData.playButton, shaderIdx);
+      Temp::TextButton::DrawReload(scene, gameData.quitButton, shaderIdx);
+    }
   }
 
   Temp::Scene::Data *Create()
@@ -100,6 +107,7 @@ namespace Game::Scene::MainMenuLevel
     scene->DrawConstructFunc = DrawConstruct;
     scene->DrawUpdateFunc = DrawUpdate;
     scene->DrawDestructFunc = DrawDestruct;
+    scene->DrawReloadFunc = DrawReload;
 
     return scene;
   }

@@ -345,6 +345,26 @@ namespace Game::Scene::GameLevel
       Temp::TextBox::DrawDestruct(data, gameData2.quitTextBox);
       Temp::TextBox::DrawDestruct(data, gameData2.replayTextBox);
     }
+    
+    void DrawReload(Temp::Scene::Data &data, int shaderIdx)
+    {
+      Grid::DrawReload(data, gameData.grid);
+      Temp::TextBox::DrawReload(data, gameData.playerTurnTextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData.player1TextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData.player1NumbersTextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData.player2TextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData.player2NumbersTextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData.numbersLeftTextBox, shaderIdx);
+    }
+    
+    void DrawReload2(Temp::Scene::Data &data, int shaderIdx)
+    {
+      Temp::TextBox::DrawReload(data, gameData2.playerWinTextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData2.player1ScoreTextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData2.player2ScoreTextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData2.quitTextBox, shaderIdx);
+      Temp::TextBox::DrawReload(data, gameData2.replayTextBox, shaderIdx);
+    }
   }
 
   Temp::Scene::Data *Create(Temp::Input::KeyEventData &keyEventData)
@@ -356,6 +376,7 @@ namespace Game::Scene::GameLevel
     scene->DrawUpdateFunc = DrawUpdate;
     scene->DestructFunc = Destruct;
     scene->DrawDestructFunc = DrawDestruct;
+    scene->DrawReloadFunc = DrawReload;
 
     keyEventDataPtr = &keyEventData;
 
@@ -372,6 +393,7 @@ namespace Game::Scene::GameLevel
     scene->DrawConstructFunc = DrawConstruct2;
     scene->DrawUpdateFunc = DrawUpdate2;
     scene->DrawDestructFunc = DrawDestruct2;
+    scene->DrawReloadFunc = DrawReload2;
 
     return scene;
   }

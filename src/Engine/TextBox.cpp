@@ -157,6 +157,18 @@ namespace Temp::TextBox
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
     Component::Drawable::Destruct(drawable);
   }
+  
+  void DrawReload(Scene::Data &scene, Data &textBox, int shaderIdx)
+  {
+    auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
+    if (shaderIdx != drawable.shaderIdx)
+    {
+      return;
+    }
+
+    DrawDestruct(scene, textBox);
+    DrawConstruct(scene, textBox);
+  }
 
   // TODO: Keeping here for reference to NOT do this.
   // Avoid using the Render Queue for real-time updates to avoid flickering

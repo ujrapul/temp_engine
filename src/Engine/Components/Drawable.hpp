@@ -25,7 +25,16 @@ namespace Temp::Component::Drawable
     bool visible{true};
     bool blockDraw{false};
     bool disableDepth{false};
-    
+#ifdef DEBUG
+    std::string shaderPath{};
+    std::filesystem::file_time_type time{};
+    int shaderIdx{};
+    int bufferDraw{};
+    int vertexStride{};
+    GLuint UBO{};
+    std::string UBOMatrices{};
+    int UBOMatrixIndex{};
+#endif
     bool operator==(const Data& other) const = default;
   };
 
@@ -40,58 +49,68 @@ namespace Temp::Component::Drawable
 
     OpenGLWrapper::Set4x4MatrixShaderProperty(drawable.shaderProgram, "model", &drawable.model.rows[0][0]);
   }
+  
+  inline void Reconstruct(Data &drawable)
+  {
+    using namespace Temp::Render;
 
-  // Make sure all API construction happens before render-thread executes!
-  inline void Construct(Data &drawable, int shaderIdx, int BufferDraw = GL_STATIC_DRAW, int vertexStride = 3, int UBO = Camera::UBO())
+    drawable.shaderProgram = OpenGLWrapper::CreateShaderProgram(drawable.shaderIdx);
+
+    drawable.VAO = OpenGLWrapper::CreateVAO();
+    drawable.VBO = OpenGLWrapper::CreateVBO(drawable.vertices.data(), drawable.vertices.size(), drawable.bufferDraw);
+    drawable.EBO = OpenGLWrapper::CreateEBO(drawable.indices.data(), drawable.indices.size(), drawable.bufferDraw);
+    
+    drawable.indicesSize = (int)drawable.indices.size();
+    OpenGLWrapper::SetVertexAttribArray(0, drawable.vertexStride, drawable.vertexStride, 0);
+
+    Update(drawable);
+
+    OpenGLWrapper::BindUBOShader(drawable.UBO, drawable.shaderProgram, "Matrices", 0);
+  }
+  
+  inline void Construct(Data &drawable, int shaderIdx, int bufferDraw, int vertexStride, int UBO, const char * UBOMatrices, int UBOMatricesIdx)
   {
     using namespace Temp::Render;
 
     drawable.shaderProgram = OpenGLWrapper::CreateShaderProgram(shaderIdx);
-
-    // Create vertex array object (VAO)
     drawable.VAO = OpenGLWrapper::CreateVAO();
-
-    // Create vertex buffer object (VBO)
-    drawable.VBO = OpenGLWrapper::CreateVBO(drawable.vertices.data(), drawable.vertices.size(), BufferDraw);
-
-    // Create Element Buffer Object (EBO) and copy index data
-    drawable.EBO = OpenGLWrapper::CreateEBO(drawable.indices.data(), drawable.indices.size(), BufferDraw);
-    
+    drawable.VBO = OpenGLWrapper::CreateVBO(drawable.vertices.data(), drawable.vertices.size(), bufferDraw);
+    drawable.EBO = OpenGLWrapper::CreateEBO(drawable.indices.data(), drawable.indices.size(), bufferDraw);
     drawable.indicesSize = (int)drawable.indices.size();
-
-    // Specify vertex attributes
-    // position attribute
     OpenGLWrapper::SetVertexAttribArray(0, vertexStride, vertexStride, 0);
 
     Update(drawable);
 
     // We are making the assumption that every shader has a Matrices uniform block
     // For getting view and projection from the camera
-    OpenGLWrapper::BindUBOShader(UBO, drawable.shaderProgram, "Matrices", 0);
-
-    // Unbind VAO and VBO and EBO
-    // OpenGLWrapper::UnbindBuffers();
+    OpenGLWrapper::BindUBOShader(UBO, drawable.shaderProgram, UBOMatrices, UBOMatricesIdx);
   }
 
-  inline void ConstructFont(Data &drawable, int shaderIdx, int BufferDraw = GL_DYNAMIC_DRAW, int vertexStride = 4, int UBO = Camera::FontUBO())
+  // Make sure all API construction happens before render-thread executes!
+  inline void Construct(Data &drawable, int shaderIdx, int bufferDraw = GL_STATIC_DRAW, int vertexStride = 3, int UBO = Camera::UBO())
   {
     using namespace Temp::Render;
 
-    drawable.shaderProgram = OpenGLWrapper::CreateShaderProgram(shaderIdx);
+#ifdef DEBUG
+    drawable.shaderIdx = shaderIdx;
+    drawable.shaderPath = OpenGLWrapper::GetShadersPath() / OpenGLWrapper::ShaderFiles()[shaderIdx];
+    drawable.UBOMatrices = "Matrices";
+    drawable.UBOMatrixIndex = 0;
+#endif
+    Construct(drawable, shaderIdx, bufferDraw, vertexStride, UBO, "Matrices", 0);
+  }
 
-    drawable.VAO = OpenGLWrapper::CreateVAO();
-    drawable.VBO = OpenGLWrapper::CreateVBO(drawable.vertices.data(), drawable.vertices.size(), BufferDraw);
-    drawable.EBO = OpenGLWrapper::CreateEBO(drawable.indices.data(), drawable.indices.size(), BufferDraw);
-    drawable.indicesSize = (int)drawable.indices.size();
+  inline void ConstructFont(Data &drawable, int shaderIdx, int bufferDraw = GL_DYNAMIC_DRAW, int vertexStride = 4, int UBO = Camera::FontUBO())
+  {
+    using namespace Temp::Render;
 
-    OpenGLWrapper::SetVertexAttribArray(0, vertexStride, vertexStride, 0);
-
-    Update(drawable);
-
-    OpenGLWrapper::BindUBOShader(UBO, drawable.shaderProgram, "FontMatrices", 1);
-
-    // Unbind VAO and VBO and EBO
-    // OpenGLWrapper::UnbindBuffers();
+#ifdef DEBUG
+    drawable.shaderIdx = shaderIdx;
+    drawable.shaderPath = OpenGLWrapper::GetShadersPath() / OpenGLWrapper::ShaderFiles()[shaderIdx];
+    drawable.UBOMatrices = "FontMatrices";
+    drawable.UBOMatrixIndex = 1;
+#endif
+    Construct(drawable, shaderIdx, bufferDraw, vertexStride, UBO, "FontMatrices", 1);
   }
 
   inline void Draw(Data &drawable)
