@@ -36,4 +36,11 @@ namespace Temp
     
     return charArray;
   }
+  
+  template<typename T>
+  inline void FreeContainer(T& p_container)
+  {
+    T empty;
+    p_container.swap(empty);
+  }
 }

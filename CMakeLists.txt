@@ -98,6 +98,7 @@ set ( ENGINE_SRC
   src/Engine/Camera.cpp
   src/Engine/Components/ComponentContainer.cpp
   src/Engine/Components/Drawable.cpp
+  src/Engine/Components/Luable.cpp
   src/Engine/Coordinator.cpp
   src/Engine/Engine.cpp
   src/Engine/EngineUtils.cpp

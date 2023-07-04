@@ -55,7 +55,7 @@ namespace Temp::Scene
       case State::ENTER:
       {
         std::unique_lock<std::mutex> lock(scene.mtx);
-        scene.DrawConstructFunc(scene);
+        scene.sceneFns.DrawConstructFunc(scene);
         scene.renderState = State::RUN;
         scene.state = Scene::State::RUN;
       }
@@ -67,7 +67,7 @@ namespace Temp::Scene
         {
           Component::Drawable::Draw(drawableArray.array[i]);
         }
-        scene.DrawUpdateFunc(scene);
+        scene.sceneFns.DrawUpdateFunc(scene);
 #ifdef DEBUG
         std::lock_guard<std::mutex> lock(scene.reloadMtx);
         if (scene.shadersToReload.size() > 0)
@@ -75,7 +75,7 @@ namespace Temp::Scene
           Render::OpenGLWrapper::LoadShaders();
           for (auto shaderIdx : scene.shadersToReload)
           {
-            scene.DrawReloadFunc(scene, shaderIdx);
+            scene.sceneFns.DrawReloadFunc(scene, shaderIdx);
           }
           scene.shadersToReload.clear();
         }
@@ -86,7 +86,7 @@ namespace Temp::Scene
       {
         std::unique_lock<std::mutex> lock(scene.mtx);
         scene.renderState = State::MAX;
-        scene.DrawDestructFunc(scene);
+        scene.sceneFns.DrawDestructFunc(scene);
         lock.unlock();
         scene.cv.notify_one();
       }

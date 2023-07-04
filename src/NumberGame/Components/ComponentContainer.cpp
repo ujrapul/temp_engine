@@ -28,6 +28,13 @@ namespace Game::Component::Container
     }
 
     template <uint8_t E>
+    void ResetEnum(Temp::Component::Container::Data &data)
+    {
+      // Destruct logic for enum E
+      Reset<E>(data);
+    }
+
+    template <uint8_t E>
     struct EnumRange
     {
       static void InitEnums(Temp::Component::Container::Data &data)
@@ -50,6 +57,13 @@ namespace Game::Component::Container
         if constexpr (E < ENUM_MAX)
           EnumRange<E + 1>::EntityDestroyedEnums(data, entity);
       }
+      
+      static void ResetEnums(Temp::Component::Container::Data &data)
+      {
+        ResetEnum<E>(data);
+        if constexpr (E < ENUM_MAX)
+          EnumRange<E + 1>::ResetEnums(data);
+      }
     };
   }
 
@@ -66,5 +80,10 @@ namespace Game::Component::Container
   void EntityDestroyed(Temp::Component::Container::Data &data, Temp::Entity entity)
   {
     EnumRange<ENUM_MIN>::EntityDestroyedEnums(data, entity);
+  }
+  
+  void Reset(Temp::Component::Container::Data &data)
+  {
+    EnumRange<ENUM_MIN>::ResetEnums(data);
   }
 }

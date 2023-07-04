@@ -34,5 +34,11 @@ namespace Temp
     {
       return Component::Container::Get<Component::Type::POSITION2D>(coordinator.componentData, entity);
     }
+    
+    void Reset(Data &coordinator)
+    {
+      EntityManager::Reset(coordinator.entityData);
+      Component::Container::Reset(coordinator.componentData);
+    }
   }
 }

@@ -4,6 +4,7 @@
 #include "FontLoader.hpp"
 #include "OpenGLWrapper.hpp"
 #include "Drawable.hpp"
+#include "EngineUtils.hpp"
 #include <vector>
 
 // NOTE: Don't use inline global mutexes, it'll stall multiple instances of the same object
@@ -11,12 +12,13 @@ namespace Temp::TextBox
 {
   namespace
   {
-    std::unordered_map<Entity, std::tuple<std::vector<float>, std::vector<unsigned int>>> newData{};
-
-    std::tuple<std::vector<float>, std::vector<unsigned int>> PopulateVerticesIndices(Data &textBox)
+    void PopulateVerticesIndices(Data &textBox)
     {
-      std::vector<float> vertices;
-      std::vector<unsigned int> indices;
+      auto &vertices = textBox.vertices;
+      auto &indices  = textBox.indices;
+      
+      FreeContainer(vertices);
+      FreeContainer(indices);
 
       vertices.reserve(textBox.text.length() * 16);
       indices.reserve(textBox.text.length() * 6);
@@ -60,8 +62,9 @@ namespace Temp::TextBox
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
       }
-
-      return std::make_tuple(vertices, indices);
+      
+      vertices.shrink_to_fit();
+      indices.shrink_to_fit();
     }
   }
 
@@ -86,9 +89,9 @@ namespace Temp::TextBox
 
     Component::Drawable::Data drawable;
     drawable.entity = textBox.entity;
-    auto [vertices, indices] = std::move(PopulateVerticesIndices(textBox));
-    drawable.vertices = std::move(vertices);
-    drawable.indices = std::move(indices);
+    PopulateVerticesIndices(textBox);
+    drawable.vertices = std::move(textBox.vertices);
+    drawable.indices = std::move(textBox.indices);
 
     Scene::AddComponent<Component::Type::DRAWABLE>(scene, textBox.entity, std::move(drawable));
     Scene::AddComponent<Component::Type::POSITION2D>(scene, textBox.entity, {textBox.x, textBox.y});
@@ -101,7 +104,7 @@ namespace Temp::TextBox
     std::lock_guard<std::mutex> lock(*textBox.mtx);
     Scene::Get<Temp::Component::Type::TEXT>(scene, textBox.entity) = newText;
     textBox.text = newText;
-    newData[textBox.entity] = std::move(PopulateVerticesIndices(textBox));
+    PopulateVerticesIndices(textBox);
     textBox.renderText = true;
   }
 
@@ -118,9 +121,8 @@ namespace Temp::TextBox
 
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
     //    PopulateVerticesIndices(drawable, textBox);
-    auto &[vertices, indices] = newData[textBox.entity];
-    drawable.vertices = std::move(vertices);
-    drawable.indices = std::move(indices);
+    drawable.vertices = std::move(textBox.vertices);
+    drawable.indices = std::move(textBox.indices);
     drawable.disableDepth = true;
 
     OpenGLWrapper::UpdateVBO(drawable.VBO, drawable.vertices.data(), drawable.vertices.size(), GL_DYNAMIC_DRAW);
@@ -174,6 +176,8 @@ namespace Temp::TextBox
   
   void Destruct(Data &textBox)
   {
+    FreeContainer(textBox.vertices);
+    FreeContainer(textBox.indices);
     delete textBox.mtx;
   }
 

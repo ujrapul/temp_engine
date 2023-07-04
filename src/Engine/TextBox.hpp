@@ -7,6 +7,7 @@
 #include "gl.h"
 #endif
 #include <string>
+#include <vector>
 
 namespace Temp::Scene
 {
@@ -25,6 +26,8 @@ namespace Temp::TextBox
     Entity entity{};
     bool renderText{false};
     bool enableOutline{false};
+    std::vector<float> vertices{};
+    std::vector<unsigned int> indices{};
     std::mutex *mtx{new std::mutex()};
   };
   

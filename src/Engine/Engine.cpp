@@ -101,7 +101,10 @@ namespace Temp::Engine
   
   void Start(Data &engine, const char *windowName, int windowX, int windowY)
   {
-    currentScene = engine.scenes.front();
+    currentScene = new Scene::Data();
+    currentScene->sceneFns = engine.sceneFns.front();
+//    Scene::Construct(*currentScene);
+    engine.coordinatorFns.Init(currentScene->coordinator);
     // Start Render Thread
     Render::Initialize(windowName, windowX, windowY, engine);
 
@@ -136,14 +139,14 @@ namespace Temp::Engine
     {
       Temp::Scene::ClearRender(*currentScene);
       std::unique_lock<std::mutex> lock(currentScene->mtx);
-      currentScene->ConstructFunc(*currentScene);
+      currentScene->sceneFns.ConstructFunc(*currentScene);
       engine.currentScene = currentScene;
       currentScene->state = Scene::State::MAX;
       currentScene->renderState = Scene::State::ENTER;
     }
     break;
     case Scene::State::RUN:
-      currentScene->Update(*currentScene, deltaTime);
+      currentScene->sceneFns.Update(*currentScene, deltaTime);
       break;
     case Scene::State::LEAVE:
     {
@@ -152,12 +155,12 @@ namespace Temp::Engine
       currentScene->renderState = Scene::State::LEAVE;
       currentScene->cv.wait(lock, []()
                             { return currentScene->renderState == Scene::State::MAX; });
-      currentScene->DestructFunc(*currentScene);
+      currentScene->sceneFns.DestructFunc(*currentScene);
       currentScene->state = Scene::State::ENTER;
-      currentScene = currentScene->nextScene;
+      currentScene->sceneFns = *currentScene->sceneFns.nextScene;
       engine.currentScene = currentScene;
-      if (currentScene)
-        currentScene->state = Scene::State::ENTER;
+      engine.coordinatorFns.Reset(currentScene->coordinator);
+      currentScene->state = Scene::State::ENTER;
     }
     break;
     default:
@@ -206,14 +209,11 @@ namespace Temp::Engine
 #endif
     Render::Destroy();
     // For now the games should handle clean up of scenes
-    for (Scene::Data *scene : engine.scenes)
-    {
-      delete scene;
-    }
     Render::OpenGLWrapper::ClearShaderStrings();
-    engine.scenes.clear();
     Input::Destruct(engine.keyEventData);
     lua_close(engine.lua);
+    engine.coordinatorFns.Destruct(currentScene->coordinator);
+    delete currentScene;
   }
 
   void Construct(Data &engine)
@@ -226,7 +226,7 @@ namespace Temp::Engine
     engine.quit = true;
   }
 
-  void EnqueueGlobalRender(Data &engine, RenderFunction func, void *data)
+  void EnqueueGlobalRender(Data &engine, void (*func)(void*), void *data)
   {
     std::unique_lock<std::mutex> lock(engine.mtx);
     engine.renderQueue.push({func, data});

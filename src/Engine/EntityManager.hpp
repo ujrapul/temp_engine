@@ -26,5 +26,6 @@ namespace Temp
     void SetSignature(Data& entityManager, Entity entity, Signature signature);
     [[nodiscard]] Signature GetSignature(Data& entityManager, Entity entity);
     void Destruct(Data& entityManager);
+    void Reset(Data& entityManager);
   }
 }

@@ -16,6 +16,12 @@ namespace Game
       Temp::Coordinator::Destruct(data);
       Component::Container::Destruct(data.componentData);
     }
+    
+    void Reset(Temp::Coordinator::Data& data)
+    {
+      Temp::Coordinator::Reset(data);
+      Component::Container::Reset(data.componentData);
+    }
   }
 }
 

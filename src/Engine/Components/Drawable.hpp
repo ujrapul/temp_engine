@@ -49,31 +49,13 @@ namespace Temp::Component::Drawable
 
     OpenGLWrapper::Set4x4MatrixShaderProperty(drawable.shaderProgram, "model", &drawable.model.rows[0][0]);
   }
-  
-#ifdef DEBUG
-  inline void Reconstruct(Data &drawable)
-  {
-    using namespace Temp::Render;
-    drawable.shaderProgram = OpenGLWrapper::CreateShaderProgram(drawable.shaderIdx);
-
-    drawable.VAO = OpenGLWrapper::CreateVAO();
-    drawable.VBO = OpenGLWrapper::CreateVBO(drawable.vertices.data(), drawable.vertices.size(), drawable.bufferDraw);
-    drawable.EBO = OpenGLWrapper::CreateEBO(drawable.indices.data(), drawable.indices.size(), drawable.bufferDraw);
-    
-    drawable.indicesSize = (int)drawable.indices.size();
-    OpenGLWrapper::SetVertexAttribArray(0, drawable.vertexStride, drawable.vertexStride, 0);
-
-    Update(drawable);
-
-    OpenGLWrapper::BindUBOShader(drawable.UBO, drawable.shaderProgram, "Matrices", 0);
-  }
-#else
-  inline void Reconstruct(Data &){}
-#endif
 
   inline void Construct(Data &drawable, int shaderIdx, int bufferDraw, int vertexStride, int UBO, const char * UBOMatrices, int UBOMatricesIdx)
   {
     using namespace Temp::Render;
+    
+    drawable.vertices.shrink_to_fit();
+    drawable.indices.shrink_to_fit();
 
     drawable.shaderProgram = OpenGLWrapper::CreateShaderProgram(shaderIdx);
     drawable.VAO = OpenGLWrapper::CreateVAO();
@@ -137,7 +119,7 @@ namespace Temp::Component::Drawable
   inline void Destruct(Data& drawable)
   {
     using namespace Temp::Render::OpenGLWrapper;
-
+    
     CleanArrays(drawable.VAO);
     CleanBuffer(drawable.VBO);
     CleanBuffer(drawable.EBO);

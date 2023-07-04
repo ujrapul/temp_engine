@@ -69,5 +69,11 @@ namespace Temp
         DestroyEntity(entityManager, entityManager.currentEntities.back());
       }
     }
+    
+    void Reset(Data& entityManager)
+    {
+      Destruct(entityManager);
+      InitData(entityManager);
+    }
   }
 }

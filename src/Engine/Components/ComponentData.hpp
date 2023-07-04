@@ -34,6 +34,14 @@ namespace Temp
     };
     
     template<typename T>
+    inline void Reset(ArrayData<T>& data)
+    {
+      data.array.fill({});
+      data.mapping = {};
+      Init(data);
+    }
+    
+    template<typename T>
     inline void Init(ArrayData<T>& data)
     {
       std::scoped_lock<std::mutex> lock(data.mtx);

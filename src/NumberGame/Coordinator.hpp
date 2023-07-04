@@ -8,5 +8,6 @@ namespace Game
   {
     void Init(Temp::Coordinator::Data& data);
     void Destruct(Temp::Coordinator::Data& data);
+    void Reset(Temp::Coordinator::Data& data);
   }
 }

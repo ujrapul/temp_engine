@@ -25,6 +25,13 @@ namespace Temp::Component::Container
     delete static_cast<ArrayData<MapToComponentDataType<T>> *>(data.components[T]);
     data.components[T] = nullptr;
   }
+  
+  template <uint8_t T>
+  constexpr void Reset(Data &data)
+  {
+    auto* arrayData = static_cast<ArrayData<MapToComponentDataType<T>> *>(data.components[T]);
+    Component::Reset(*arrayData);
+  }
 
   template <uint8_t T>
   [[nodiscard]] constexpr ArrayData<MapToComponentDataType<T>> &GetComponentArray(Data &data)
@@ -63,4 +70,5 @@ namespace Temp::Component::Container
   void Init(Data &data);
   void Destruct(Data &data);
   void EntityDestroyed(Data &data, Entity entity);
+  void Reset(Data& data);
 }

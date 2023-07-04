@@ -51,7 +51,7 @@ namespace Game::Scene::MainMenuLevel
 
       Temp::Camera::ResetView();
 
-      Temp::Scene::Construct(scene);
+//      Temp::Scene::Construct(scene);
 
       TextBox::Construct(scene, gameData.gameTextBox);
       Temp::Component::Hoverable::Data playHoverable{PlayCallback, HoverEnter, HoverLeave, &gameData.playButton, -20, 0, 9, 4};
@@ -65,12 +65,12 @@ namespace Game::Scene::MainMenuLevel
       Temp::TextButton::Update(deltaTime);
     }
 
-    void Destruct(Temp::Scene::Data &scene)
+    void Destruct(Temp::Scene::Data &)
     {
       TextBox::Destruct(gameData.gameTextBox);
       Temp::TextButton::Destruct(gameData.playButton);
       Temp::TextButton::Destruct(gameData.quitButton);
-      Temp::Scene::Destruct(scene);
+//      Temp::Scene::Destruct(scene);
     }
 
     void DrawUpdate(Temp::Scene::Data &scene)
@@ -100,16 +100,16 @@ namespace Game::Scene::MainMenuLevel
     }
   }
 
-  Temp::Scene::Data *Create()
+  Temp::Scene::SceneFns Create()
   {
-    Temp::Scene::Data *scene = new Temp::Scene::Data();
-    scene->ConstructFunc = Construct;
-    scene->Update = Update;
-    scene->DestructFunc = Destruct;
-    scene->DrawConstructFunc = DrawConstruct;
-    scene->DrawUpdateFunc = DrawUpdate;
-    scene->DrawDestructFunc = DrawDestruct;
-    scene->DrawReloadFunc = DrawReload;
+    Temp::Scene::SceneFns scene;
+    scene.ConstructFunc = Construct;
+    scene.Update = Update;
+    scene.DestructFunc = Destruct;
+    scene.DrawConstructFunc = DrawConstruct;
+    scene.DrawUpdateFunc = DrawUpdate;
+    scene.DrawDestructFunc = DrawDestruct;
+    scene.DrawReloadFunc = DrawReload;
 
     return scene;
   }

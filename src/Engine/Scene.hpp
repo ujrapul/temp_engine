@@ -31,21 +31,9 @@ namespace Temp::Scene
     RenderFunction func;
     void *data;
   };
-
-  struct Data
+  
+  struct SceneFns
   {
-    Coordinator::Data coordinator{};
-    std::queue<RenderData> renderQueue{};
-    State state{State::ENTER};
-    State renderState{State::MAX};
-    Data *nextScene{nullptr};
-    std::mutex mtx{};
-    std::mutex queueMtx{};
-    std::condition_variable cv{};
-#ifdef DEBUG
-    std::mutex reloadMtx{};
-    std::unordered_set<int> shadersToReload{};
-#endif
     void (*ConstructFunc)(Scene::Data &){Construct};
     void (*Update)(Scene::Data &, float){NoOpSceneUpdate};
     void (*DestructFunc)(Scene::Data &){Destruct};
@@ -53,6 +41,23 @@ namespace Temp::Scene
     void (*DrawDestructFunc)(Scene::Data &){NoOpScene};
     void (*DrawUpdateFunc)(Scene::Data &){NoOpScene};
     void (*DrawReloadFunc)(Scene::Data &, int){NoOpSceneDrawReload};
+    SceneFns* nextScene{};
+  };
+
+  struct Data
+  {
+    Coordinator::Data coordinator{};
+    std::queue<RenderData> renderQueue{};
+    State state{State::ENTER};
+    State renderState{State::MAX};
+    std::mutex mtx{};
+    std::mutex queueMtx{};
+    std::condition_variable cv{};
+#ifdef DEBUG
+    std::mutex reloadMtx{};
+    std::unordered_set<int> shadersToReload{};
+#endif
+    SceneFns sceneFns{};
   };
 
   template <uint8_t T>

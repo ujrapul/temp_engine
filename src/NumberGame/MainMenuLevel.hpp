@@ -1,11 +1,8 @@
 #pragma once
 
-namespace Temp::Scene
-{
-  struct Data;
-}
+#include "Engine/Scene.hpp"
 
 namespace Game::Scene::MainMenuLevel
 {
-  Temp::Scene::Data *Create();
+  Temp::Scene::SceneFns Create();
 }

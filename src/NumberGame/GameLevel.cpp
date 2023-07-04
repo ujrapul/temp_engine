@@ -174,7 +174,7 @@ namespace Game::Scene::GameLevel
       player2Score = 0;
       replay = false;
 
-      Coordinator::Init(data.coordinator);
+//      Coordinator::Init(data.coordinator);
 
       gameData.grid.gridSize = 100;
 
@@ -212,7 +212,7 @@ namespace Game::Scene::GameLevel
 
     void Construct2(Temp::Scene::Data &data)
     {
-      Coordinator::Init(data.coordinator);
+//      Coordinator::Init(data.coordinator);
       switch (playerWinState)
       {
       case 0:
@@ -319,9 +319,9 @@ namespace Game::Scene::GameLevel
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
     }
 
-    void Destruct(Temp::Scene::Data &data)
+    void Destruct(Temp::Scene::Data &)
     {
-      Coordinator::Destruct(data.coordinator);
+//      Coordinator::Destruct(data.coordinator);
 //      Temp::Scene::Destruct(data);
       Temp::TextBox::Destruct(gameData.playerTurnTextBox);
       Temp::TextBox::Destruct(gameData.player1TextBox);
@@ -333,9 +333,9 @@ namespace Game::Scene::GameLevel
 //      delete gameData.grid;
     }
     
-    void Destruct2(Temp::Scene::Data &data)
+    void Destruct2(Temp::Scene::Data &)
     {
-      Coordinator::Destruct(data.coordinator);
+//      Coordinator::Destruct(data.coordinator);
 //      Temp::Scene::Destruct(data);
       Temp::TextBox::Destruct(gameData2.playerWinTextBox);
       Temp::TextBox::Destruct(gameData2.player1ScoreTextBox);
@@ -385,16 +385,16 @@ namespace Game::Scene::GameLevel
     }
   }
 
-  Temp::Scene::Data *Create(Temp::Input::KeyEventData &keyEventData)
+  Temp::Scene::SceneFns Create(Temp::Input::KeyEventData &keyEventData)
   {
-    Temp::Scene::Data *scene = new Temp::Scene::Data();
-    scene->ConstructFunc = Construct;
-    scene->Update = Update;
-    scene->DrawConstructFunc = DrawConstruct;
-    scene->DrawUpdateFunc = DrawUpdate;
-    scene->DestructFunc = Destruct;
-    scene->DrawDestructFunc = DrawDestruct;
-    scene->DrawReloadFunc = DrawReload;
+    Temp::Scene::SceneFns scene;
+    scene.ConstructFunc = Construct;
+    scene.Update = Update;
+    scene.DrawConstructFunc = DrawConstruct;
+    scene.DrawUpdateFunc = DrawUpdate;
+    scene.DestructFunc = Destruct;
+    scene.DrawDestructFunc = DrawDestruct;
+    scene.DrawReloadFunc = DrawReload;
 
     keyEventDataPtr = &keyEventData;
 
@@ -403,16 +403,16 @@ namespace Game::Scene::GameLevel
 
   // This is here only for testing. In an actual game, it's better to create a separate file
   // to host this data
-  Temp::Scene::Data *Create2(Temp::Input::KeyEventData & /*keyEventData*/)
+  Temp::Scene::SceneFns Create2(Temp::Input::KeyEventData & /*keyEventData*/)
   {
-    Temp::Scene::Data *scene = new Temp::Scene::Data();
-    scene->ConstructFunc = Construct2;
-    scene->Update = Update2;
-    scene->DrawConstructFunc = DrawConstruct2;
-    scene->DrawUpdateFunc = DrawUpdate2;
-    scene->DestructFunc = Destruct2;
-    scene->DrawDestructFunc = DrawDestruct2;
-    scene->DrawReloadFunc = DrawReload2;
+    Temp::Scene::SceneFns scene;
+    scene.ConstructFunc = Construct2;
+    scene.Update = Update2;
+    scene.DrawConstructFunc = DrawConstruct2;
+    scene.DrawUpdateFunc = DrawUpdate2;
+    scene.DestructFunc = Destruct2;
+    scene.DrawDestructFunc = DrawDestruct2;
+    scene.DrawReloadFunc = DrawReload2;
 
     return scene;
   }
