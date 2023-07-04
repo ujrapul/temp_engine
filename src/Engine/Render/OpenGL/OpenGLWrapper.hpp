@@ -11,6 +11,7 @@
 #include <ft2build.h>
 #include <iostream>
 #include <vector>
+#include <filesystem>
 #include FT_FREETYPE_H
 
 // IMPORTANT NOTES SINCE YOU'RE TOO DUMB TO REMEMBER THEM!
@@ -22,7 +23,7 @@
 namespace Temp::Render::OpenGLWrapper
 {
   // DO NOT USE OUTSIDE OPENGLWRAPPER!
-  inline std::vector<std::vector<const char *>> globalShaders{};
+  inline std::vector<std::vector<const char *>> globalShaders;
 
   namespace ShaderIdx
   {
@@ -45,6 +46,21 @@ namespace Temp::Render::OpenGLWrapper
   {
     static auto shadersPath = ApplicationDirectory() / "Shaders";
     return shadersPath;
+  }
+  
+  inline const std::vector<std::string>& GlobalShaderFiles()
+  {
+    static std::vector<std::string> out = {
+      (GetShadersPath() / "Common.glsl").c_str()
+    };
+    return out;
+  }
+  
+  inline std::vector<std::filesystem::file_time_type>& GlobalShaderFilesTimes()
+  {
+    static std::vector<std::filesystem::file_time_type> out;
+    out.resize(GlobalShaderFiles().size());
+    return out;
   }
 
   void LoadShaders();

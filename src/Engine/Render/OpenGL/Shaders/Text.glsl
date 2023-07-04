@@ -51,6 +51,6 @@ void main() {
   if(alpha <= 0 || alpha > 1.0) {
     discard;
   }
-  color = vec4(mix(u_color.rgb, u_outline_color.rgb, outline), alpha);
+  color = vec4(mix(applyOutlineGlow(text, texCoords).rgb, u_outline_color.rgb, outline), alpha);
 }
 #endif

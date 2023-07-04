@@ -58,20 +58,37 @@ namespace Temp::Engine
             }
           }
         }
-        // TODO: Need to reload the state of the shader as well, including all uniforms
+
         {
           std::lock_guard<std::mutex> lock(currentScene->reloadMtx);
           if (currentScene->renderState == Scene::State::RUN)
           {
-            auto &drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*currentScene);
-            for (size_t i = 0; i < drawableArray.mapping.size; ++i)
+            const auto& globals = Render::OpenGLWrapper::GlobalShaderFiles();
+            for (int i = 0; i < globals.size(); ++i)
             {
-              auto &drawable = drawableArray.array[i];
-              auto time = std::filesystem::last_write_time(drawable.shaderPath);
-              if (time != drawable.time)
+              auto &drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*currentScene);
+              auto time = std::filesystem::last_write_time(globals[i].c_str());
+              if (time != Render::OpenGLWrapper::GlobalShaderFilesTimes()[i])
               {
-                drawable.time = time;
-                currentScene->shadersToReload.insert(drawable.shaderIdx);
+                Render::OpenGLWrapper::GlobalShaderFilesTimes()[i] = time;
+                for (size_t i = 0; i < drawableArray.mapping.size; ++i)
+                {
+                  auto &drawable = drawableArray.array[i];
+                  currentScene->shadersToReload.insert(drawable.shaderIdx);
+                }
+              }
+              else
+              {
+                for (size_t i = 0; i < drawableArray.mapping.size; ++i)
+                {
+                  auto &drawable = drawableArray.array[i];
+                  auto time = std::filesystem::last_write_time(drawable.shaderPath);
+                  if (time != drawable.time)
+                  {
+                    drawable.time = time;
+                    currentScene->shadersToReload.insert(drawable.shaderIdx);
+                  }
+                }
               }
             }
           }

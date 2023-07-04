@@ -11,21 +11,33 @@ namespace Temp::Render::OpenGLWrapper
 {
   namespace
   {
+    // Need to delete when passed out
     const char *GetCommonShader()
     {
-      static const char* common = LoadFileAsString(std::filesystem::path(GetShadersPath() / "Common.glsl").c_str());
+      const char* common = LoadFileAsString(std::filesystem::path(GetShadersPath() / "Common.glsl").c_str());
       return common;
     }
   }
 
   void LoadShaders()
   {
-    const auto& shadersPath = GetShadersPath();
-
     static const char *VERT_HEADER = "#version 330\n#define VERTEX_SHADER\n";
     static const char *FRAG_HEADER = "#version 330\n#define FRAGMENT_SHADER\n";
-
+    
+    for (std::vector<const char*>& shaderGroup : globalShaders)
+    {
+      for (const char* string : shaderGroup)
+      {
+        if (string != VERT_HEADER && string != FRAG_HEADER)
+        {
+          delete [] string;
+        }
+      }
+    }
     globalShaders.clear();
+
+    const auto& shadersPath = GetShadersPath();
+
     for (const char* shaderFile : ShaderFiles())
     {
       globalShaders.insert(globalShaders.end(), {
