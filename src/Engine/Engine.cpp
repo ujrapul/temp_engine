@@ -96,8 +96,8 @@ namespace Temp::Engine
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
     }
-  }
 #endif
+  }
   
   void Start(Data &engine, const char *windowName, int windowX, int windowY)
   {
@@ -210,6 +210,7 @@ namespace Temp::Engine
     {
       delete scene;
     }
+    Render::OpenGLWrapper::ClearShaderStrings();
     engine.scenes.clear();
     Input::Destruct(engine.keyEventData);
     lua_close(engine.lua);

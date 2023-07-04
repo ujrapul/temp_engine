@@ -11,6 +11,9 @@ namespace Temp::Render::OpenGLWrapper
 {
   namespace
   {
+    const char *VERT_HEADER = "#version 330\n#define VERTEX_SHADER\n";
+    const char *FRAG_HEADER = "#version 330\n#define FRAGMENT_SHADER\n";
+
     // Need to delete when passed out
     const char *GetCommonShader()
     {
@@ -18,12 +21,9 @@ namespace Temp::Render::OpenGLWrapper
       return common;
     }
   }
-
-  void LoadShaders()
+  
+  void ClearShaderStrings()
   {
-    static const char *VERT_HEADER = "#version 330\n#define VERTEX_SHADER\n";
-    static const char *FRAG_HEADER = "#version 330\n#define FRAGMENT_SHADER\n";
-    
     for (std::vector<const char*>& shaderGroup : globalShaders)
     {
       for (const char* string : shaderGroup)
@@ -35,6 +35,11 @@ namespace Temp::Render::OpenGLWrapper
       }
     }
     globalShaders.clear();
+  }
+
+  void LoadShaders()
+  {
+    ClearShaderStrings();
 
     const auto& shadersPath = GetShadersPath();
 

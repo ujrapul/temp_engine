@@ -52,10 +52,7 @@ namespace Temp::Scene
     void (*DrawConstructFunc)(Scene::Data &){NoOpScene};
     void (*DrawDestructFunc)(Scene::Data &){NoOpScene};
     void (*DrawUpdateFunc)(Scene::Data &){NoOpScene};
-#ifdef DEBUG
     void (*DrawReloadFunc)(Scene::Data &, int){NoOpSceneDrawReload};
-#endif
-
   };
 
   template <uint8_t T>

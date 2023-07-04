@@ -50,10 +50,10 @@ namespace Temp::Component::Drawable
     OpenGLWrapper::Set4x4MatrixShaderProperty(drawable.shaderProgram, "model", &drawable.model.rows[0][0]);
   }
   
+#ifdef DEBUG
   inline void Reconstruct(Data &drawable)
   {
     using namespace Temp::Render;
-
     drawable.shaderProgram = OpenGLWrapper::CreateShaderProgram(drawable.shaderIdx);
 
     drawable.VAO = OpenGLWrapper::CreateVAO();
@@ -67,7 +67,10 @@ namespace Temp::Component::Drawable
 
     OpenGLWrapper::BindUBOShader(drawable.UBO, drawable.shaderProgram, "Matrices", 0);
   }
-  
+#else
+  inline void Reconstruct(Data &){}
+#endif
+
   inline void Construct(Data &drawable, int shaderIdx, int bufferDraw, int vertexStride, int UBO, const char * UBOMatrices, int UBOMatricesIdx)
   {
     using namespace Temp::Render;

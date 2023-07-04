@@ -160,6 +160,7 @@ namespace Temp::TextBox
   
   void DrawReload(Scene::Data &scene, Data &textBox, int shaderIdx)
   {
+#ifdef DEBUG
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
     if (shaderIdx != drawable.shaderIdx)
     {
@@ -168,6 +169,12 @@ namespace Temp::TextBox
 
     DrawDestruct(scene, textBox);
     DrawConstruct(scene, textBox);
+#endif
+  }
+  
+  void Destruct(Data &textBox)
+  {
+    delete textBox.mtx;
   }
 
   // TODO: Keeping here for reference to NOT do this.

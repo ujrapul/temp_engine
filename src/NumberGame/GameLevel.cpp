@@ -20,7 +20,7 @@ namespace Game::Scene::GameLevel
       std::array<Player::Data, 2> players{};
       std::unordered_set<int> numbersUsed{};
       std::array<int, 10> numbersUnused{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-      Grid::Data *grid{new Grid::Data()};
+      Grid::Data grid{};
       TextBox::Data playerTurnTextBox{"Player 1's Turn", -20, 40, fontScale, (Entity)-1};
       TextBox::Data player1TextBox{"Player 1's numbers", -85, 10, fontScale, (Entity)-1};
       TextBox::Data player1NumbersTextBox{"", -85, 0, fontScale, (Entity)-1};
@@ -111,7 +111,7 @@ namespace Game::Scene::GameLevel
 
     void UpdateNumbers(Temp::Scene::Data &sceneData, Entity player, int currentValue)
     {
-      Grid::UpdateNumbers(sceneData, gameData.grid, player, currentValue);
+      Grid::UpdateNumbers(sceneData, &gameData.grid, player, currentValue);
       UpdateText(sceneData, currentValue);
     }
 
@@ -164,7 +164,7 @@ namespace Game::Scene::GameLevel
     void Construct(Temp::Scene::Data &data)
     {
       Temp::Camera::ResetView();
-      Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid->gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
+      Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid.gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
 
       gameData = {};
@@ -176,7 +176,7 @@ namespace Game::Scene::GameLevel
 
       Coordinator::Init(data.coordinator);
 
-      gameData.grid->gridSize = 100;
+      gameData.grid.gridSize = 100;
 
       Temp::TextBox::Construct(data, gameData.playerTurnTextBox);
       Temp::TextBox::Construct(data, gameData.player1TextBox);
@@ -184,7 +184,7 @@ namespace Game::Scene::GameLevel
       Temp::TextBox::Construct(data, gameData.player2TextBox);
       Temp::TextBox::Construct(data, gameData.player2NumbersTextBox);
       Temp::TextBox::Construct(data, gameData.numbersLeftTextBox);
-      Grid::Construct(data, gameData.grid);
+      Grid::Construct(data, &gameData.grid);
 
       Entity Player1 = Temp::Scene::CreateEntity(data);
       Temp::Scene::AddComponent<Component::Type::COLLECTED_VALUE>(data, Player1, {});
@@ -285,7 +285,7 @@ namespace Game::Scene::GameLevel
 
     void DrawConstruct(Temp::Scene::Data &data)
     {
-      Grid::DrawConstruct(data, gameData.grid);
+      Grid::DrawConstruct(data, &gameData.grid);
       Temp::TextBox::DrawConstruct(data, gameData.playerTurnTextBox);
       Temp::TextBox::DrawConstruct(data, gameData.player1TextBox);
       Temp::TextBox::DrawConstruct(data, gameData.player1NumbersTextBox);
@@ -305,12 +305,12 @@ namespace Game::Scene::GameLevel
 
     void DrawUpdate(Temp::Scene::Data &data)
     {
-      Grid::DrawUpdate(data, gameData.grid);
+      Grid::DrawUpdate(data, &gameData.grid);
       TextBox::UpdateRender(data, gameData.player1NumbersTextBox);
       TextBox::UpdateRender(data, gameData.player2NumbersTextBox);
       TextBox::UpdateRender(data, gameData.numbersLeftTextBox);
       TextBox::UpdateRender(data, gameData.playerTurnTextBox);
-      Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid->gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
+      Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid.gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
     }
 
@@ -321,14 +321,32 @@ namespace Game::Scene::GameLevel
 
     void Destruct(Temp::Scene::Data &data)
     {
-      Temp::Scene::Destruct(data);
-      Grid::Destruct(gameData.grid);
-      delete gameData.grid;
+      Coordinator::Destruct(data.coordinator);
+//      Temp::Scene::Destruct(data);
+      Temp::TextBox::Destruct(gameData.playerTurnTextBox);
+      Temp::TextBox::Destruct(gameData.player1TextBox);
+      Temp::TextBox::Destruct(gameData.player1NumbersTextBox);
+      Temp::TextBox::Destruct(gameData.player2TextBox);
+      Temp::TextBox::Destruct(gameData.player2NumbersTextBox);
+      Temp::TextBox::Destruct(gameData.numbersLeftTextBox);
+      Grid::Destruct(&gameData.grid);
+//      delete gameData.grid;
+    }
+    
+    void Destruct2(Temp::Scene::Data &data)
+    {
+      Coordinator::Destruct(data.coordinator);
+//      Temp::Scene::Destruct(data);
+      Temp::TextBox::Destruct(gameData2.playerWinTextBox);
+      Temp::TextBox::Destruct(gameData2.player1ScoreTextBox);
+      Temp::TextBox::Destruct(gameData2.player2ScoreTextBox);
+      Temp::TextBox::Destruct(gameData2.quitTextBox);
+      Temp::TextBox::Destruct(gameData2.replayTextBox);
     }
     
     void DrawDestruct(Temp::Scene::Data &data)
     {
-      Grid::DrawDestruct(data, gameData.grid);
+      Grid::DrawDestruct(data, &gameData.grid);
       Temp::TextBox::DrawDestruct(data, gameData.playerTurnTextBox);
       Temp::TextBox::DrawDestruct(data, gameData.player1TextBox);
       Temp::TextBox::DrawDestruct(data, gameData.player1NumbersTextBox);
@@ -348,7 +366,7 @@ namespace Game::Scene::GameLevel
     
     void DrawReload(Temp::Scene::Data &data, int shaderIdx)
     {
-      Grid::DrawReload(data, gameData.grid);
+      Grid::DrawReload(data, &gameData.grid);
       Temp::TextBox::DrawReload(data, gameData.playerTurnTextBox, shaderIdx);
       Temp::TextBox::DrawReload(data, gameData.player1TextBox, shaderIdx);
       Temp::TextBox::DrawReload(data, gameData.player1NumbersTextBox, shaderIdx);
@@ -392,6 +410,7 @@ namespace Game::Scene::GameLevel
     scene->Update = Update2;
     scene->DrawConstructFunc = DrawConstruct2;
     scene->DrawUpdateFunc = DrawUpdate2;
+    scene->DestructFunc = Destruct2;
     scene->DrawDestructFunc = DrawDestruct2;
     scene->DrawReloadFunc = DrawReload2;
 

@@ -35,4 +35,5 @@ namespace Temp::TextBox
   void EnableOutline(Scene::Data &scene, Data &textBox, bool enable);
   void DrawDestruct(Scene::Data &scene, Data &textBox);
   void DrawReload(Scene::Data &scene, Data &textBox, int shaderIdx);
+  void Destruct(Data &textBox);
 }

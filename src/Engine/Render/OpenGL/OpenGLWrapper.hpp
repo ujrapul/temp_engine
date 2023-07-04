@@ -35,6 +35,8 @@ namespace Temp::Render::OpenGLWrapper
       MAX
     };
   };
+
+  void ClearShaderStrings();
   
   inline const std::vector<const char*>& ShaderFiles()
   {

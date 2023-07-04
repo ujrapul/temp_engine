@@ -147,16 +147,14 @@ void RenderThread()
     while (Temp::Engine::IsActive(*self.engine)) {
       Temp::Engine::Process(*self.engine);
       @autoreleasepool {
-        NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
+        NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
         if (event) {
           [NSApp sendEvent:event];
-        } else {
         }
       }
     }
-    
-    Temp::Engine::Destroy(*self.engine);
   }
+  Temp::Engine::Destroy(*self.engine);
   [application terminate:nil];
 }
 

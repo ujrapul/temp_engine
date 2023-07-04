@@ -24,11 +24,11 @@ fi
                 fi
                 ninja;;
     Darwin*)    if [ "$1" = "release" ] || [ "$1" = "Release" ]; then
-                  mkdir Release
-                  cp -rf ../src/Engine/Fonts Release
-                  cp -rf ../src/Engine/Render/OpenGL/Shaders Release
-                  cp -rf ../src/Engine/Images Release
-		  cp -rf ../src/Engine/LuaScripts Release
+		  mkdir RelWithDebInfo
+                  cp -rf ../src/Engine/Fonts RelWithDebInfo
+                  cp -rf ../src/Engine/Render/OpenGL/Shaders RelWithDebInfo
+                  cp -rf ../src/Engine/Images RelWithDebInfo
+		  cp -rf ../src/Engine/LuaScripts RelWithDebInfo
                   cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Xcode ..;
                 else
                   mkdir Debug

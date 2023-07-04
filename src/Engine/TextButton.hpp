@@ -55,4 +55,9 @@ namespace Temp::TextButton
   {
     TextBox::DrawReload(scene, textButton.textBox, shaderIdx);
   }
+  
+  inline void Destruct(Data &textButton)
+  {
+    TextBox::Destruct(textButton.textBox);
+  }
 }

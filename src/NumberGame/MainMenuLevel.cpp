@@ -13,7 +13,6 @@ namespace Game::Scene::MainMenuLevel
     using namespace Temp;
 
     float fontScale = 0.04f;
-    std::mutex mtx{};
 
     struct Data
     {
@@ -68,6 +67,9 @@ namespace Game::Scene::MainMenuLevel
 
     void Destruct(Temp::Scene::Data &scene)
     {
+      TextBox::Destruct(gameData.gameTextBox);
+      Temp::TextButton::Destruct(gameData.playButton);
+      Temp::TextButton::Destruct(gameData.quitButton);
       Temp::Scene::Destruct(scene);
     }
 

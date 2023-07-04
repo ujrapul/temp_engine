@@ -22,7 +22,7 @@ namespace Temp::Component::Container
   template <uint8_t T>
   constexpr void Destruct(Data &data)
   {
-    delete static_cast<Temp::Component::ArrayData<MapToComponentDataType<T>> *>(data.components[T]);
+    delete static_cast<ArrayData<MapToComponentDataType<T>> *>(data.components[T]);
     data.components[T] = nullptr;
   }
 
