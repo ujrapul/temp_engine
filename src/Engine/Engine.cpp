@@ -49,7 +49,7 @@ namespace Temp::Engine
             for (size_t i = 0; i < luableArray.mapping.size; ++i)
             {
               auto &luable = luableArray.array[i];
-              auto time = std::filesystem::last_write_time(luable.path);
+              auto time = std::filesystem::last_write_time(ApplicationDirectory() / "LuaScripts" / luable.path);
               if (time != luable.time)
               {
                 luable.time = time;

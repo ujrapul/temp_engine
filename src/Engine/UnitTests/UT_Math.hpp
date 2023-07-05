@@ -1,5 +1,9 @@
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 #include "Math.hpp"
 
 namespace Temp::Math
@@ -77,15 +81,15 @@ namespace Temp::Math
 
       // Dot Product
       float dotProduct2 = v2a.dot(v2b);
-      assert(std::abs(dotProduct2 - 23.0f) < 0.0001f);
+      assert(Abs(dotProduct2 - 23.0f) < 0.0001f);
 
       // Magnitude
       float magnitude2 = v2a.magnitude();
-      assert(std::abs(magnitude2 - 3.6056f) < 0.0001f);
+      assert(Abs(magnitude2 - 3.6056f) < 0.0001f);
 
       // Magnitude2
       float magnitude22 = v2a.magnitude2();
-      assert(std::abs(magnitude22 - 13) < 0.0001f);
+      assert(Abs(magnitude22 - 13) < 0.0001f);
 
       // Normalization
       assert(vec2Equals(v2a.normalize(), {0.5547f, 0.832f}));
@@ -330,3 +334,4 @@ namespace Temp::Math
   }
 }
 
+#pragma GCC diagnostic pop

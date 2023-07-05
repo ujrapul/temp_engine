@@ -1,6 +1,7 @@
 #include "Luable.hpp"
 #include "Engine.hpp"
 #include "Logger.hpp"
+#include "EngineUtils.hpp"
 #include <atomic>
 
 namespace Temp::Component::Luable
@@ -8,7 +9,7 @@ namespace Temp::Component::Luable
   bool LoadScript(const Data& luable)
   {
     auto* L = Engine::engine.lua;
-    if (luaL_loadfile(L, luable.path.c_str())) {
+    if (luaL_loadfile(L, (ApplicationDirectory() / "LuaScripts" / luable.path).c_str())) {
       Logger::Log("Something went wrong loading the chunk (syntax error?)");
       Logger::Log(lua_tostring(L, -1));
       lua_pop(L, 1);

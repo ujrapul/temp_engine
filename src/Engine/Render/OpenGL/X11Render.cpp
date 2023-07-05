@@ -41,7 +41,7 @@ namespace Temp::Render
       // Vertical Sync | Set to 1 to Enable | 0 to disable
       glXSwapIntervalEXT(display, window, 0);
 
-      Event::RenderStart();
+      Event::RenderSetup();
       // Main rendering loop
       while (!Event::EventData.renderQuit)
       {
@@ -200,7 +200,7 @@ namespace Temp::Render
         int currentWidth = windowAttributes.width;
         int currentHeight = windowAttributes.height;
         int &windowWidth = Event::EventData.windowWidth;
-        int &windoHeight = Event::EventData.windowHeight;
+        int &windowHeight = Event::EventData.windowHeight;
 
         if (currentWidth != windowWidth || currentHeight != windowHeight)
         {
@@ -232,7 +232,8 @@ namespace Temp::Render
         int mouseY = xev.xbutton.y - windowAttributes.y;
         int button = xev.xbutton.button;
 
-        if (button == 0)
+        // std::cout << button << std::endl;
+        if (button == 1)
         {
           Event::Click(mouseX, mouseY);
         }
@@ -247,7 +248,7 @@ namespace Temp::Render
   void Destroy()
   {
     Event::EventData.renderQuit = true;
-    renderThread.join();
+    Event::EventData.renderThread.join();
 
     // Cleanup
     glXMakeCurrent(display, None, NULL);

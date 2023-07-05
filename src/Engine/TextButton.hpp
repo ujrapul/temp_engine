@@ -17,7 +17,7 @@ namespace Temp::TextButton
   {
     textButton.entity = Scene::CreateEntity(scene);
     Scene::AddComponent<Component::Type::HOVERABLE>(scene, textButton.entity, std::move(hoverable));
-    Scene::AddComponent<Component::Type::LUABLE>(scene, textButton.entity, {"LuaScripts/Test.lua"});
+    Scene::AddComponent<Component::Type::LUABLE>(scene, textButton.entity, {"Test.lua"});
     
     const auto& luable = Scene::Get<Component::Type::LUABLE>(scene, textButton.entity);
     Component::Luable::LoadScript(luable);

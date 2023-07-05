@@ -23,6 +23,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_BUILD ON)
 
 set ( TEST_GAME_SRC
   src/TestGame/main.cpp
@@ -167,7 +169,7 @@ file(GLOB_RECURSE SOURCE_LIST
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${SOURCE_LIST})
 add_custom_target(Development SOURCES ${SOURCE_LIST})
 
-add_library(${TARGET_ENGINE} ${ENGINE_HEADER} ${ENGINE_SRC} ${LUA_SOURCE_LIST})
+add_library(${TARGET_ENGINE} ${ENGINE_HEADER} ${ENGINE_SRC})
 #add_executable(${TARGET_TEST_GAME} ${TEST_GAME_SRC} ${TEST_GAME_HEADER})
 #add_executable(${TARGET_TEST_GAME_2} ${TEST_GAME_2_SRC} ${TEST_GAME_2_HEADER})
 add_executable(${TARGET_ENGINE_UNIT_TESTS} ${ENGINE_UT_HEADER} ${ENGINE_UT_SOURCE})
@@ -218,6 +220,7 @@ ExternalProject_Add(
     BUILD_COMMAND ${LUA_BUILD_CMD}
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE true
+    BUILD_BYPRODUCTS ${LUAJIT_SOURCE_DIR}/src/libluajit.a
 )
 
 # Include LuaJIT headers
@@ -238,6 +241,7 @@ include_directories(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Dependencies/f
 set_target_properties(freetype PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:freetype,INTERFACE_INCLUDE_DIRECTORIES>)
 target_link_libraries(${TARGET_ENGINE} PRIVATE freetype)
 
+add_dependencies(${TARGET_NUMBER_GAME} ${TARGET_ENGINE})
 #target_link_libraries(${TARGET_TEST_GAME} ${TARGET_ENGINE})
 #target_link_libraries(${TARGET_TEST_GAME_2} ${TARGET_ENGINE})
 target_link_libraries(${TARGET_ENGINE_UNIT_TESTS} ${TARGET_ENGINE})
