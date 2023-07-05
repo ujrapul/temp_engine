@@ -16,12 +16,12 @@ namespace Temp::TextBox
     {
       auto &vertices = textBox.vertices;
       auto &indices  = textBox.indices;
-      
-      FreeContainer(vertices);
-      FreeContainer(indices);
 
       vertices.reserve(textBox.text.length() * 16);
       indices.reserve(textBox.text.length() * 6);
+
+      vertices.clear();
+      indices.clear();
 
       float x = textBox.x;
       float y = textBox.y;
@@ -62,9 +62,6 @@ namespace Temp::TextBox
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
       }
-      
-      vertices.shrink_to_fit();
-      indices.shrink_to_fit();
     }
   }
 
@@ -90,13 +87,15 @@ namespace Temp::TextBox
     Component::Drawable::Data drawable;
     drawable.entity = textBox.entity;
     PopulateVerticesIndices(textBox);
-    drawable.vertices = std::move(textBox.vertices);
-    drawable.indices = std::move(textBox.indices);
+    Component::Drawable::UpdateData(drawable, textBox.vertices, textBox.indices);
+    textBox.mtx = new std::mutex();
+    textBox.renderText = false;
+    textBox.enableOutline = false;
 
     Scene::AddComponent<Component::Type::DRAWABLE>(scene, textBox.entity, std::move(drawable));
     Scene::AddComponent<Component::Type::POSITION2D>(scene, textBox.entity, {textBox.x, textBox.y});
     Scene::AddComponent<Component::Type::SCALE>(scene, textBox.entity, textBox.scale);
-    Scene::AddComponent<Component::Type::TEXT>(scene, textBox.entity, std::move(textBox.text));
+    Scene::AddComponent<Component::Type::TEXT>(scene, textBox.entity, textBox.text);
   }
 
   void UpdateText(Scene::Data &scene, Data &textBox, const std::string &newText)
@@ -120,9 +119,7 @@ namespace Temp::TextBox
     }
 
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
-    //    PopulateVerticesIndices(drawable, textBox);
-    drawable.vertices = std::move(textBox.vertices);
-    drawable.indices = std::move(textBox.indices);
+    Component::Drawable::UpdateData(drawable, textBox.vertices, textBox.indices);
     drawable.disableDepth = true;
 
     OpenGLWrapper::UpdateVBO(drawable.VBO, drawable.vertices.data(), drawable.vertices.size(), GL_DYNAMIC_DRAW);
@@ -176,8 +173,6 @@ namespace Temp::TextBox
   
   void Destruct(Data &textBox)
   {
-    FreeContainer(textBox.vertices);
-    FreeContainer(textBox.indices);
     delete textBox.mtx;
   }
 

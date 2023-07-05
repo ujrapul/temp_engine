@@ -156,9 +156,7 @@ namespace Temp::Engine
       currentScene->cv.wait(lock, []()
                             { return currentScene->renderState == Scene::State::MAX; });
       currentScene->sceneFns.DestructFunc(*currentScene);
-      currentScene->state = Scene::State::ENTER;
       currentScene->sceneFns = *currentScene->sceneFns.nextScene;
-      engine.currentScene = currentScene;
       engine.coordinatorFns.Reset(currentScene->coordinator);
       currentScene->state = Scene::State::ENTER;
     }

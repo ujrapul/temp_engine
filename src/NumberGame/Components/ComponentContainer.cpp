@@ -11,14 +11,14 @@ namespace Game::Component::Container
     template <uint8_t E>
     void InitEnum(Temp::Component::Container::Data &data)
     {
-      Init<E>(data);
+      Temp::Component::Container::Init<E>(data);
     }
 
     template <uint8_t E>
     void DestructEnum(Temp::Component::Container::Data &data)
     {
       // Destruct logic for enum E
-      Destruct<E>(data);
+      Temp::Component::Container::Destruct<E>(data);
     }
 
     template <uint8_t E>
@@ -31,7 +31,7 @@ namespace Game::Component::Container
     void ResetEnum(Temp::Component::Container::Data &data)
     {
       // Destruct logic for enum E
-      Reset<E>(data);
+      Temp::Component::Container::Reset<E>(data);
     }
 
     template <uint8_t E>

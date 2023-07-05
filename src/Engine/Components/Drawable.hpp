@@ -112,8 +112,15 @@ namespace Temp::Component::Drawable
     OpenGLWrapper::BindTexture(GL_TEXTURE0, drawable.texture);
 
     // Bind the VAO and draw the triangle
-    OpenGLWrapper::DrawElementsInstanced(drawable.VAO, (int)drawable.indices.size(), drawable.numInstances);
+    OpenGLWrapper::DrawElementsInstanced(drawable.VAO, drawable.indicesSize, drawable.numInstances);
     glDepthMask(GL_TRUE);
+  }
+
+  inline void UpdateData(Data& drawable, const std::vector<float>& vertices, const std::vector<unsigned int>& indices)
+  {
+    drawable.vertices.assign(vertices.begin(), vertices.end());
+    drawable.indices.assign(indices.begin(), indices.end());
+    drawable.indicesSize = (int)indices.size();
   }
   
   inline void Destruct(Data& drawable)

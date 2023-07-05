@@ -36,19 +36,18 @@ namespace Temp
     template<typename T>
     inline void Reset(ArrayData<T>& data)
     {
-      data.array.fill({});
-      data.mapping = {};
+      // NOTE: Shouldn't be necessary
+      // data.array.fill({});
       Init(data);
     }
     
     template<typename T>
     inline void Init(ArrayData<T>& data)
     {
-      std::scoped_lock<std::mutex> lock(data.mtx);
-      for (Entity e = 0; e < MAX_ENTITIES; ++e) {
-        data.mapping.indexToEntity[e] = UINT_MAX;
-        data.mapping.entityToIndex[e] = SIZE_MAX;
-      }
+      std::lock_guard<std::mutex> lock(data.mtx);
+      data.mapping.indexToEntity.fill({UINT_MAX});
+      data.mapping.entityToIndex.fill({SIZE_MAX});
+      data.mapping.size = 0;
     }
 
     template<typename T>
@@ -59,7 +58,7 @@ namespace Temp
     {
       assert(entity < MAX_ENTITIES && "Component added to same entity more than once.");
 
-      std::scoped_lock<std::mutex> lock(data.mtx);
+      std::lock_guard<std::mutex> lock(data.mtx);
       if (data.mapping.entityToIndex[entity] < MAX_ENTITIES) {
         data.array[data.mapping.entityToIndex[entity]] = component;
       } else {
@@ -77,7 +76,7 @@ namespace Temp
     {
       assert(entity < MAX_ENTITIES && "Removing non-existent component.");
 
-      std::scoped_lock<std::mutex> lock(data.mtx);
+      std::lock_guard<std::mutex> lock(data.mtx);
 
       std::size_t indexOfRemovedEntity = data.mapping.entityToIndex[entity];
       std::size_t indexOfLastElement = data.mapping.size - 1;

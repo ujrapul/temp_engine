@@ -57,6 +57,11 @@ namespace Game::Grid
     grid->entity = Temp::Scene::CreateEntity(data);
     Temp::Scene::AddComponent<Temp::Component::Type::DRAWABLE>(data, grid->entity, {});
 
+    grid->gridValues.clear();
+    grid->gridTranslations.clear();
+    grid->gridUVOffsets.clear();
+    grid->mtx = new std::mutex();
+
     auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(data, grid->entity);
 
     drawable.numInstances = grid->gridSize * grid->gridSize;
@@ -89,10 +94,7 @@ namespace Game::Grid
     }
 
     auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(data, grid->entity);
-
-    drawable.vertices = Vertices();
-    drawable.indices = Indices();
-
+    Temp::Component::Drawable::UpdateData(drawable, Vertices(), Indices());
     Temp::Component::Drawable::Construct(drawable, Temp::Render::OpenGLWrapper::ShaderIdx::GRID);
 
     grid->uvVBO = OpenGLWrapper::CreateVBO(TexCoords().data(), TexCoords().size());

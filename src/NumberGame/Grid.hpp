@@ -20,7 +20,7 @@ namespace Game::Grid
     GLuint translationVBO;
     GLuint uvOffsetVBO;
     bool updateVBO{false};
-    std::mutex* mtx{new std::mutex()};
+    std::mutex* mtx{nullptr};
   };
 
   void Construct(Temp::Scene::Data &data, Data *grid);

@@ -247,6 +247,8 @@ namespace Temp::Render
 
   void Destroy()
   {
+    gladLoaderUnloadGL();
+    gladLoaderUnloadGLX();
     Event::EventData.renderQuit = true;
     Event::EventData.renderThread.join();
 

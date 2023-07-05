@@ -28,7 +28,7 @@ namespace Temp::TextBox
     bool enableOutline{false};
     std::vector<float> vertices{};
     std::vector<unsigned int> indices{};
-    std::mutex *mtx{new std::mutex()};
+    std::mutex *mtx{nullptr};
   };
   
   void DrawConstruct(Scene::Data &scene, Data &textBox);

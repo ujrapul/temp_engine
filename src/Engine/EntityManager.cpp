@@ -10,7 +10,9 @@ namespace Temp
   {
     void InitData(Data &entityManager)
     {
-      entityManager = {};
+      entityManager.currentEntities.clear();
+      entityManager.livingEntityCount = 0;
+      entityManager.signatures.fill({});
       for (Entity e = 0; e < MAX_ENTITIES; ++e)
       {
         entityManager.availableEntities.push(e);
