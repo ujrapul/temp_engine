@@ -212,6 +212,8 @@ namespace Game::Scene::GameLevel
 
     void Construct2(Temp::Scene::Data &data)
     {
+      gameData2 = {};
+      replay = false;
 //      Coordinator::Init(data.coordinator);
       switch (playerWinState)
       {
