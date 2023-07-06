@@ -1,4 +1,5 @@
 #include "Scene.hpp"
+#include "SceneObject.hpp"
 
 namespace Temp::Scene
 {
@@ -18,12 +19,16 @@ namespace Temp::Scene
   
   void Construct(Data &scene)
   {
-    Coordinator::Init(scene.coordinator);
+    for (auto& object : scene.objects)
+    {
+      SceneObject::Construct(scene, object);
+    }
+//    Coordinator::Init(scene.coordinator);
   }
   
   void Destruct(Data &scene)
   {
-    Coordinator::Destruct(scene.coordinator);
+//    Coordinator::Destruct(scene.coordinator);
   }
   
   Entity CreateEntity(Data &scene)

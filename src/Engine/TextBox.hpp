@@ -31,6 +31,7 @@ namespace Temp::TextBox
     std::mutex *mtx{nullptr};
   };
   
+  void InitSceneObject();
   void DrawConstruct(Scene::Data &scene, Data &textBox);
   void Construct(Scene::Data &scene, Data &textBox);
   void UpdateText(Scene::Data &scene, Data &textBox, const std::string &newText);

@@ -67,6 +67,7 @@ set ( ENGINE_HEADER
   src/Engine/Render/glad/gl.h
   src/Engine/Render/glad/khrplatform.h
   src/Engine/Scene.hpp
+  src/Engine/SceneObject.Hpp
   src/Engine/TextButton.hpp
   src/Engine/TextBox.hpp
   src/Engine/Dependencies/stbimage/stb_image.h # TODO: When you become more knowledgable try writing your own image loading system
@@ -110,6 +111,7 @@ set ( ENGINE_SRC
   src/Engine/Render/OpenGL/OpenGLWrapper.cpp
   src/Engine/Render/glad/gl.c
   src/Engine/Scene.cpp
+  src/Engine/SceneObject.cpp
   src/Engine/TextBox.cpp
   src/Engine/Dependencies/stbimage/stb_image.cpp # TODO: When you become more knowledgable try writing your own image loading system
 )

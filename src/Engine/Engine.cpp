@@ -3,6 +3,7 @@
 #include "Camera.hpp"
 #include "Event.hpp"
 #include "Luable.hpp"
+#include "SceneObject.hpp"
 #include <chrono>
 #include <thread>
 #include <filesystem>
@@ -101,6 +102,7 @@ namespace Temp::Engine
   
   void Start(Data &engine, const char *windowName, int windowX, int windowY)
   {
+    SceneObject::Init();
     currentScene = new Scene::Data();
     currentScene->sceneFns = engine.sceneFns.front();
 //    Scene::Construct(*currentScene);

@@ -1,14 +1,21 @@
 #pragma once
 
 #include "Coordinator.hpp"
+#include "SceneObject.hpp"
 #include <iostream>
 #include <functional>
 #include <mutex>
 #include <condition_variable>
 #include <unordered_set>
+#include <vector>
+
+namespace Temp::SceneObject
+{
+  struct Data;
+}
 
 namespace Temp::Scene
-{
+{  
   enum class State : uint8_t
   {
     ENTER = 0,
@@ -16,16 +23,16 @@ namespace Temp::Scene
     LEAVE = 2,
     MAX = 3
   };
-
+  
   inline void NoOpScene(struct Data &) {}
   inline void NoOpSceneUpdate(struct Data &, float) {}
   inline void NoOpSceneDrawReload(struct Data &, int) {}
   void Construct(Data &scene);
   void Destruct(Data &scene);
   void Draw(Data &scene);
-
+  
   typedef void (*RenderFunction)(Data &, void *);
-
+  
   struct RenderData
   {
     RenderFunction func;
@@ -43,9 +50,10 @@ namespace Temp::Scene
     void (*DrawReloadFunc)(Scene::Data &, int){NoOpSceneDrawReload};
     SceneFns* nextScene{};
   };
-
+  
   struct Data
   {
+    std::vector<SceneObject::Data> objects{};
     Coordinator::Data coordinator{};
     std::queue<RenderData> renderQueue{};
     State state{State::ENTER};
@@ -59,55 +67,55 @@ namespace Temp::Scene
 #endif
     SceneFns sceneFns{};
   };
-
+  
   template <uint8_t T>
   [[nodiscard]] constexpr Component::MapToComponentDataType<T> &Get(Data &scene, Entity entity)
   {
     return Component::Container::Get<T>(scene.coordinator.componentData, entity);
   }
-
+  
   template <uint8_t T>
   [[nodiscard]] constexpr const Component::MapToComponentDataType<T> &Get(const Data &scene, Entity entity)
   {
     return Component::Container::Get<T>(scene.coordinator.componentData, entity);
   }
-
+  
   template <uint8_t T>
   [[nodiscard]] constexpr Component::ArrayData<Component::MapToComponentDataType<T>> &GetComponentArray(Data &scene)
   {
     return *static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T]);
   }
-
+  
   template <uint8_t T>
   [[nodiscard]] constexpr const Component::ArrayData<Component::MapToComponentDataType<T>> &GetComponentArray(const Data &scene)
   {
     return *static_cast<Component::ArrayData<Component::MapToComponentDataType<T>> *>(scene.coordinator.componentData.components[T]);
   }
-
+  
   template <uint8_t T>
   [[nodiscard]] constexpr Entity GetEntityUsingIndex(const Data &scene, size_t index)
   {
     return GetComponentArray<T>(scene).mapping.indexToEntity[index];
   }
-
+  
   template <uint8_t T>
   [[nodiscard]] constexpr size_t GetComponentSize(const Data &scene)
   {
     return GetComponentArray<T>(scene).mapping.size;
   }
-
+  
   template <uint8_t T>
   constexpr void AddComponent(Data &scene, Entity entity, Component::MapToComponentDataType<T> component)
   {
     Coordinator::AddComponent<T>(scene.coordinator, entity, component);
   }
-
+  
   template <uint8_t T>
   constexpr void AddComponent(Data &scene, Entity entity)
   {
     Coordinator::AddComponent<T>(scene.coordinator, entity, Component::GetDefaultValue<T>());
   }
-
+  
   Entity CreateEntity(Data &scene);
   void DestroyEntity(Data &scene, Entity entity);
   const Math::Vec2f &GetPosition(const Data &scene, Entity entity);

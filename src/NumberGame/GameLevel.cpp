@@ -186,7 +186,7 @@ namespace Game::Scene::GameLevel
     }
 
     void Construct(Temp::Scene::Data &data)
-    {
+    {      
       Temp::Camera::ResetView();
       Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid.gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
