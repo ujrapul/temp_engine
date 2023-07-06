@@ -1,0 +1,9 @@
+{
+  TextBox
+  {
+    Name: "NumberGameTextBox"
+    Position: 0 40
+    Size: 60 40
+    Text: "NumberGame"
+  }
+}
