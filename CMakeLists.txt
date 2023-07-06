@@ -36,8 +36,8 @@ set ( NUMBER_GAME_SRC
   src/NumberGame/Components/ComponentContainer.cpp
   src/NumberGame/Coordinator.cpp
   src/NumberGame/GameLevel.cpp
-  src/NumberGame/MainMenuLevel.cpp
   src/NumberGame/Grid.cpp
+  src/NumberGame/MainMenuLevel.cpp
   src/NumberGame/Scene.cpp
   src/NumberGame/main.cpp
 )
@@ -51,31 +51,31 @@ set ( ENGINE_HEADER
   src/Engine/Components/Hoverable.hpp
   src/Engine/Components/Luable.hpp
   src/Engine/Coordinator.hpp
+  src/Engine/Dependencies/stbimage/stb_image.h # TODO: When you become more knowledgable try writing your own image loading system
   src/Engine/Engine.hpp
   src/Engine/EngineUtils.hpp
-  src/Engine/Entity.hpp
-  src/Engine/EntityManager.hpp
+  src/Engine/Entity/Entity.hpp
+  src/Engine/Entity/EntityManager.hpp
+  src/Engine/Entity/Player.hpp
+  src/Engine/Entity/TextBox.hpp
+  src/Engine/Entity/TextButton.hpp
   src/Engine/Event.hpp
   src/Engine/FontLoader.hpp
   src/Engine/ImageLoader.hpp
   src/Engine/Input.hpp
   src/Engine/Logger.hpp
   src/Engine/Math.hpp
-  src/Engine/Player.hpp
   src/Engine/Render/OpenGL/OpenGLWrapper.hpp
   src/Engine/Render/RenderUtils.hpp
   src/Engine/Render/glad/gl.h
   src/Engine/Render/glad/khrplatform.h
-  src/Engine/Scene.hpp
-  src/Engine/SceneObject.Hpp
-  src/Engine/TextButton.hpp
-  src/Engine/TextBox.hpp
-  src/Engine/Dependencies/stbimage/stb_image.h # TODO: When you become more knowledgable try writing your own image loading system
+  src/Engine/Scene/Scene.hpp
+  src/Engine/Scene/SceneObject.hpp
 )
 set ( ENGINE_UT_HEADER
   src/Engine/UnitTests/UT_Common.hpp
-  src/Engine/UnitTests/UT_ComponentData.hpp
   src/Engine/UnitTests/UT_ComponentContainer.hpp
+  src/Engine/UnitTests/UT_ComponentData.hpp
   src/Engine/UnitTests/UT_Event.hpp
   src/Engine/UnitTests/UT_Hoverable.hpp
   src/Engine/UnitTests/UT_Math.hpp
@@ -89,8 +89,8 @@ if (WIN32)
   )
 elseif (LINUX)
   list (APPEND ENGINE_HEADER
-    src/Engine/Render/glad/glx.h
     src/Engine/Render/OpenGL/X11Render.hpp
+    src/Engine/Render/glad/glx.h
   )
 elseif (APPLE)
   list (APPEND ENGINE_HEADER
@@ -103,17 +103,17 @@ set ( ENGINE_SRC
   src/Engine/Components/Drawable.cpp
   src/Engine/Components/Luable.cpp
   src/Engine/Coordinator.cpp
+  src/Engine/Dependencies/stbimage/stb_image.cpp # TODO: When you become more knowledgable try writing your own image loading system
   src/Engine/Engine.cpp
   src/Engine/EngineUtils.cpp
-  src/Engine/EntityManager.cpp
+  src/Engine/Entity/EntityManager.cpp
+  src/Engine/Entity/TextBox.cpp
   src/Engine/FontLoader.cpp
   src/Engine/Input.cpp
   src/Engine/Render/OpenGL/OpenGLWrapper.cpp
   src/Engine/Render/glad/gl.c
-  src/Engine/Scene.cpp
-  src/Engine/SceneObject.cpp
-  src/Engine/TextBox.cpp
-  src/Engine/Dependencies/stbimage/stb_image.cpp # TODO: When you become more knowledgable try writing your own image loading system
+  src/Engine/Scene/Scene.cpp
+  src/Engine/Scene/SceneObject.cpp
 )
 if (WIN32)
   list (APPEND ENGINE_SRC
@@ -121,8 +121,8 @@ if (WIN32)
   )
 elseif (LINUX)
   list (APPEND ENGINE_SRC
-    src/Engine/Render/glad/glx.c
     src/Engine/Render/OpenGL/X11Render.cpp
+    src/Engine/Render/glad/glx.c
   )
 elseif (APPLE)
   list (APPEND ENGINE_SRC
@@ -147,8 +147,8 @@ set ( NUMBER_GAME_HEADER
   src/NumberGame/Coordinator.hpp
   src/NumberGame/Entry.hpp
   src/NumberGame/GameLevel.hpp
-  src/NumberGame/MainMenuLevel.hpp
   src/NumberGame/Grid.hpp
+  src/NumberGame/MainMenuLevel.hpp
   src/NumberGame/Scene.hpp
 )
 
@@ -159,15 +159,15 @@ set(TARGET_ENGINE TempEngine)
 set(TARGET_ENGINE_UNIT_TESTS TempEngineUT)
 
 file(GLOB_RECURSE SOURCE_LIST
-  "${CMAKE_CURRENT_LIST_DIR}/src/*.hpp"
-  "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/src/*.c"
+  "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/*.glsl"
   "${CMAKE_CURRENT_LIST_DIR}/src/*.h"
+  "${CMAKE_CURRENT_LIST_DIR}/src/*.hpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/*.level"
+  "${CMAKE_CURRENT_LIST_DIR}/src/*.lua"
   "${CMAKE_CURRENT_LIST_DIR}/src/*.m"
   "${CMAKE_CURRENT_LIST_DIR}/src/*.mm"
-  "${CMAKE_CURRENT_LIST_DIR}/src/*.glsl"
-  "${CMAKE_CURRENT_LIST_DIR}/src/*.lua"
-  "${CMAKE_CURRENT_LIST_DIR}/src/*.level"
 )
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${SOURCE_LIST})
 add_custom_target(Development SOURCES ${SOURCE_LIST})
@@ -185,13 +185,15 @@ include_directories(
   src
   src/Engine
   src/Engine/Components
+  src/Engine/Dependencies
+  src/Engine/Dependencies/LuaJIT/src
+  src/Engine/Dependencies/stbimage
+  src/Engine/Entity
   src/Engine/Render
   src/Engine/Render/OpenGL
-  src/Engine/Render/glad
   src/Engine/Render/OpenGL/Shaders
-  src/Engine/Dependencies
-  src/Engine/Dependencies/stbimage
-  src/Engine/Dependencies/LuaJIT/src
+  src/Engine/Render/glad
+  src/Engine/Scene
   src/NumberGame
   src/NumberGame/Components
   src/TestGame

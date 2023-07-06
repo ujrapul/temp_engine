@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Scene.hpp"
+#include "Engine/Scene/Scene.hpp"
 
 namespace Game::Scene::MainMenuLevel
 {

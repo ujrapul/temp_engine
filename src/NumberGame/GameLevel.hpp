@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Scene.hpp"
+#include "Engine/Scene/Scene.hpp"
 #include "Engine/Input.hpp"
 
 namespace Game::Scene::GameLevel
