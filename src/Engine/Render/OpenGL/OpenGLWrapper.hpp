@@ -194,7 +194,7 @@ namespace Temp::Render::OpenGLWrapper
   {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * arraySize, indices, BufferDraw);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     return EBO;
   }
 
@@ -228,12 +228,10 @@ namespace Temp::Render::OpenGLWrapper
     glEnableVertexAttribArray(arrayIndex);
   }
 
-  // Assumes you're only using int
-  inline void SetVertexAttribIArrayInstanced(int arrayIndex, int numOfElements, int stride, int position)
+  inline void SetVertexIAttribArray(int arrayIndex, int numOfElements, int stride, int position)
   {
-    glVertexAttribIPointer(arrayIndex, numOfElements, GL_INT, stride * sizeof(int), (void *)(position * sizeof(int)));
+    glVertexAttribPointer(arrayIndex, numOfElements, GL_INT, GL_FALSE, stride * sizeof(int), (void *)(position * sizeof(int)));
     glEnableVertexAttribArray(arrayIndex);
-    glVertexAttribDivisor(arrayIndex, 1); // Set the attribute to update once per instance
   }
 
   // Assumes you're only using float
@@ -244,11 +242,20 @@ namespace Temp::Render::OpenGLWrapper
     glVertexAttribDivisor(arrayIndex, 1); // Set the attribute to update once per instance
   }
 
+  // Assumes you're only using int
+  inline void SetVertexAttribIArrayInstanced(int arrayIndex, int numOfElements, int stride, int position)
+  {
+    glVertexAttribIPointer(arrayIndex, numOfElements, GL_INT, stride * sizeof(int), (void *)(position * sizeof(int)));
+    glEnableVertexAttribArray(arrayIndex);
+    glVertexAttribDivisor(arrayIndex, 1); // Set the attribute to update once per instance
+  }
+
   inline void UnbindBuffers()
   {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
   }
 
   GLuint LoadTexture(const char *texturePath, int imageDataType);
@@ -327,11 +334,19 @@ namespace Temp::Render::OpenGLWrapper
 
   inline void CleanArrays(GLuint &vao)
   {
+    glBindVertexArray(vao);
     glDeleteVertexArrays(1, &vao);
   }
 
-  inline void CleanBuffer(GLuint &buffer)
+  inline void CleanArrayBuffer(GLuint &buffer)
   {
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glDeleteBuffers(1, &buffer);
+  }
+
+  inline void CleanElementBuffer(GLuint &buffer)
+  {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
     glDeleteBuffers(1, &buffer);
   }
 

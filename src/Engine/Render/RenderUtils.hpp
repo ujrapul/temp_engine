@@ -205,15 +205,15 @@ namespace Temp::Render
   inline void Clean(Square &square)
   {
     OpenGLWrapper::CleanArrays(square.VAO);
-    OpenGLWrapper::CleanBuffer(square.VBO);
-    OpenGLWrapper::CleanBuffer(square.EBO);
+    OpenGLWrapper::CleanArrayBuffer(square.VBO);
+    OpenGLWrapper::CleanElementBuffer(square.EBO);
     OpenGLWrapper::CleanShader(square.shaderProgram);
   }
 
   inline void Clean(Cube &cube)
   {
     OpenGLWrapper::CleanArrays(cube.VAO);
-    OpenGLWrapper::CleanBuffer(cube.VBO);
+    OpenGLWrapper::CleanArrayBuffer(cube.VBO);
     OpenGLWrapper::CleanShader(cube.shaderProgram);
   }
 }

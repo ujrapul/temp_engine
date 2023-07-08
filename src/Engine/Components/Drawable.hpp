@@ -13,6 +13,7 @@ namespace Temp::Component::Drawable
   {
     std::vector<float> vertices{};
     std::vector<unsigned int> indices{};
+    std::vector<GLuint> buffers{};
     Math::Mat4 model{};
     Entity entity{UINT32_MAX};
     GLuint VAO{};
@@ -37,10 +38,10 @@ namespace Temp::Component::Drawable
 #endif
 
     // Needed for unit test
-    bool operator==(const Data& other) const = default;
+    bool operator==(const Data &other) const = default;
   };
 
-  constexpr void Scale(Data &drawable, const Math::Vec3f& scale)
+  constexpr void Scale(Data &drawable, const Math::Vec3f &scale)
   {
     drawable.model = drawable.model.scale(scale);
   }
@@ -52,12 +53,9 @@ namespace Temp::Component::Drawable
     OpenGLWrapper::Set4x4MatrixShaderProperty(drawable.shaderProgram, "model", &drawable.model.rows[0][0]);
   }
 
-  inline void Construct(Data &drawable, int shaderIdx, int bufferDraw, int vertexStride, int UBO, const char * UBOMatrices, int UBOMatricesIdx)
+  inline void Construct(Data &drawable, int shaderIdx, int bufferDraw, int vertexStride, int UBO, const char *UBOMatrices, int UBOMatricesIdx)
   {
     using namespace Temp::Render;
-    
-    drawable.vertices.shrink_to_fit();
-    drawable.indices.shrink_to_fit();
 
     drawable.shaderProgram = OpenGLWrapper::CreateShaderProgram(shaderIdx);
     drawable.VAO = OpenGLWrapper::CreateVAO();
@@ -66,11 +64,15 @@ namespace Temp::Component::Drawable
     drawable.indicesSize = (int)drawable.indices.size();
     OpenGLWrapper::SetVertexAttribArray(0, vertexStride, vertexStride, 0);
 
+    FreeContainer(drawable.vertices);
+    FreeContainer(drawable.indices);
+
     Update(drawable);
 
     // We are making the assumption that every shader has a Matrices uniform block
     // For getting view and projection from the camera
     OpenGLWrapper::BindUBOShader(UBO, drawable.shaderProgram, UBOMatrices, UBOMatricesIdx);
+    // OpenGLWrapper::UnbindBuffers();
   }
 
   // Make sure all API construction happens before render-thread executes!
@@ -103,7 +105,7 @@ namespace Temp::Component::Drawable
   inline void Draw(Data &drawable)
   {
     using namespace Temp::Render;
-    
+
     if (!drawable.visible || drawable.blockDraw)
     {
       return;
@@ -118,20 +120,92 @@ namespace Temp::Component::Drawable
     glDepthMask(GL_TRUE);
   }
 
-  inline void UpdateData(Data& drawable, const std::vector<float>& vertices, const std::vector<unsigned int>& indices)
+  inline void UpdateData(Data &drawable, std::vector<float> vertices, std::vector<unsigned int> indices)
   {
-    drawable.vertices.assign(vertices.begin(), vertices.end());
-    drawable.indices.assign(indices.begin(), indices.end());
-    drawable.indicesSize = (int)indices.size();
+    drawable.vertices = std::move(vertices);
+    drawable.indices = std::move(indices);
+    drawable.indicesSize = (int)drawable.indices.size();
+    FreeContainer(vertices);
+    FreeContainer(indices);
   }
-  
-  inline void Destruct(Data& drawable)
+
+  inline void Destruct(Data &drawable)
   {
     using namespace Temp::Render::OpenGLWrapper;
-    
+
+    // IMPORTANT: Make sure to clean up buffers so that vector data can be released and destructed
+    // Otherwise memory usage will slowly climb on every new instance of this object
+    for (auto buffer : drawable.buffers)
+    {
+      CleanArrayBuffer(buffer);
+    }
+    CleanElementBuffer(drawable.EBO);
+    CleanArrayBuffer(drawable.VBO);
     CleanArrays(drawable.VAO);
-    CleanBuffer(drawable.VBO);
-    CleanBuffer(drawable.EBO);
     CleanShader(drawable.shaderProgram);
+    UnbindBuffers();
+
+    FreeContainer(drawable.buffers);
+    FreeContainer(drawable.vertices);
+    FreeContainer(drawable.indices);
+  }
+
+  template<typename T>
+  inline void CreateBuffer(Data &drawable, std::vector<T>& data)
+  {
+    using namespace Temp::Render::OpenGLWrapper;
+    drawable.buffers.push_back(CreateVBO(data.data(), sizeof(T), data.size(), GL_STATIC_DRAW));
+  }
+
+  inline void UpdateFloatBuffer(GLuint buffer, std::vector<float> data, int BufferDraw = GL_STATIC_DRAW)
+  {
+    using namespace Temp::Render::OpenGLWrapper;
+    UpdateVBO(buffer, data.data(), data.size(), BufferDraw);
+    FreeContainer(data);
+  }
+
+  inline void UpdateIndexBuffer(GLuint buffer, std::vector<unsigned int> data, int BufferDraw = GL_STATIC_DRAW)
+  {
+    using namespace Temp::Render::OpenGLWrapper;
+    UpdateEBO(buffer, data.data(), data.size(), BufferDraw);
+    FreeContainer(data);
+  }
+
+  inline GLuint CreateFloatBuffer(Data &drawable, std::vector<float>& data, int arrayIndex, int numOfElements, int stride, int position = 0)
+  {
+    using namespace Temp::Render::OpenGLWrapper;
+    CreateBuffer(drawable, data);
+    SetVertexAttribArray(arrayIndex, numOfElements, stride, position);
+    return drawable.buffers.back();
+  }
+
+  inline GLuint CreateIntBuffer(Data &drawable, std::vector<int>& data, int arrayIndex, int numOfElements, int stride, int position = 0)
+  {
+    using namespace Temp::Render::OpenGLWrapper;
+    CreateBuffer(drawable, data);
+    SetVertexIAttribArray(arrayIndex, numOfElements, stride, position);
+    return drawable.buffers.back();
+  }
+
+  inline GLuint CreateFloatInstancedBuffer(Data &drawable, std::vector<float>& data, int arrayIndex, int numOfElements, int stride, int position = 0)
+  {
+    using namespace Temp::Render::OpenGLWrapper;
+    CreateBuffer(drawable, data);
+    SetVertexAttribArrayInstanced(arrayIndex, numOfElements, stride, position);
+    return drawable.buffers.back();
+  }
+
+  inline GLuint CreateIntInstancedBuffer(Data &drawable, std::vector<int>& data, int arrayIndex, int numOfElements, int stride, int position = 0)
+  {
+    using namespace Temp::Render::OpenGLWrapper;
+    CreateBuffer(drawable, data);
+    SetVertexAttribIArrayInstanced(arrayIndex, numOfElements, stride, position);
+    return drawable.buffers.back();
+  }
+
+  inline void UpdateVertexIndexBuffers(Data &drawable, int BufferDraw = GL_STATIC_DRAW)
+  {
+    UpdateFloatBuffer(drawable.VBO, std::move(drawable.vertices), BufferDraw);
+    UpdateIndexBuffer(drawable.EBO, std::move(drawable.indices), BufferDraw);
   }
 }

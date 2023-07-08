@@ -1,5 +1,6 @@
 #include "EntityManager.hpp"
 #include "Entity.hpp"
+#include "EngineUtils.hpp"
 #include <cassert>
 #include <iostream>
 #include <algorithm>
@@ -13,6 +14,11 @@ namespace Temp
       entityManager.currentEntities.clear();
       entityManager.livingEntityCount = 0;
       entityManager.signatures.fill({});
+      // Needed to make sure we're not adding more than MAX_ENTITIES
+      // There was a bug where without the swap we continously added
+      // MAX_ENTITIES elements into the queue every reset causing the
+      // memory usage to substantially increase every iteration
+      FreeContainer(entityManager.availableEntities);
       for (Entity e = 0; e < MAX_ENTITIES; ++e)
       {
         entityManager.availableEntities.push(e);

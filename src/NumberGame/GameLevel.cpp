@@ -31,23 +31,6 @@ namespace Game::Scene::GameLevel
       int numbersLeft{10};
       bool player1Turn{true};
       bool acceptInput{true};
-
-      void Reset()
-      {
-        players.fill({0});
-        numbersUsed.clear();
-        numbersUnused = {0,1,2,3,4,5,6,7,8,9};
-        playerTurnTextBox.text = "Player 1's Turn";
-        player1TextBox.text = "Player 1's numbers";
-        player1NumbersTextBox.text = "";
-        player2TextBox.text = "Player 2's numbers";
-        player2NumbersTextBox.text = "";
-        numbersLeftTextBox.text = "Numbers Left: 0 1 2 3 4 5 6 7 8 9";
-        currentNumber = -1;
-        numbersLeft = 10;
-        player1Turn = true;
-        acceptInput = true;
-      }
     };
 
     struct Data2
@@ -57,13 +40,6 @@ namespace Game::Scene::GameLevel
       TextBox::Data player2ScoreTextBox{"Player 2 Score: ", -20, -5, fontScale, (Entity)-1};
       TextBox::Data quitTextBox{"Press Q to quit", -20, -15, fontScale, (Entity)-1};
       TextBox::Data replayTextBox{"Press 0-9 to replay", -20, -22, fontScale, (Entity)-1};
-
-      void Reset()
-      {
-        playerWinTextBox.text = "Player 1 Wins!";
-        player1ScoreTextBox.text = "Player 1 Score: ";
-        player2ScoreTextBox.text = "Player 2 Score: ";
-      }
     };
 
     Data gameData{};
@@ -191,8 +167,7 @@ namespace Game::Scene::GameLevel
       Temp::Camera::UpdateOrthoScale(data, 0.1f * (gameData.grid.gridSize / 50.f) * (720.f / Temp::Camera::GetHeight()));
       Temp::Camera::UpdateFontOrthoScale(data, 0.1f * (70.f / 50.f) * (720.f / Temp::Camera::GetHeight()));
 
-      gameData.Reset();
-      //gameData = {};
+      gameData = {};
       //gameData2 = {};
       playerWinState = 0;
       player1Score = 0;
@@ -237,8 +212,7 @@ namespace Game::Scene::GameLevel
 
     void Construct2(Temp::Scene::Data &data)
     {
-      gameData2.Reset();
-      // gameData2 = {};
+      gameData2 = {};
       replay = false;
 //      Coordinator::Init(data.coordinator);
       switch (playerWinState)

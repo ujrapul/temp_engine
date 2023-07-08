@@ -96,18 +96,9 @@ namespace Game::Grid
     auto &drawable = Temp::Scene::Get<Temp::Component::Type::DRAWABLE>(data, grid->entity);
     Temp::Component::Drawable::UpdateData(drawable, Vertices(), Indices());
     Temp::Component::Drawable::Construct(drawable, Temp::Render::OpenGLWrapper::ShaderIdx::GRID);
-
-    grid->uvVBO = OpenGLWrapper::CreateVBO(TexCoords().data(), TexCoords().size());
-    OpenGLWrapper::SetVertexAttribArray(1, 2, 2, 0);
-
-    grid->translationVBO = OpenGLWrapper::CreateVBO(grid->gridTranslations.data(), sizeof(int), grid->gridTranslations.size());
-    OpenGLWrapper::SetVertexAttribIArrayInstanced(2, 2, 2, 0);
-
-    grid->uvOffsetVBO = OpenGLWrapper::CreateVBO(grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
-    OpenGLWrapper::SetVertexAttribArrayInstanced(3, 2, 2, 0);
-
-    // Unbind VAO and VBO and EBO
-    OpenGLWrapper::UnbindBuffers();
+    grid->uvVBO = Temp::Component::Drawable::CreateFloatBuffer(drawable, TexCoords(), 1, 2, 2, 0);
+    grid->translationVBO = Temp::Component::Drawable::CreateIntInstancedBuffer(drawable, grid->gridTranslations, 2, 2, 2, 0);
+    grid->uvOffsetVBO = Temp::Component::Drawable::CreateFloatInstancedBuffer(drawable, grid->gridUVOffsets, 3, 2, 2, 0);
 
     // load and create a texture
     // -------------------------
@@ -116,6 +107,9 @@ namespace Game::Grid
 
     // Needs to be called to set variables in the shader!
     OpenGLWrapper::Set1IntShaderProperty(drawable.shaderProgram, "texture1", 0);
+
+    // Unbind VAO and VBO and EBO
+    OpenGLWrapper::UnbindBuffers();
   }
 
   // Add one layer of indirection so that the function isn't called before construction occurs
@@ -131,7 +125,7 @@ namespace Game::Grid
       return;
     }
 
-    OpenGLWrapper::UpdateVBO(grid->uvOffsetVBO, grid->gridUVOffsets.data(), grid->gridUVOffsets.size());
+    Temp::Component::Drawable::UpdateFloatBuffer(grid->uvOffsetVBO, grid->gridUVOffsets);
     grid->updateVBO = false;
   }
 

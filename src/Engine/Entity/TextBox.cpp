@@ -18,11 +18,11 @@ namespace Temp::TextBox
       auto &vertices = textBox.vertices;
       auto &indices = textBox.indices;
 
+      FreeContainer(vertices);
+      FreeContainer(indices);
+
       vertices.reserve(textBox.text.length() * 16);
       indices.reserve(textBox.text.length() * 6);
-
-      vertices.clear();
-      indices.clear();
 
       float x = textBox.x;
       float y = textBox.y;
@@ -72,6 +72,7 @@ namespace Temp::TextBox
 
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
     drawable.texture = Font::Characters['0'].texture;
+    Component::Drawable::UpdateData(drawable, std::move(textBox.vertices), std::move(textBox.indices));
 
     Component::Drawable::ConstructFont(drawable, OpenGLWrapper::ShaderIdx::TEXT);
 
@@ -88,7 +89,6 @@ namespace Temp::TextBox
     Component::Drawable::Data drawable;
     drawable.entity = textBox.entity;
     PopulateVerticesIndices(textBox);
-    Component::Drawable::UpdateData(drawable, textBox.vertices, textBox.indices);
     textBox.mtx = new std::mutex();
     textBox.renderText = false;
     textBox.enableOutline = false;
@@ -120,15 +120,17 @@ namespace Temp::TextBox
     }
 
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
-    Component::Drawable::UpdateData(drawable, textBox.vertices, textBox.indices);
+    Component::Drawable::UpdateData(drawable, std::move(textBox.vertices), std::move(textBox.indices));
     drawable.disableDepth = true;
 
-    OpenGLWrapper::UpdateVBO(drawable.VBO, drawable.vertices.data(), drawable.vertices.size(), GL_DYNAMIC_DRAW);
-    OpenGLWrapper::UpdateEBO(drawable.EBO, drawable.indices.data(), drawable.indices.size(), GL_DYNAMIC_DRAW);
+    // NOTE: This is referring to updating the drawable buffers manually using the OpenGLWrapper
+    // Don't know why this won't update properly if I pass textBox vertices and indices directly
+    // Removing std::move from DrawConstruct doesn't work...
+    Temp::Component::Drawable::UpdateVertexIndexBuffers(drawable, GL_DYNAMIC_DRAW);
+    FreeContainer(textBox.vertices);
+    FreeContainer(textBox.indices);
 
     textBox.renderText = false;
-
-    drawable.indicesSize = (int)drawable.indices.size();
   }
 
   struct EnableOutlineData
@@ -158,7 +160,11 @@ namespace Temp::TextBox
     Component::Drawable::Destruct(drawable);
   }
 
+#ifdef DEBUG
   void DrawReload(Scene::Data &scene, Data &textBox, int shaderIdx)
+#else
+  void DrawReload(Scene::Data &, Data &, int)
+#endif
   {
 #ifdef DEBUG
     auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
@@ -174,6 +180,8 @@ namespace Temp::TextBox
 
   void Destruct(Data &textBox)
   {
+    FreeContainer(textBox.vertices);
+    FreeContainer(textBox.indices);
     delete textBox.mtx;
   }
 
