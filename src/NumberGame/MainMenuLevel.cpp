@@ -24,27 +24,27 @@ namespace Game::Scene::MainMenuLevel
 
     Data gameData{};
 
-    // void PlayCallback(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &)
-    // {
-    //   scene.state = Temp::Scene::State::LEAVE;
-    // }
+     void PlayCallback(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &)
+     {
+       scene.state = Temp::Scene::State::LEAVE;
+     }
 
-    // void QuitCallback(Temp::Scene::Data &, Temp::Component::Hoverable::Data &)
-    // {
-    //   Engine::Quit(Engine::engine);
-    // }
+     void QuitCallback(Temp::Scene::Data &, Temp::Component::Hoverable::Data &)
+     {
+       Engine::Quit(Engine::engine);
+     }
 
-    // void HoverEnter(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &hoverable)
-    // {
-    //   auto *button = static_cast<TextButton::Data *>(hoverable.callbackData);
-    //   TextBox::EnableOutline(scene, button->textBox, true);
-    // }
+     void HoverEnter(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &hoverable)
+     {
+       auto *button = static_cast<TextButton::Data *>(hoverable.callbackData);
+       TextBox::EnableOutline(scene, button->textBox, true);
+     }
 
-    // void HoverLeave(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &hoverable)
-    // {
-    //   auto *button = static_cast<TextButton::Data *>(hoverable.callbackData);
-    //   TextBox::EnableOutline(scene, button->textBox, false);
-    // }
+     void HoverLeave(Temp::Scene::Data &scene, Temp::Component::Hoverable::Data &hoverable)
+     {
+       auto *button = static_cast<TextButton::Data *>(hoverable.callbackData);
+       TextBox::EnableOutline(scene, button->textBox, false);
+     }
 
     void Construct(Temp::Scene::Data &scene)
     {
@@ -53,13 +53,15 @@ namespace Game::Scene::MainMenuLevel
 
       Temp::Camera::ResetView();
 
-//      Temp::Scene::Construct(scene);
+      Temp::Scene::Construct(scene);
 
-      std::cout << scene.objectsNameTable.at("NumberGameTextBox")->type << std::endl;
-      gameData.gameTextBox = *static_cast<TextBox::Data*>(scene.objectsNameTable.at("NumberGameTextBox")->data);
-      gameData.playButton = *static_cast<TextButton::Data*>(scene.objectsNameTable.at("PlayTextButton")->data);
-      gameData.quitButton = *static_cast<TextButton::Data*>(scene.objectsNameTable.at("QuitTextButton")->data);
-
+      gameData.gameTextBox = *static_cast<TextBox::Data*>(Temp::Scene::GetObject(scene, "NumberGameTextBox").data);
+      gameData.playButton = *static_cast<TextButton::Data*>(Temp::Scene::GetObject(scene, "PlayTextButton").data);
+      gameData.quitButton = *static_cast<TextButton::Data*>(Temp::Scene::GetObject(scene, "QuitTextButton").data);
+      
+      TextButton::SetHoverableCallbacks(scene, gameData.playButton, PlayCallback, HoverEnter, HoverLeave, &gameData.playButton);
+      TextButton::SetHoverableCallbacks(scene, gameData.quitButton, QuitCallback, HoverEnter, HoverLeave, &gameData.quitButton);
+      
       // gameData.playButton.
 
       // TextBox::Construct(scene, gameData.gameTextBox);

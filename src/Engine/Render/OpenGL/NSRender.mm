@@ -196,7 +196,7 @@ void CreateDisplay(const char *windowName, int windowX, int windowY, Temp::Engin
 
 namespace Temp::Render
 {
-  void Initialize(const char *windowName, int windowX, int windowY, Temp::Engine::Data &engine)
+  void Initialize(const char */*windowName*/, int windowX, int windowY, Temp::Engine::Data &engine)
   {
     Temp::Camera::UpdateCameraAspect(engine, windowX, windowY);
     Temp::Event::EventData.renderThread = std::thread(RenderThread);
@@ -213,7 +213,7 @@ namespace Temp::Render
   }
   
   // Process Events
-  void Run(Engine::Data &engine)
+  void Run(Engine::Data &/*engine*/)
   {
     
   }

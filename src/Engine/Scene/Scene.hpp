@@ -10,6 +10,7 @@
 #include <unordered_set>
 #endif
 #include <vector>
+#include <unordered_map>
 
 namespace Temp::SceneObject
 {
@@ -56,7 +57,7 @@ namespace Temp::Scene
   struct Data
   {
     std::vector<SceneObject::Data> objects{};
-    std::unordered_map<std::string, SceneObject::Data*> objectsNameTable{};
+    std::unordered_map<std::string, int> objectsNameIdxTable{};
     Coordinator::Data coordinator{};
     std::queue<RenderData> renderQueue{};
     State state{State::ENTER};
@@ -124,4 +125,5 @@ namespace Temp::Scene
   const Math::Vec2f &GetPosition(const Data &scene, Entity entity);
   void EnqueueRender(Scene::Data &scene, RenderFunction func, void *data);
   void ClearRender(Scene::Data &scene);
+  SceneObject::Data& GetObject(Scene::Data &scene, const std::string& name);
 }

@@ -22,7 +22,7 @@
 namespace
 {
 #ifdef __APPLE__
-  CGEventFlags lastFlags = 0;
+  //CGEventFlags lastFlags = 0;
   CFRunLoopRef cfRunLoop{};
   
   constexpr void MacInputHandle(Temp::Input::KeyEventData &data)
@@ -129,7 +129,7 @@ namespace Temp::Input
   }
   
 #ifdef __APPLE__
-  CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *data)
+  CGEventRef CGEventCallback(CGEventTapProxy /*proxy*/, CGEventType type, CGEventRef event, void *data)
   {
     auto* keyEventData = static_cast<KeyEventData *>(data);
     

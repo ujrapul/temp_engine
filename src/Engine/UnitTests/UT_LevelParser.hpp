@@ -13,24 +13,20 @@ namespace Temp::LevelParser::UnitTests
     Assert("Test Level Parsing", Parse(scene, "Test.level"));
 
     auto& objects = scene.objects;
-    auto& table = scene.objectsNameTable;
+    auto& table = scene.objectsNameIdxTable;
 
     Assert("Test Level Parsing objects size after Parse", objects.size() == 2);
     auto* object0 = static_cast<TextBox::Data*>(objects[0].data);
     auto* object1 = static_cast<TextButton::Data*>(objects[1].data);
     auto &subObject10 = object1->textBox;
     auto &constructData1 = *static_cast<Component::Hoverable::Data*>(objects[1].constructData);
-    for (auto& [k,v] : table)
-    {
-      std::cout << "TEST: " << v->name << std::endl;
-    }
     Assert("Test Level Parsing object 1 valid", objects[0].type == SceneObject::Type::TEXTBOX
                                                 && objects[0].name == "NumberGameTextBox"
                                                 && object0->text == "NumberGame"
                                                 && object0->x == 0
                                                 && object0->y == 40
                                                 && Math::Abs(object0->scale - 0.04) < Math::EPSILON
-                                                && table.at(objects[0].name)->data == objects[0].data
+                                                && objects[table[objects[0].name]].data == objects[0].data
                                                 );
     Assert("Test Level Parsing object 2 valid", objects[1].type == SceneObject::Type::TEXTBUTTON
                                                 && objects[1].name == "NumberGameTextButton"
@@ -42,7 +38,7 @@ namespace Temp::LevelParser::UnitTests
                                                 && constructData1.y == 0
                                                 && constructData1.width == 9
                                                 && constructData1.height == 4
-                                                && table.at(objects[1].name)->data == objects[1].data
+                                                && objects[table[objects[1].name]].data == objects[1].data
                                                 );
   }
 }

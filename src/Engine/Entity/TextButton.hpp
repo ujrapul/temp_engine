@@ -62,4 +62,18 @@ namespace Temp::TextButton
   {
     TextBox::Destruct(textButton.textBox);
   }
+  
+  inline void SetHoverableCallbacks(Scene::Data &scene,
+                                    Data &textButton,
+                                    void (*Click)(Scene::Data &, Component::Hoverable::Data &),
+                                    void (*HoverEnter)(Scene::Data &, Component::Hoverable::Data &),
+                                    void (*HoverLeave)(Scene::Data &, Component::Hoverable::Data &),
+                                    void *callbackData)
+  {
+    auto& hoverable = Scene::Get<Component::Type::HOVERABLE>(scene, textButton.entity);
+    hoverable.Click = Click;
+    hoverable.HoverEnter = HoverEnter;
+    hoverable.HoverLeave = HoverLeave;
+    hoverable.callbackData = callbackData;
+  }
 }

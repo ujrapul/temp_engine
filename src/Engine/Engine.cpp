@@ -25,6 +25,7 @@ namespace Temp::Engine
     std::vector<Component::Luable::Data*> hotReloadLuables;
 #endif
     
+#ifdef __linux
     void RunLinux(Data &engine, const char *windowName, int windowX, int windowY)
     {
       Start(engine, windowName, windowX, windowY);
@@ -36,6 +37,7 @@ namespace Temp::Engine
 
       Destroy(engine);
     }
+#endif
     
 #ifdef DEBUG
     void HotReloadThread(Data& engine)
@@ -218,7 +220,7 @@ namespace Temp::Engine
 
   void Construct(Data &engine)
   {
-    engine.keyEventData = std::move(Input::Construct());
+    engine.keyEventData = Input::Construct();
   }
 
   void Quit(Data &engine)

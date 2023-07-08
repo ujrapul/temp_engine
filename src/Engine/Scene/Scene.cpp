@@ -110,4 +110,9 @@ namespace Temp::Scene
     std::unique_lock<std::mutex> lock(scene.queueMtx);
     scene.renderQueue = {};
   }
+  
+  SceneObject::Data& GetObject(Scene::Data &scene, const std::string& name)
+  {
+    return scene.objects[scene.objectsNameIdxTable[name]];
+  }
 }

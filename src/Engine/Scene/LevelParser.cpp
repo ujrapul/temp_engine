@@ -21,10 +21,8 @@ namespace Temp::LevelParser
     {
       std::string name = object.name;
       object.type = type;
-      data.scene.objects.push_back(std::move(object));
-      data.scene.objectsNameTable[name] = &data.scene.objects.back();
-      std::cout << "PARSE NAME: [" << name << "]" << std::endl;
-      std::cout << "PARSE: " << data.scene.objectsNameTable["NumberGameTextBox"]->name << std::endl;
+      data.scene.objects.push_back(object);
+      data.scene.objectsNameIdxTable[name] = (int)data.scene.objects.size() - 1;
     }
 
     bool GetLine(std::istringstream &f, std::string &l, int &lnum)
@@ -167,7 +165,7 @@ namespace Temp::LevelParser
         }
         object.data = textBox;
       }
-      AddSceneObject(std::move(object), SceneObject::Type::TEXTBOX, data);
+      AddSceneObject(object, SceneObject::Type::TEXTBOX, data);
       return true;
     }
 
@@ -218,8 +216,7 @@ namespace Temp::LevelParser
         }
         object.data = textButton;
       }
-      AddSceneObject(std::move(object), SceneObject::Type::TEXTBUTTON, data);
-      std::cout << "PARSE 2: " << data.scene.objectsNameTable["NumberGameTextBox"]->name << std::endl;
+      AddSceneObject(object, SceneObject::Type::TEXTBUTTON, data);
       return true;
     }
   }
@@ -228,7 +225,7 @@ namespace Temp::LevelParser
   {
     int lineNumber = 0;
     scene.objects.clear();
-    scene.objectsNameTable.clear();
+    scene.objectsNameIdxTable.clear();
     auto path = ApplicationDirectory() / "Levels" / file;
     std::string contents;
     ReadFile(contents, path);
@@ -265,7 +262,6 @@ namespace Temp::LevelParser
         break;
       }
     }
-    std::cout << "PARSE 3: " << data.scene.objectsNameTable["NumberGameTextBox"]->name << std::endl;
     return true;
   }
 }

@@ -36,14 +36,14 @@ TextButton
   TextBox
   {
     Name: QuitTextBox
-    Position: -20 0
+    Position: -20 -7
     Scale: 0.04
-    Text: Play
+    Text: Quit
   }
   
   Hoverable
   {
-    Position: -20 0
+    Position: -20 -7
     Size: 9 4
   }
 }
