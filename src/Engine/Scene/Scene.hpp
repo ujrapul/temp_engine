@@ -6,7 +6,9 @@
 #include <functional>
 #include <mutex>
 #include <condition_variable>
+#ifdef DEBUG
 #include <unordered_set>
+#endif
 #include <vector>
 
 namespace Temp::SceneObject
@@ -54,6 +56,7 @@ namespace Temp::Scene
   struct Data
   {
     std::vector<SceneObject::Data> objects{};
+    std::unordered_map<std::string, SceneObject::Data*> objectsNameTable{};
     Coordinator::Data coordinator{};
     std::queue<RenderData> renderQueue{};
     State state{State::ENTER};
@@ -103,9 +106,9 @@ namespace Temp::Scene
   {
     return GetComponentArray<T>(scene).mapping.size;
   }
-  
+
   template <uint8_t T>
-  constexpr void AddComponent(Data &scene, Entity entity, Component::MapToComponentDataType<T> component)
+  constexpr void AddComponent(Data &scene, Entity entity, const Component::MapToComponentDataType<T>& component)
   {
     Coordinator::AddComponent<T>(scene.coordinator, entity, component);
   }

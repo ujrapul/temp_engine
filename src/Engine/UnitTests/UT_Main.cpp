@@ -3,6 +3,7 @@
 #include "UT_Event.hpp"
 #include "UT_Math.hpp"
 #include "UT_Hoverable.hpp"
+#include "UT_LevelParser.hpp"
 
 int main()
 {
@@ -14,6 +15,9 @@ int main()
   Component::Hoverable::UnitTests::Run();
   Event::UnitTests::Run();
   Math::UnitTests::Run();
+  Logger::logType = Logger::LogType::COUT;
+  LevelParser::UnitTests::Run();
+  Logger::logType = Logger::LogType::NOOP;
   
   std::cout << "Unit Tests Passed!" << std::endl;
 

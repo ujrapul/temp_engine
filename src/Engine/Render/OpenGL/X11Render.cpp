@@ -33,7 +33,7 @@ namespace Temp::Render
     XVisualInfo *visualInfo{};
     Colormap colormap{};
 
-    void RenderThread(Engine::Data &engine)
+    void RenderThread()
     {
       // Make the OpenGL context current for the rendering thread
       glXMakeCurrent(display, window, context);
@@ -149,7 +149,7 @@ namespace Temp::Render
   {
     CreateDisplay(windowName, windowX, windowY);
     Camera::UpdateCameraAspect(engine, windowX, windowY);
-    Event::EventData.renderThread = std::thread(RenderThread, std::ref(engine));
+    Event::EventData.renderThread = std::thread(RenderThread);
   }
 
   // TODO: Try to thread this

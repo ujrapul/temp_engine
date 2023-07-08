@@ -20,7 +20,7 @@ namespace Temp::Coordinator
   void Reset(Data &coordinator);
 
   template <uint8_t T>
-  constexpr void AddComponent(Data &coordinator, Entity entity, Component::MapToComponentDataType<T> component)
+  constexpr void AddComponent(Data &coordinator, Entity entity, const Component::MapToComponentDataType<T>& component)
   {
     Signature sig = EntityManager::GetSignature(coordinator.entityData, entity);
     sig.set(T);

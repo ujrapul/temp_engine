@@ -28,6 +28,10 @@ namespace Temp::Scene
   
   void Destruct(Data &scene)
   {
+    for (auto& object : scene.objects)
+    {
+      SceneObject::Destruct(scene, object);
+    }
 //    Coordinator::Destruct(scene.coordinator);
   }
   

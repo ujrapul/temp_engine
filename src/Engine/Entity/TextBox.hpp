@@ -31,7 +31,6 @@ namespace Temp::TextBox
     std::mutex *mtx{nullptr};
   };
   
-  void InitSceneObject();
   void DrawConstruct(Scene::Data &scene, Data &textBox);
   void Construct(Scene::Data &scene, Data &textBox);
   void UpdateText(Scene::Data &scene, Data &textBox, const std::string &newText);
@@ -40,4 +39,5 @@ namespace Temp::TextBox
   void DrawDestruct(Scene::Data &scene, Data &textBox);
   void DrawReload(Scene::Data &scene, Data &textBox, int shaderIdx);
   void Destruct(Data &textBox);
+  inline void Update(Scene::Data &, Data &, float){}
 }

@@ -35,6 +35,8 @@ namespace Temp::Component::Drawable
     std::string UBOMatrices{};
     int UBOMatrixIndex{};
 #endif
+
+    // Needed for unit test
     bool operator==(const Data& other) const = default;
   };
 

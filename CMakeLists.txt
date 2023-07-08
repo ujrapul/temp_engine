@@ -69,6 +69,7 @@ set ( ENGINE_HEADER
   src/Engine/Render/RenderUtils.hpp
   src/Engine/Render/glad/gl.h
   src/Engine/Render/glad/khrplatform.h
+  src/Engine/Scene/LevelParser.hpp
   src/Engine/Scene/Scene.hpp
   src/Engine/Scene/SceneObject.hpp
 )
@@ -112,6 +113,7 @@ set ( ENGINE_SRC
   src/Engine/Input.cpp
   src/Engine/Render/OpenGL/OpenGLWrapper.cpp
   src/Engine/Render/glad/gl.c
+  src/Engine/Scene/LevelParser.cpp
   src/Engine/Scene/Scene.cpp
   src/Engine/Scene/SceneObject.cpp
 )
@@ -172,11 +174,11 @@ file(GLOB_RECURSE SOURCE_LIST
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${SOURCE_LIST})
 add_custom_target(Development SOURCES ${SOURCE_LIST})
 
-add_library(${TARGET_ENGINE} ${ENGINE_HEADER} ${ENGINE_SRC})
+add_library(${TARGET_ENGINE} ${ENGINE_SRC})
 #add_executable(${TARGET_TEST_GAME} ${TEST_GAME_SRC} ${TEST_GAME_HEADER})
 #add_executable(${TARGET_TEST_GAME_2} ${TEST_GAME_2_SRC} ${TEST_GAME_2_HEADER})
-add_executable(${TARGET_ENGINE_UNIT_TESTS} ${ENGINE_UT_HEADER} ${ENGINE_UT_SOURCE})
-add_executable(${TARGET_NUMBER_GAME} ${NUMBER_GAME_SRC} ${NUMBER_GAME_HEADER})
+add_executable(${TARGET_ENGINE_UNIT_TESTS} ${ENGINE_UT_SOURCE})
+add_executable(${TARGET_NUMBER_GAME} ${NUMBER_GAME_SRC})
 
 set_target_properties(${TARGET_ENGINE} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -275,6 +277,10 @@ endif()
 #  $<$<CXX_COMPILER_ID:MSVC>:/w>
 #  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-w>
 #)
+target_compile_options(${TARGET_ENGINE} PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+)
 target_compile_options(${TARGET_ENGINE_UNIT_TESTS} PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>

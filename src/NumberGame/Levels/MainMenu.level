@@ -1,9 +1,49 @@
+// MainMenu.level
+
+TextBox
 {
+  Name: NumberGameTextBox
+  Position: -20 10
+  Scale: 0.04
+  Text: NUMBER GAME
+}
+
+TextButton
+{
+  Name: PlayTextButton
   TextBox
   {
-    Name: "NumberGameTextBox"
-    Position: 0 40
-    Size: 60 40
-    Text: "NumberGame"
+    Name: PlayTextBox
+    Position: -20 0
+    Scale: 0.04
+    Text: Play
+  }
+
+  Hoverable
+  {
+    // Script: PlayButton.Lua
+    // ClickFn: Click
+    // HoverEnterFn: HoverEnter
+    // HoverLeaveFn: HoverLeave
+    Position: -20 0
+    Size: 9 4
+  }
+}
+
+TextButton
+{
+  Name: QuitTextButton
+  TextBox
+  {
+    Name: QuitTextBox
+    Position: -20 0
+    Scale: 0.04
+    Text: Play
+  }
+  
+  Hoverable
+  {
+    Position: -20 0
+    Size: 9 4
   }
 }

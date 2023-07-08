@@ -39,6 +39,7 @@ namespace Temp::Event::UnitTests
     
     Scene::Data scene;
     Scene::Construct(scene);
+    Coordinator::Init(scene.coordinator);
     Temp::Engine::engine.currentScene = &scene;
     
     Event::Hover(0, 0);
@@ -48,6 +49,9 @@ namespace Temp::Event::UnitTests
     Assert("Test Event Click Terminates with non Scene State Run", !isClick);
     
     scene.state = Scene::State::RUN;
+
+    Event::Hover(0, 0);
+    Event::Click(0, 0);
     
     Assert("Test Event Hover Terminates with No Hoverable", !isHoverEnter && !isHoverLeave);
     Assert("Test Event Click Terminates with No Hoverable", !isClick);
@@ -81,5 +85,6 @@ namespace Temp::Event::UnitTests
     Assert("Test Event Click when Mouse is not in Hoverable", !isClick);
     
     Scene::Destruct(scene);
+    Coordinator::Destruct(scene.coordinator);
   }
 }

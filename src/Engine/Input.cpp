@@ -251,7 +251,11 @@ namespace Temp::Input
     delete data.keyQueue;
   }
   
+#ifdef __APPLE__
   void HandleThread(KeyEventData &data)
+#else
+  void HandleThread(KeyEventData &)
+#endif
   {
 #ifdef __APPLE__
     MacInputHandle(data);

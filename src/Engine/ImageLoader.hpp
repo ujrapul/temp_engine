@@ -1,5 +1,5 @@
-// #pragma GCC diagnostic push
-// #pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 #include "Math.hpp"
 #include <iostream>
@@ -224,4 +224,4 @@ namespace Temp::ImageLoader
   }
 }
 
-// #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop

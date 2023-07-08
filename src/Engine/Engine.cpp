@@ -65,7 +65,7 @@ namespace Temp::Engine
           if (currentScene->renderState == Scene::State::RUN)
           {
             const auto& globals = Render::OpenGLWrapper::GlobalShaderFiles();
-            for (int i = 0; i < globals.size(); ++i)
+            for (size_t i = 0; i < globals.size(); ++i)
             {
               auto &drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*currentScene);
               auto time = std::filesystem::last_write_time(globals[i].c_str());

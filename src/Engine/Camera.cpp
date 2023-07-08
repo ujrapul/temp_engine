@@ -31,8 +31,8 @@ namespace Temp::Camera
 
     Projection projection = Projection::PERSPECTIVE;
 
-    Math::Mat4 orthoProjection = std::move(OrthoProjection());
-    Math::Mat4 fontOrthoProjection = std::move(FontOrthoProjection());
+    Math::Mat4 orthoProjection = OrthoProjection();
+    Math::Mat4 fontOrthoProjection = FontOrthoProjection();
 
     Math::Mat4 perspProjection = Math::Mat4::perspective(Math::ToRadians(fov), aspect, 0.1, 100);
 

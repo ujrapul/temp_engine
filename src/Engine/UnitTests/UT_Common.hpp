@@ -18,7 +18,7 @@ namespace Temp
   {
     if (!value)
     {
-      std::cout << "FAILED " << testName << std::endl;
+      std::cout << "FAILED [\033[91m\033[1m " << testName << "\033[0m ]\n";
     }
     assert(value);
   }
