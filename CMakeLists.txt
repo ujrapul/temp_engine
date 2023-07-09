@@ -48,4 +48,4 @@ add_custom_target(Development SOURCES ${SOURCE_LIST})
 
 add_subdirectory(src/Engine)
 add_subdirectory(src/NumberGame)
-add_subdirectory(src/Engine/UnitTests)
+add_subdirectory(src/UnitTests)

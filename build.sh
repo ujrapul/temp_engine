@@ -13,45 +13,41 @@ fi
 build_folder="."
 project_name="NumberGame"
 top_level_dir=$PWD
+asset_command="ln -sf"
+asset_directory="Engine"
+asset_folders=("Fonts" "Shaders" "Images" "LuaScripts" "Levels")
 
 mk_dir() {
-  rm -rf $build_folder/Assets/Fonts
+  rm -rf $build_folder/$project_name/Assets
 
-  mkdir -p $build_folder/$project_name/Assets/Fonts
-  mkdir -p $build_folder/$project_name/Assets/Shaders
-  mkdir -p $build_folder/$project_name/Assets/Images
-  mkdir -p $build_folder/$project_name/Assets/LuaScripts
-  mkdir -p $build_folder/$project_name/Assets/Levels
+  for folder in ${asset_folders[@]}; do
+    mkdir -p $build_folder/$project_name/Assets/$folder
+  done
+}
+
+create_asset_directory() {
+  for folder in ${asset_folders[@]}; do
+    $asset_command $top_level_dir/src/$asset_directory/Assets/$folder/* $build_folder/$project_name/Assets/$folder 2>/dev/null || :
+  done
+}
+
+create_asset() {
+  mk_dir
+  asset_directory="Engine"
+  create_asset_directory
+
+  asset_directory=$project_name
+  create_asset_directory
 }
 
 create_asset_ln() {
-  mk_dir
-  ln -sf $top_level_dir/src/Engine/Assets/Fonts/* $build_folder/$project_name/Assets/Fonts
-  ln -sf $top_level_dir/src/Engine/Assets/Shaders/* $build_folder/$project_name/Assets/Shaders
-  ln -sf $top_level_dir/src/Engine/Assets/Images/* $build_folder/$project_name/Assets/Images
-  ln -sf $top_level_dir/src/Engine/Assets/LuaScripts/* $build_folder/$project_name/Assets/LuaScripts
-  ln -sf $top_level_dir/src/Engine/Assets/Levels/* $build_folder/$project_name/Assets/Levels
-
-  ln -sf $top_level_dir/src/$project_name/Assets/Fonts/* $build_folder/$project_name/Assets/Fonts
-  ln -sf $top_level_dir/src/$project_name/Assets/Shaders/* $build_folder/$project_name/Assets/Shaders
-  ln -sf $top_level_dir/src/$project_name/Assets/Images/* $build_folder/$project_name/Assets/Images
-  ln -sf $top_level_dir/src/$project_name/Assets/LuaScripts/* $build_folder/$project_name/Assets/LuaScripts
-  ln -sf $top_level_dir/src/$project_name/Assets/Levels/* $build_folder/$project_name/Assets/Levels
+  asset_command="ln -sf"
+  create_asset
 }
 
 copy_asset() {
-  mk_dir
-  cp -rf $top_level_dir/src/Engine/Assets/Fonts/* $build_folder/$project_name/Assets/Fonts
-  cp -rf $top_level_dir/src/Engine/Assets/Shaders/* $build_folder/$project_name/Assets/Shaders
-  cp -rf $top_level_dir/src/Engine/Assets/Images/* $build_folder/$project_name/Assets/Images
-  cp -rf $top_level_dir/src/Engine/Assets/LuaScripts/* $build_folder/$project_name/Assets/LuaScripts
-  cp -rf $top_level_dir/src/Engine/Assets/Levels/* $build_folder/$project_name/Assets/Levels
-
-  cp -rf $top_level_dir/src/$project_name/Assets/Fonts/* $build_folder/$project_name/Assets/Fonts
-  cp -rf $top_level_dir/src/$project_name/Assets/Render/OpenGL/Shaders/* $build_folder/$project_name/Assets/Shaders
-  cp -rf $top_level_dir/src/$project_name/Assets/Images/* $build_folder/$project_name/Assets/Images
-  cp -rf $top_level_dir/src/$project_name/Assets/LuaScripts/* $build_folder/$project_name/Assets/LuaScripts
-  cp -rf $top_level_dir/src/$project_name/Assets/Levels/* $build_folder/$project_name/Assets/Levels
+  asset_command="cp -rf"
+  create_asset
 }
 
 (
@@ -69,7 +65,12 @@ copy_asset() {
     if [ "$1" = "release" ] || [ "$1" = "Release" ] || [ "$2" = "release" ] || [ "$2" = "Release" ]; then
       mkdir RelWithDebInfo
       build_folder="RelWithDebInfo"
-      copy_asset
+      for dir in $top_level_dir/src/*/; do
+        project_name=$(basename "$dir")
+        if [ "$project_name" != "Engine" ]; then
+          copy_asset
+        fi
+      done
       (
         cd RelWithDebInfo
         cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Ninja ../..
@@ -80,7 +81,12 @@ copy_asset() {
     else
       mkdir Debug
       build_folder="Debug"
-      create_asset_ln
+      for dir in $top_level_dir/src/*/; do
+        project_name=$(basename "$dir")
+        if [ "$project_name" != "Engine" ]; then
+          create_asset_ln
+        fi
+      done
       (
         cd Debug
         cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja ../..
@@ -94,11 +100,25 @@ copy_asset() {
     if [ "$1" = "release" ] || [ "$1" = "Release" ] || [ "$2" = "release" ] || [ "$2" = "Release" ]; then
       mkdir RelWithDebInfo
       build_folder="RelWithDebInfo"
+      for dir in $top_level_dir/src/*/; do
+        project_name=$(basename "$dir")
+        if [ "$project_name" != "Engine" ]; then
+          copy_asset
+        fi
+      done
+      project_name="UnitTests"
       copy_asset
       cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Xcode ..
     else
       mkdir Debug
       build_folder="Debug"
+      for dir in $top_level_dir/src/*/; do
+        project_name=$(basename "$dir")
+        if [ "$project_name" != "Engine" ]; then
+          create_asset_ln
+        fi
+      done
+      project_name="UnitTests"
       create_asset_ln
       cmake -DCMAKE_BUILD_TYPE=Debug -G Xcode ..
     fi
