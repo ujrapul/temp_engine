@@ -1,5 +1,7 @@
 #include "OpenGLWrapper.hpp"
 #include "FontLoader.hpp"
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 // IMPORTANT NOTES SINCE YOU'RE TOO DUMB TO REMEMBER THEM!
 //
@@ -70,6 +72,11 @@ namespace Temp::Render::OpenGLWrapper
     stbi_image_free(data);
 
     return texture;
+  }
+
+  GLuint GenerateFontTexture(FT_FaceRec_* face)
+  {
+    return CreateTexture(GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer, GL_CLAMP_TO_EDGE);
   }
 
   // TODO: Keeping this for reference! Remove when TextBox can handle vertex buffer changes.

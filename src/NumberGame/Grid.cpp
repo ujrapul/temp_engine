@@ -102,7 +102,7 @@ namespace Game::Grid
 
     // load and create a texture
     // -------------------------
-    // drawable.texture = OpenGLWrapper::LoadTexture((ApplicationDirectory / "Images" / "awesomeface.png").c_str(), GL_RGBA);
+    // drawable.texture = OpenGLWrapper::LoadTexture((AssetsDirectory() / "Images" / "awesomeface.png").c_str(), GL_RGBA);
     drawable.texture = Font::Characters[0].texture;
 
     // Needs to be called to set variables in the shader!

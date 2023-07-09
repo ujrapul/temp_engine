@@ -13,6 +13,9 @@ namespace Temp::Component::Luable
 #endif
   };
   
+  // TODO: Perhaps add static functions that are called here
+  // Every LuaScript should have these functions
+  // Or we should provide error checking for whether those fns exist
   bool LoadScript(const Data& luable);
   void ExecFunction(const char* luaFn);
 }

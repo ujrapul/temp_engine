@@ -8,17 +8,17 @@
 #include "gl.h"
 #endif
 #include "stb_image.h"
-#include <ft2build.h>
 #include <iostream>
 #include <vector>
 #include <filesystem>
-#include FT_FREETYPE_H
 
 // IMPORTANT NOTES SINCE YOU'RE TOO DUMB TO REMEMBER THEM!
 //
 // Use glVertexAttribPointer for vec2, GLfloat, GLdouble, and GLubyte
 // Use glVertexAttrib"I"Pointer for ivec2, GLint, GLuint, and GLbyte
 //
+
+struct FT_FaceRec_;
 
 namespace Temp::Render::OpenGLWrapper
 {
@@ -46,7 +46,7 @@ namespace Temp::Render::OpenGLWrapper
   
   inline const std::filesystem::path& GetShadersPath()
   {
-    static auto shadersPath = ApplicationDirectory() / "Shaders";
+    static auto shadersPath = AssetsDirectory() / "Shaders";
     return shadersPath;
   }
   
@@ -362,10 +362,7 @@ namespace Temp::Render::OpenGLWrapper
     glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
   }
 
-  inline GLuint GenerateFontTexture(FT_Face face)
-  {
-    return CreateTexture(GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer, GL_CLAMP_TO_EDGE);
-  }
+  GLuint GenerateFontTexture(FT_FaceRec_* face);
 
   inline void UpdateSubTexture(int xOffset, int yOffset, int textureWidth, int textureHeight, void *data)
   {

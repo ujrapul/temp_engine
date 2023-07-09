@@ -3,6 +3,7 @@
 #include "TextButton.hpp"
 #include "Logger.hpp"
 #include <string_view>
+#include <cstring>
 
 namespace Temp::LevelParser
 {
@@ -226,7 +227,7 @@ namespace Temp::LevelParser
     int lineNumber = 0;
     scene.objects.clear();
     scene.objectsNameIdxTable.clear();
-    auto path = ApplicationDirectory() / "Levels" / file;
+    auto path = AssetsDirectory() / "Levels" / file;
     std::string contents;
     ReadFile(contents, path);
     std::istringstream f(contents);

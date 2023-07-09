@@ -21,7 +21,7 @@ namespace Temp::Font
       return;
     }
 
-    std::filesystem::path fontsPath = ApplicationDirectory() / "Fonts" / "Arial.ttf";
+    std::filesystem::path fontsPath = AssetsDirectory() / "Fonts" / "Arial.ttf";
 
     FT_Face face = nullptr;
     if (FT_New_Face(ft, fontsPath.c_str(), 0, &face))

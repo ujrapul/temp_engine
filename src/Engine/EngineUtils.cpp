@@ -44,4 +44,10 @@ namespace Temp
     static std::filesystem::path applicationDirectory{GetApplicationDirectory()};
     return applicationDirectory;
   }
+
+  const std::filesystem::path& AssetsDirectory()
+  {
+    static std::filesystem::path applicationDirectory{GetApplicationDirectory() / "Assets"};
+    return applicationDirectory;
+  }
 }

@@ -1,4 +1,4 @@
-#include "NumberGame/Entry.hpp"
+#include "Entry.hpp"
 
 int main()
 {

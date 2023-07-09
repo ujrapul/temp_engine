@@ -10,6 +10,8 @@
 namespace Temp
 {
   const std::filesystem::path &ApplicationDirectory();
+  const std::filesystem::path &AssetsDirectory();
+  
   inline const char *LoadFileAsString(const char *filePath, bool nullTerminate = true)
   {
     std::ifstream fileStream(filePath, std::ios::ate | std::ios::binary);

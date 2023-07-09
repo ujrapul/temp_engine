@@ -173,6 +173,7 @@ namespace Temp::TextBox
       return;
     }
 
+    PopulateVerticesIndices(textBox);
     DrawDestruct(scene, textBox);
     DrawConstruct(scene, textBox);
 #endif
