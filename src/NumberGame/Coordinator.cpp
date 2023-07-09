@@ -1,27 +1,23 @@
 #include "Coordinator.hpp"
 #include "Components/ComponentContainer.hpp"
 
-namespace Game
+namespace Game::Coordinator
 {
-  namespace Coordinator
+  void Init(Temp::Coordinator::Data &data)
   {
-    void Init(Temp::Coordinator::Data& data)
-    {
-      Temp::Coordinator::Init(data);
-      Component::Container::Init(data.componentData);
-    }
-    
-    void Destruct(Temp::Coordinator::Data& data)
-    {
-      Temp::Coordinator::Destruct(data);
-      Component::Container::Destruct(data.componentData);
-    }
-    
-    void Reset(Temp::Coordinator::Data& data)
-    {
-      Temp::Coordinator::Reset(data);
-      Component::Container::Reset(data.componentData);
-    }
+    Temp::Coordinator::Init(data);
+    Component::Container::Init(data.componentData);
+  }
+
+  void Destruct(Temp::Coordinator::Data &data)
+  {
+    Temp::Coordinator::Destruct(data);
+    Component::Container::Destruct(data.componentData);
+  }
+
+  void Reset(Temp::Coordinator::Data &data)
+  {
+    Temp::Coordinator::Reset(data);
+    Component::Container::Reset(data.componentData);
   }
 }
-

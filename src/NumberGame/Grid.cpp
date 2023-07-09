@@ -66,7 +66,7 @@ namespace Game::Grid
 
     drawable.numInstances = grid->gridSize * grid->gridSize;
 
-    srand(static_cast<uint>(time(NULL)));
+    srand(static_cast<uint>(time(nullptr)));
     for (auto row = 0; row < grid->gridSize; ++row)
     {
       for (auto col = 0; col < grid->gridSize; ++col)

@@ -18,12 +18,16 @@
 #include <iostream>
 #include <thread>
 #include <unistd.h>
-#define MIN_KEYCODE 8
 
 namespace Temp::Render
 {
   namespace
   {
+    enum
+    {
+      MIN_KEYCODE = 8
+    };
+    
     // X11 Display and Window variables
     Display *display{nullptr};
     Window window{};
@@ -60,8 +64,8 @@ namespace Temp::Render
       Event::EventData.windowHeight = windowY;
 
       // Open the X11 display
-      display = XOpenDisplay(NULL);
-      if (display == NULL)
+      display = XOpenDisplay(nullptr);
+      if (display == nullptr)
       {
         std::cerr << "Unable to open X11 display" << std::endl;
         return;
@@ -91,7 +95,7 @@ namespace Temp::Render
           None};
 
       visualInfo = glXChooseVisual(display, screen, attribs);
-      if (visualInfo == NULL)
+      if (visualInfo == nullptr)
       {
         std::cerr << "Unable to find a suitable visual" << std::endl;
         return;
@@ -116,8 +120,8 @@ namespace Temp::Render
       XSetWMProtocols(display, window, &wmDeleteWindow, 1);
 
       // Create the OpenGL context
-      context = glXCreateContext(display, visualInfo, NULL, GL_TRUE);
-      if (context == NULL)
+      context = glXCreateContext(display, visualInfo, nullptr, GL_TRUE);
+      if (context == nullptr)
       {
         std::cerr << "Unable to create an OpenGL context" << std::endl;
         return;
@@ -253,7 +257,7 @@ namespace Temp::Render
     Event::EventData.renderThread.join();
 
     // Cleanup
-    glXMakeCurrent(display, None, NULL);
+    glXMakeCurrent(display, None, nullptr);
     glXDestroyContext(display, context);
     XDestroyWindow(display, window);
     XFreeColormap(display, colormap);

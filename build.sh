@@ -16,6 +16,10 @@ top_level_dir=$PWD
 asset_command="ln -sf"
 asset_directory="Engine"
 asset_folders=("Fonts" "Shaders" "Images" "LuaScripts" "Levels")
+use_clang_tidy="OFF"
+if [[ "$*" == *"clang-tidy"* ]]; then
+  use_clang_tidy="ON"
+fi
 
 mk_dir() {
   rm -rf $build_folder/$project_name/Assets
@@ -73,7 +77,7 @@ copy_asset() {
       done
       (
         cd RelWithDebInfo
-        cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Ninja ../..
+        cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_CLANG_TIDY=$use_clang_tidy -G Ninja ../..
         ninja
       )
       project_name="UnitTests"
@@ -89,7 +93,7 @@ copy_asset() {
       done
       (
         cd Debug
-        cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja ../..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_CLANG_TIDY=$use_clang_tidy -G Ninja ../..
         ninja
       )
       project_name="UnitTests"
@@ -108,7 +112,7 @@ copy_asset() {
       done
       project_name="UnitTests"
       copy_asset
-      cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G Xcode ..
+      cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_CLANG_TIDY=$use_clang_tidy -G Xcode ..
     else
       mkdir Debug
       build_folder="Debug"
@@ -120,7 +124,7 @@ copy_asset() {
       done
       project_name="UnitTests"
       create_asset_ln
-      cmake -DCMAKE_BUILD_TYPE=Debug -G Xcode ..
+      cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_CLANG_TIDY=$use_clang_tidy -G Xcode ..
     fi
     xcodebuild -scheme TempEngine build
     xcodebuild -scheme NumberGame build

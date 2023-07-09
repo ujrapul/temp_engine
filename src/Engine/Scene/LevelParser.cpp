@@ -74,7 +74,7 @@ namespace Temp::LevelParser
 
     bool ParseTextBox(TextBox::Data &textBox, std::string &name, GlobalData &data)
     {
-      while (GetLine(data.f, data.line, data.lineNumber) && data.line.find("}") == std::string::npos)
+      while (GetLine(data.f, data.line, data.lineNumber) && data.line.find('}') == std::string::npos)
       {
         if (IgnoreLine(data.line))
         {
@@ -115,7 +115,7 @@ namespace Temp::LevelParser
 
     bool ParseHoverable(Component::Hoverable::Data &hoverable, GlobalData &data)
     {
-      while (GetLine(data.f, data.line, data.lineNumber) && data.line.find("}") == std::string::npos)
+      while (GetLine(data.f, data.line, data.lineNumber) && data.line.find('}') == std::string::npos)
       {
         if (IgnoreLine(data.line))
         {
@@ -156,7 +156,7 @@ namespace Temp::LevelParser
     bool ParseTextBox(GlobalData &data)
     {
       SceneObject::Data object;
-      if (GetLine(data.f, data.line, data.lineNumber) && data.line.find("{") != std::string::npos)
+      if (GetLine(data.f, data.line, data.lineNumber) && data.line.find('{') != std::string::npos)
       {
         auto *textBox = new TextBox::Data();
         if (!ParseTextBox(*textBox, object.name, data))
@@ -173,10 +173,10 @@ namespace Temp::LevelParser
     bool ParseTextButton(GlobalData &data)
     {
       SceneObject::Data object;
-      if (GetLine(data.f, data.line, data.lineNumber) && data.line.find("{") != std::string::npos)
+      if (GetLine(data.f, data.line, data.lineNumber) && data.line.find('{') != std::string::npos)
       {
         auto *textButton = new TextButton::Data();
-        while (GetLine(data.f, data.line, data.lineNumber) && data.line.find("}") == std::string::npos)
+        while (GetLine(data.f, data.line, data.lineNumber) && data.line.find('}') == std::string::npos)
         {
           if (IgnoreLine(data.line))
           {
@@ -189,7 +189,7 @@ namespace Temp::LevelParser
           }
           else if (tokens[0].find("TextBox") != std::string::npos)
           {
-            if (GetLine(data.f, data.line, data.lineNumber) && data.line.find("{") != std::string::npos)
+            if (GetLine(data.f, data.line, data.lineNumber) && data.line.find('{') != std::string::npos)
             {
               std::string name;
               TextBox::Data textBox;
@@ -203,7 +203,7 @@ namespace Temp::LevelParser
           }
           else if (tokens[0].find("Hoverable") != std::string::npos)
           {
-            if (GetLine(data.f, data.line, data.lineNumber) && data.line.find("{") != std::string::npos)
+            if (GetLine(data.f, data.line, data.lineNumber) && data.line.find('{') != std::string::npos)
             {
               auto* hoverable = new Component::Hoverable::Data();
               if (!ParseHoverable(*hoverable, data))

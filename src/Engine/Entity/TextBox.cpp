@@ -78,8 +78,6 @@ namespace Temp::TextBox
 
     OpenGLWrapper::Set1IntShaderProperty(drawable.shaderProgram, "text", 0);
     OpenGLWrapper::UnbindBuffers();
-
-    UpdateRender(scene, textBox);
   }
 
   void Construct(Scene::Data &scene, Data &textBox)
@@ -93,7 +91,7 @@ namespace Temp::TextBox
     textBox.renderText = false;
     textBox.enableOutline = false;
 
-    Scene::AddComponent<Component::Type::DRAWABLE>(scene, textBox.entity, std::move(drawable));
+    Scene::AddComponent<Component::Type::DRAWABLE>(scene, textBox.entity, drawable);
     Scene::AddComponent<Component::Type::POSITION2D>(scene, textBox.entity, {textBox.x, textBox.y});
     Scene::AddComponent<Component::Type::SCALE>(scene, textBox.entity, textBox.scale);
     Scene::AddComponent<Component::Type::TEXT>(scene, textBox.entity, textBox.text);
@@ -127,9 +125,6 @@ namespace Temp::TextBox
     // Don't know why this won't update properly if I pass textBox vertices and indices directly
     // Removing std::move from DrawConstruct doesn't work...
     Temp::Component::Drawable::UpdateVertexIndexBuffers(drawable, GL_DYNAMIC_DRAW);
-    FreeContainer(textBox.vertices);
-    FreeContainer(textBox.indices);
-
     textBox.renderText = false;
   }
 

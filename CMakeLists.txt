@@ -25,6 +25,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_VERBOSE_BUILD ON)
+if (USE_CLANG_TIDY STREQUAL "ON")
+  set(CMAKE_CXX_CLANG_TIDY
+    clang-tidy;
+    -checks='-*,performance-*,modernize-*,-modernize-use-trailing-return-type,-modernize-avoid-c-arrays,-clang-analyzer-cplusplus.NewDeleteLeaks,';
+    -fix;)
+endif()
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 

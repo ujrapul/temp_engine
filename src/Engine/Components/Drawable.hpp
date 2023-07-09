@@ -125,8 +125,6 @@ namespace Temp::Component::Drawable
     drawable.vertices = std::move(vertices);
     drawable.indices = std::move(indices);
     drawable.indicesSize = (int)drawable.indices.size();
-    FreeContainer(vertices);
-    FreeContainer(indices);
   }
 
   inline void Destruct(Data &drawable)
