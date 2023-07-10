@@ -25,6 +25,7 @@ set ( ENGINE_SRC
   FontLoader.cpp
   Input.cpp
   Render/OpenGL/OpenGLWrapper.cpp
+  Render/OpenGL/imgui_impl_x11.cpp
   Render/glad/gl.c
   Scene/LevelParser.cpp
   Scene/Scene.cpp
@@ -84,14 +85,14 @@ else()
   set (LUA_BUILD_CMD msvcbuild.bat)
 endif()
 ExternalProject_Add(
-    LuaJIT
-    PREFIX ${LUAJIT_BINARY_DIR}
-    SOURCE_DIR ${LUAJIT_SOURCE_DIR}
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${LUA_BUILD_CMD}
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE true
-    BUILD_BYPRODUCTS ${LUAJIT_SOURCE_DIR}/src/libluajit.a
+  LuaJIT
+  PREFIX ${LUAJIT_BINARY_DIR}
+  SOURCE_DIR ${LUAJIT_SOURCE_DIR}
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ${LUA_BUILD_CMD}
+  INSTALL_COMMAND ""
+  BUILD_IN_SOURCE true
+  BUILD_BYPRODUCTS ${LUAJIT_SOURCE_DIR}/src/libluajit.a
 )
 
 # Include LuaJIT headers
@@ -111,6 +112,30 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype)
 target_include_directories(${TARGET_ENGINE} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype/include)
 set_target_properties(freetype PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:freetype,INTERFACE_INCLUDE_DIRECTORIES>)
 target_link_libraries(${TARGET_ENGINE} PRIVATE freetype)
+
+# Add the ImGui library
+add_library(imgui
+  OBJECT
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_demo.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_draw.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_tables.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_widgets.cpp
+  # ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends/imgui_impl_glfw.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends/imgui_impl_opengl3.cpp
+)
+set_target_properties(
+  imgui
+  PROPERTIES
+    CXX_CLANG_TIDY ""
+)
+
+target_include_directories(imgui
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends
+)
+
+target_link_libraries(${TARGET_ENGINE} PRIVATE imgui)
 
 if(APPLE)
   target_link_libraries(${TARGET_ENGINE} PRIVATE

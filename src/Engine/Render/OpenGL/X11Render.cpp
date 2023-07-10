@@ -11,6 +11,15 @@
 #include "Event.hpp"
 #include "gl.h"
 #include "glx.h"
+
+#define EDITOR
+
+#ifdef EDITOR
+#include "imgui.h"
+#include "imgui_impl_x11.hpp"
+#include "imgui_impl_opengl3.h"
+#endif
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <chrono>
@@ -27,7 +36,7 @@ namespace Temp::Render
     {
       MIN_KEYCODE = 8
     };
-    
+
     // X11 Display and Window variables
     Display *display{nullptr};
     Window window{};
@@ -36,6 +45,29 @@ namespace Temp::Render
     GLXContext context{};
     XVisualInfo *visualInfo{};
     Colormap colormap{};
+
+#ifdef EDITOR
+    void RenderImGui()
+    {
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplX11_NewFrame();
+      ImGui::NewFrame();
+
+      // Add your ImGui UI code here
+      bool show_demo_window;
+      ImGui::ShowDemoWindow(&show_demo_window);
+      ImGui::Begin("Create Entity");
+      if (ImGui::Button("TextBox"))
+      {
+        std::cout << "GOT HERE!" << std::endl;
+      }
+      ImGui::Button("TextButton");
+      ImGui::End();
+
+      ImGui::Render();
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+#endif
 
     void RenderThread()
     {
@@ -50,6 +82,9 @@ namespace Temp::Render
       while (!Event::EventData.renderQuit)
       {
         Event::RenderRun();
+#ifdef EDITOR
+        RenderImGui();
+#endif
 
         glXSwapBuffers(display, window);
       }
@@ -104,7 +139,7 @@ namespace Temp::Render
       // Create a colormap for the window
       XSetWindowAttributes windowAttribs;
       windowAttribs.colormap = XCreateColormap(display, rootWindow, visualInfo->visual, AllocNone);
-      windowAttribs.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | PointerMotionMask | ButtonPressMask;
+      windowAttribs.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | KeyReleaseMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask;
       colormap = windowAttribs.colormap;
 
       // Create the window
@@ -146,6 +181,24 @@ namespace Temp::Render
         std::cerr << "OpenGL 3.3 is not supported" << std::endl;
         return;
       }
+
+#ifdef EDITOR
+      // Setup Dear ImGui context
+      IMGUI_CHECKVERSION();
+      ImGui::CreateContext();
+      ImGuiIO &io = ImGui::GetIO();
+      (void)io;
+      // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+      // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+      // Setup Dear ImGui style
+      ImGui::StyleColorsDark();
+      // ImGui::StyleColorsClassic();
+
+      // Setup Platform/Renderer backends
+      ImGui_ImplOpenGL3_Init();
+      ImGui_ImplX11_Init(display, window);
+#endif
     }
   }
 
@@ -163,14 +216,15 @@ namespace Temp::Render
     {
       XEvent xev;
       XNextEvent(display, &xev);
+#ifdef EDITOR
+      ImGui_ImplX11_EventHandler(xev);
+#endif
 
       switch (xev.type)
       {
       case KeyPress:
       {
-        // Needed to map X11 KeyCode to native Linux
-        int linuxKeyCode = xev.xkey.keycode - MIN_KEYCODE;
-        Input::PushKeyQueue(static_cast<Input::KeyboardCode>(linuxKeyCode), &engine.keyEventData);
+        Input::PushKeyQueue(static_cast<Input::KeyboardCode>(xev.xkey.keycode), &engine.keyEventData);
       }
       break;
       case ClientMessage:
@@ -251,10 +305,17 @@ namespace Temp::Render
 
   void Destroy()
   {
-    gladLoaderUnloadGL();
-    gladLoaderUnloadGLX();
     Event::EventData.renderQuit = true;
     Event::EventData.renderThread.join();
+
+    gladLoaderUnloadGL();
+    gladLoaderUnloadGLX();
+
+#ifdef EDITOR
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplX11_Shutdown();
+    ImGui::DestroyContext();
+#endif
 
     // Cleanup
     glXMakeCurrent(display, None, nullptr);
