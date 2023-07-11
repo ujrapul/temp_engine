@@ -37,8 +37,10 @@ if (WIN32)
 elseif (LINUX)
   list (APPEND ENGINE_SRC
     Render/OpenGL/X11Render.cpp
-    Render/OpenGL/imgui_impl_x11.cpp
     Render/glad/glx.c
+  )
+  set (EDITOR_SRC
+    Render/OpenGL/imgui_impl_x11.cpp
   )
 elseif (APPLE)
   list (APPEND ENGINE_SRC
@@ -50,9 +52,6 @@ elseif (APPLE)
   #  COMPILE_FLAGS "-x objective-c++"
 endif()
 
-add_library(${TARGET_ENGINE} STATIC ${ENGINE_SRC})
-target_include_directories(${TARGET_ENGINE} PUBLIC ${ENGINE_INCLUDE_DIRS})
-set_target_properties(${TARGET_ENGINE} PROPERTIES LINKER_LANGUAGE CXX)
 include_directories(
   ${OPENGL_INCLUDE_DIRS}
   Components
@@ -67,10 +66,51 @@ include_directories(
   Scene
 )
 
-target_link_libraries(${TARGET_ENGINE} PRIVATE ${OPENGL_LIBRARIES})
-if (LINUX)
-  target_link_libraries(${TARGET_ENGINE} PRIVATE X11)
-endif()
+function(make_library TARGET)
+  target_include_directories(${TARGET} PUBLIC ${ENGINE_INCLUDE_DIRS})
+
+  target_link_libraries(${TARGET} PRIVATE ${OPENGL_LIBRARIES})
+  if (LINUX)
+    target_link_libraries(${TARGET} PRIVATE X11)
+  elseif(APPLE)
+    target_link_libraries(${TARGET} PRIVATE
+      "-framework CoreFoundation"
+      "-framework CoreGraphics"
+      "-framework AppKit"
+      "-framework OpenGL"
+      "-framework Cocoa"
+    )
+    target_compile_definitions(${TARGET} PUBLIC GL_SILENCE_DEPRECATION)
+  endif()
+
+  # Link with LuaJIT library
+  add_dependencies(${TARGET} LuaJIT)
+  if(UNIX)
+    target_link_libraries(${TARGET} PRIVATE ${LUAJIT_SOURCE_DIR}/src/libluajit.a)
+  else()
+    target_link_libraries(${TARGET} PRIVATE ${LUAJIT_SOURCE_DIR}/src/libluajit.lib)
+  endif()
+
+  target_include_directories(${TARGET} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype/include)
+  target_link_libraries(${TARGET} PRIVATE freetype)
+
+  target_link_libraries(${TARGET_ENGINE_EDITOR} PRIVATE imgui)
+
+  set_target_properties(${TARGET} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Engine"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Engine"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Engine"
+  )
+
+  target_compile_options(${TARGET} PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+  )
+endfunction()
+
+add_library(${TARGET_ENGINE} STATIC ${ENGINE_SRC})
+add_library(${TARGET_ENGINE_EDITOR} STATIC ${ENGINE_SRC} ${EDITOR_SRC})
+target_compile_definitions(${TARGET_ENGINE_EDITOR} PRIVATE -DEDITOR)
 
 # Set the path to LuaJIT source directory
 set(LUAJIT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/LuaJIT")  # Update the path to the LuaJIT source directory
@@ -99,19 +139,9 @@ ExternalProject_Add(
 include_directories(SYSTEM ${LUAJIT_BINARY_DIR}/src)  # Update the path to the LuaJIT headers
 set_target_properties(LuaJIT PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:LuaJIT,INTERFACE_INCLUDE_DIRECTORIES>)
 
-# Link with LuaJIT library
-add_dependencies(${TARGET_ENGINE} LuaJIT)
-if(UNIX)
-  target_link_libraries(${TARGET_ENGINE} PRIVATE ${LUAJIT_SOURCE_DIR}/src/libluajit.a)
-else()
-  target_link_libraries(${TARGET_ENGINE} PRIVATE ${LUAJIT_SOURCE_DIR}/src/libluajit.lib)
-endif()
-
 # TODO: When you become more knowledgable try writing your own font loading system
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype)
-target_include_directories(${TARGET_ENGINE} SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype/include)
 set_target_properties(freetype PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:freetype,INTERFACE_INCLUDE_DIRECTORIES>)
-target_link_libraries(${TARGET_ENGINE} PRIVATE freetype)
 
 # Add the ImGui library
 add_library(imgui
@@ -121,7 +151,6 @@ add_library(imgui
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_draw.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_tables.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_widgets.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends/imgui_impl_glfw.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends/imgui_impl_opengl3.cpp
 )
 set_target_properties(
@@ -135,27 +164,8 @@ target_include_directories(imgui
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends
 )
 
-target_link_libraries(${TARGET_ENGINE} PRIVATE imgui)
+target_link_libraries(${TARGET_ENGINE_EDITOR} PRIVATE imgui)
 
-if(APPLE)
-  target_link_libraries(${TARGET_ENGINE} PRIVATE
-  "-framework CoreFoundation"
-  "-framework CoreGraphics"
-  "-framework AppKit"
-  "-framework OpenGL"
-  "-framework Cocoa"
-  )
-  target_compile_definitions(${TARGET_ENGINE} PUBLIC GL_SILENCE_DEPRECATION)
-endif()
-
-set_target_properties(${TARGET_ENGINE} PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Engine"
-  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Engine"
-  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Engine"
-)
-
-target_compile_options(${TARGET_ENGINE} PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
-)
+make_library(${TARGET_ENGINE})
+make_library(${TARGET_ENGINE_EDITOR})
 

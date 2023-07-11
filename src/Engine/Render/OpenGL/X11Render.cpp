@@ -12,8 +12,6 @@
 #include "gl.h"
 #include "glx.h"
 
-#define EDITOR
-
 #ifdef EDITOR
 #include "imgui.h"
 #include "imgui_impl_x11.hpp"

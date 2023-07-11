@@ -35,8 +35,10 @@ endif()
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(TARGET_ENGINE TempEngine)
+set(TARGET_ENGINE_EDITOR TempEngineEditor)
+set(TARGET_EDITOR Editor)
 set(TARGET_NUMBER_GAME NumberGame)
-set(TARGET_ENGINE_UNIT_TESTS TempEngineUT)
+set(TARGET_ENGINE_UNIT_TESTS UT_Engine)
 
 file(GLOB_RECURSE SOURCE_LIST
   "${CMAKE_CURRENT_LIST_DIR}/src/*.c"
@@ -56,5 +58,6 @@ source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${SOURCE_LIST})
 add_custom_target(Development SOURCES ${SOURCE_LIST})
 
 add_subdirectory(src/Engine)
+add_subdirectory(src/Editor)
 add_subdirectory(src/NumberGame)
-add_subdirectory(src/UnitTests)
+add_subdirectory(src/UT_Engine)

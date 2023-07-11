@@ -19,6 +19,8 @@ asset_folders=("Fonts" "Shaders" "Images" "LuaScripts" "Levels")
 use_clang_tidy="OFF"
 asset_folder="."
 build_path="$build_folder/$project_name/Assets"
+is_copy_asset=true
+
 if [[ "$*" == *"clang-tidy"* ]]; then
   use_clang_tidy="ON"
 fi
@@ -56,6 +58,41 @@ copy_asset() {
   create_asset
 }
 
+build_project_linux() {
+  mkdir $build_folder
+  for dir in $top_level_dir/src/*/; do
+    project_name=$(basename "$dir")
+    build_path="$build_folder/$project_name/Assets"
+    if [ "$project_name" != "Engine" ]; then
+      if [ "$is_copy_asset" = true ]; then
+        copy_asset
+      else
+        create_asset_ln
+      fi
+    fi
+  done
+  (
+    cd $build_folder
+    cmake -DCMAKE_BUILD_TYPE=$build_folder -DUSE_CLANG_TIDY=$use_clang_tidy -G Ninja ../..
+    ninja
+  )
+}
+
+build_project_mac() {
+  for dir in $top_level_dir/src/*/; do
+    project_name=$(basename "$dir")
+    build_path="$project_name/$build_folder/Assets"
+    if [ "$project_name" != "Engine" ]; then
+      if [ "$is_copy_asset" = true ]; then
+        copy_asset
+      else
+        create_asset_ln
+      fi
+    fi
+  done
+  cmake -DCMAKE_BUILD_TYPE=$build_folder -DUSE_CLANG_TIDY=$use_clang_tidy -G Xcode ..
+}
+
 (
   git submodule update --init --recursive
   (
@@ -69,66 +106,24 @@ copy_asset() {
   case "${unameOut}" in
   Linux*)
     if [[ "$*" == *"release"* ]] || [[ "$*" == *"Release"* ]]; then
-      mkdir RelWithDebInfo
       build_folder="RelWithDebInfo"
-      for dir in $top_level_dir/src/*/; do
-        project_name=$(basename "$dir")
-        build_path="$build_folder/$project_name/Assets"
-        if [ "$project_name" != "Engine" ]; then
-          copy_asset
-        fi
-      done
-      (
-        cd RelWithDebInfo
-        cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_CLANG_TIDY=$use_clang_tidy -G Ninja ../..
-        ninja
-      )
-      project_name="UnitTests"
-      copy_asset
+      is_copy_asset=true
+      build_project_linux
     else
-      mkdir Debug
       build_folder="Debug"
-      for dir in $top_level_dir/src/*/; do
-        project_name=$(basename "$dir")
-        build_path="$build_folder/$project_name/Assets"
-        if [ "$project_name" != "Engine" ]; then
-          create_asset_ln
-        fi
-      done
-      (
-        cd Debug
-        cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_CLANG_TIDY=$use_clang_tidy -G Ninja ../..
-        ninja
-      )
-      project_name="UnitTests"
-      create_asset_ln
+      is_copy_asset=false
+      build_project_linux
     fi
     ;;
   Darwin*)
     if [[ "$*" == *"release"* ]] || [[ "$*" == *"Release"* ]]; then
       build_folder="RelWithDebInfo"
-      for dir in $top_level_dir/src/*/; do
-        project_name=$(basename "$dir")
-        build_path="$project_name/$build_folder/Assets"
-        if [ "$project_name" != "Engine" ]; then
-          copy_asset
-        fi
-      done
-      project_name="UnitTests"
-      copy_asset
-      cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_CLANG_TIDY=$use_clang_tidy -G Xcode ..
+      is_copy_asset=true
+      build_project_mac
     else
       build_folder="Debug"
-      for dir in $top_level_dir/src/*/; do
-        project_name=$(basename "$dir")
-        build_path="$project_name/$build_folder/Assets"
-        if [ "$project_name" != "Engine" ]; then
-          create_asset_ln
-        fi
-      done
-      project_name="UnitTests"
-      create_asset_ln
-      cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_CLANG_TIDY=$use_clang_tidy -G Xcode ..
+      is_copy_asset=false
+      build_project_mac
     fi
     xcodebuild -scheme NumberGame build -configuration $build_folder
     xcodebuild -scheme TempEngineUT build -configuration $build_folder

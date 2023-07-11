@@ -3,7 +3,8 @@
 #include "Components/ComponentType.hpp"
 #include "EntityManager.hpp"
 
-namespace Temp::Coordinator{
+namespace Temp::Coordinator
+{
   Entity CreateEntity(Data &coordinator)
   {
     return EntityManager::CreateEntity(coordinator.entityData);
