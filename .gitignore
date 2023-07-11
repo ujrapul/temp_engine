@@ -37,3 +37,4 @@ build/
 
 # Miscellaneous
 .DS_Store
+imgui.ini
