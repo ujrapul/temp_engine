@@ -30,6 +30,18 @@ namespace
 //  }
 }
 
+@interface TempOpenGLView : NSOpenGLView
+@end
+
+@implementation TempOpenGLView
+- (void)keyDown:(NSEvent *)theEvent {
+}
+// Needed to remove 'ding'/'beep' sound when pressing key
+- (BOOL)acceptsFirstResponder {
+    return YES;
+}
+@end
+
 void RenderThread()
 {
   // Get the OpenGL context
@@ -110,7 +122,7 @@ void RenderThread()
     
     // Create the OpenGL view
     NSRect windowRect = NSMakeRect(0, 0, Temp::Event::EventData.windowWidth, Temp::Event::EventData.windowHeight);
-    nsOpenGLView = [[[NSOpenGLView alloc] initWithFrame:windowRect pixelFormat:pixelFormat] autorelease];
+    nsOpenGLView = [[[TempOpenGLView alloc] initWithFrame:windowRect pixelFormat:pixelFormat] autorelease];
     
     // Create the window and set the content view
     window = [[[NSWindow alloc] initWithContentRect:windowRect styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO] autorelease];

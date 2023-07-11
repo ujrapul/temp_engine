@@ -48,6 +48,9 @@ file(GLOB_RECURSE SOURCE_LIST
   "${CMAKE_CURRENT_LIST_DIR}/src/*.lua"
   "${CMAKE_CURRENT_LIST_DIR}/src/*.m"
   "${CMAKE_CURRENT_LIST_DIR}/src/*.mm"
+  "${CMAKE_CURRENT_LIST_DIR}/src/*.txt"
+  "*.sh"
+  "*.md"
 )
 source_group(TREE "${CMAKE_CURRENT_LIST_DIR}" FILES ${SOURCE_LIST})
 add_custom_target(Development SOURCES ${SOURCE_LIST})

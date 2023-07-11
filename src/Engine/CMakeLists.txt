@@ -25,7 +25,6 @@ set ( ENGINE_SRC
   FontLoader.cpp
   Input.cpp
   Render/OpenGL/OpenGLWrapper.cpp
-  Render/OpenGL/imgui_impl_x11.cpp
   Render/glad/gl.c
   Scene/LevelParser.cpp
   Scene/Scene.cpp
@@ -38,6 +37,7 @@ if (WIN32)
 elseif (LINUX)
   list (APPEND ENGINE_SRC
     Render/OpenGL/X11Render.cpp
+    Render/OpenGL/imgui_impl_x11.cpp
     Render/glad/glx.c
   )
 elseif (APPLE)
