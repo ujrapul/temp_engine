@@ -72,8 +72,8 @@ copy_asset() {
       mkdir RelWithDebInfo
       build_folder="RelWithDebInfo"
       for dir in $top_level_dir/src/*/; do
-        build_path="$build_folder/$project_name/Assets"
         project_name=$(basename "$dir")
+        build_path="$build_folder/$project_name/Assets"
         if [ "$project_name" != "Engine" ]; then
           copy_asset
         fi
@@ -89,8 +89,8 @@ copy_asset() {
       mkdir Debug
       build_folder="Debug"
       for dir in $top_level_dir/src/*/; do
-        build_path="$build_folder/$project_name/Assets"
         project_name=$(basename "$dir")
+        build_path="$build_folder/$project_name/Assets"
         if [ "$project_name" != "Engine" ]; then
           create_asset_ln
         fi
