@@ -14,7 +14,7 @@ layout(std140) uniform FontMatrices {
 };
 
 void main() {
-  gl_Position = projection * vec4(vertex.xy, 10.0, 1.0);
+  gl_Position = projection * model * vec4(vertex.xy, 10.0, 1.0);
   texCoords = vertex.zw;
 }
 #endif

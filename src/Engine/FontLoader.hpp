@@ -30,4 +30,9 @@ namespace Temp::Font
   inline std::unordered_map<char, Character> Characters{};
 
   void LoadFont();
+  
+  constexpr uint32_t Padding()
+  {
+    return 16;
+  }
 }

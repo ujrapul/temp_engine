@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Entity.hpp"
+#ifdef EDITOR
+#include "Math.hpp"
+#endif
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
@@ -20,6 +23,9 @@ namespace Temp::TextBox
   struct Data
   {
     std::string text{};
+#ifdef EDITOR
+    Math::Vec2f hoverableSize{};
+#endif
     float x{};
     float y{};
     float scale{};

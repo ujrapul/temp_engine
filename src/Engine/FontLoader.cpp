@@ -30,7 +30,7 @@ namespace Temp::Font
       return;
     }
 
-    constexpr uint32_t padding = 16;
+    constexpr uint32_t padding = Padding();
     constexpr int fontSize = 128;
 
     FT_Set_Pixel_Sizes(face, 0, fontSize);

@@ -13,13 +13,11 @@ namespace Game::Scene::MainMenuLevel
   {
     using namespace Temp;
 
-    float fontScale = 0.04f;
-
     struct Data
     {
-      TextBox::Data gameTextBox{"NUMBER GAME", -20, 10, fontScale, 0};
-      TextButton::Data playButton{0, {"Play ", -20, 0, fontScale, 0}};
-      TextButton::Data quitButton{0, {"Quit", -20, -7, fontScale, 0}};
+      TextBox::Data gameTextBox{};
+      TextButton::Data playButton{};
+      TextButton::Data quitButton{};
     };
 
     Data gameData{};
@@ -64,17 +62,17 @@ namespace Game::Scene::MainMenuLevel
       Temp::TextButton::Update(scene, gameData.playButton, deltaTime);
     }
 
-    void Destruct(Temp::Scene::Data &)
+    void Destruct(Temp::Scene::Data &scene)
     {
-      TextBox::Destruct(gameData.gameTextBox);
-      Temp::TextButton::Destruct(gameData.playButton);
-      Temp::TextButton::Destruct(gameData.quitButton);
-//      Temp::Scene::Destruct(scene);
+      // TextBox::Destruct(gameData.gameTextBox);
+      // Temp::TextButton::Destruct(gameData.playButton);
+      // Temp::TextButton::Destruct(gameData.quitButton);
+     Temp::Scene::Destruct(scene);
     }
 
     void DrawUpdate(Temp::Scene::Data &scene)
     {
-      Temp::Camera::UpdateFontOrthoScale(scene, 0.15 * (720.f / Temp::Camera::GetHeight()));
+      Temp::Camera::UpdateFontOrthoScale(scene, (720.f / Temp::Camera::GetHeight()));
     }
 
     void DrawConstruct(Temp::Scene::Data &scene)

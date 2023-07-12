@@ -24,8 +24,6 @@ layout(std140) uniform Matrices {
                    // 16             // 128 (col4)
 };
 
-uniform mat4 model;
-
 void main() {
   gl_Position = projection * view * model * (vec4(position, 1.0) + vec4(translation, 0, 0));
   vs_out.TexCoords = aTexCoord + uvOffset - vec2(0.001, 0.001); // Need to subtract by a little less to avoid texture bleed

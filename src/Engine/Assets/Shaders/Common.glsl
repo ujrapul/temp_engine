@@ -3,6 +3,9 @@ precision mediump float;
 #endif
 
 #ifdef VERTEX_SHADER
+
+uniform mat4 model;
+
 #endif
 
 #ifdef FRAGMENT_SHADER

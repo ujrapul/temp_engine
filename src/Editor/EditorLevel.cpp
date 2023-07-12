@@ -16,8 +16,9 @@ namespace Temp::Scene::EditorLevel
     {
     }
 
-    void DrawUpdate(Scene::Data& /*unused*/)
+    void DrawUpdate(Scene::Data& scene)
     {
+      Temp::Camera::UpdateFontOrthoScale(scene, (1080.f / Temp::Camera::GetHeight()));
     }
 
     void Destruct(Scene::Data& /*unused*/)

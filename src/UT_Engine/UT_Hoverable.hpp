@@ -1,6 +1,8 @@
 #pragma once
 
+#include "UT_Common.hpp"
 #include "Hoverable.hpp"
+#include "Scene.hpp"
 
 namespace Temp::Component::Hoverable::UnitTests
 {
@@ -26,7 +28,7 @@ namespace Temp::Component::Hoverable::UnitTests
   void Run()
   {
     Scene::Data scene;
-    Data hoverable{nullptr, HoverEnter, HoverLeave, nullptr, -1000, -1000, 2000, 2000};
+    Data hoverable{nullptr, HoverEnter, HoverLeave, nullptr, nullptr, -1000, -1000, 2000, 2000};
     Assert("Test Hoverable is Inside", Hoverable::IsInside(hoverable, 0, 0));
     Assert("Test Hoverable is not Inside", !Hoverable::IsInside(hoverable, -1000, -1000));
     

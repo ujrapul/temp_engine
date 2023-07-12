@@ -6,6 +6,9 @@
 #include "OpenGLWrapper.hpp"
 #include "Drawable.hpp"
 #include "EngineUtils.hpp"
+#ifdef EDITOR
+#include "Hoverable.hpp"
+#endif
 #include <vector>
 
 // NOTE: Don't use inline global mutexes, it'll stall multiple instances of the same object
@@ -15,6 +18,9 @@ namespace Temp::TextBox
   {
     void PopulateVerticesIndices(Data &textBox)
     {
+#ifdef EDITOR
+      textBox.hoverableSize = {};
+#endif
       auto &vertices = textBox.vertices;
       auto &indices = textBox.indices;
 
@@ -24,8 +30,8 @@ namespace Temp::TextBox
       vertices.reserve(textBox.text.length() * 16);
       indices.reserve(textBox.text.length() * 6);
 
-      float x = textBox.x;
-      float y = textBox.y;
+      float x = 0;
+      float y = 0;
       float scale = textBox.scale;
 
       // iterate through all characters
@@ -62,8 +68,25 @@ namespace Temp::TextBox
         // std::cout << xpos << " " << ypos + h << std::endl; // top left
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+
+#ifdef EDITOR
+        // Right now only supports text on one line
+        textBox.hoverableSize.y = Math::Max(textBox.hoverableSize.y, h);
+#endif
       }
+#ifdef EDITOR
+      textBox.hoverableSize.x = x + Font::Padding() * textBox.scale;
+#endif
     }
+
+#ifdef EDITOR
+    void Drag(Scene::Data &scene, Component::Hoverable::Data &hoverable, float x, float y)
+    {
+      auto &textBox = *static_cast<TextBox::Data *>(hoverable.callbackData);
+      auto &drawable = Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
+      Component::Drawable::SetTranslate(drawable, {x, y + Font::Padding() * textBox.scale * 2, 0});
+    }
+#endif
   }
 
   void DrawConstruct(Scene::Data &scene, Data &textBox)
@@ -90,11 +113,26 @@ namespace Temp::TextBox
     textBox.mtx = new std::mutex();
     textBox.renderText = false;
     textBox.enableOutline = false;
+    Component::Drawable::SetTranslate(drawable, {textBox.x, textBox.y, 0});
+
+#ifdef EDITOR
+    Component::Hoverable::Data hoverable{};
+    hoverable.width = textBox.hoverableSize.x;
+    hoverable.height = textBox.hoverableSize.y;
+    hoverable.x = textBox.x;
+    hoverable.y = textBox.y - Font::Padding() * textBox.scale * 2; // Padding only constitutes one side, so multiply by 2
+    hoverable.Drag = Drag;
+    hoverable.isDrag = true;
+#endif
 
     Scene::AddComponent<Component::Type::DRAWABLE>(scene, textBox.entity, drawable);
     Scene::AddComponent<Component::Type::POSITION2D>(scene, textBox.entity, {textBox.x, textBox.y});
     Scene::AddComponent<Component::Type::SCALE>(scene, textBox.entity, textBox.scale);
     Scene::AddComponent<Component::Type::TEXT>(scene, textBox.entity, textBox.text);
+#ifdef EDITOR
+    hoverable.callbackData = &textBox; //&Scene::Get<Temp::Component::Type::DRAWABLE>(scene, textBox.entity);
+    Scene::AddComponent<Component::Type::HOVERABLE>(scene, textBox.entity, hoverable);
+#endif
   }
 
   void UpdateText(Scene::Data &scene, Data &textBox, const std::string &newText)

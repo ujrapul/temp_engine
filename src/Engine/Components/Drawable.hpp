@@ -26,6 +26,7 @@ namespace Temp::Component::Drawable
     bool visible{true};
     bool blockDraw{false};
     bool disableDepth{false};
+    bool updateModel{false};
 #ifdef DEBUG
     std::string shaderPath{};
     std::filesystem::file_time_type time{};
@@ -41,16 +42,29 @@ namespace Temp::Component::Drawable
     bool operator==(const Data &other) const = default;
   };
 
-  constexpr void Scale(Data &drawable, const Math::Vec3f &scale)
-  {
-    drawable.model = drawable.model.scale(scale);
-  }
-
   inline void Update(Data &drawable)
   {
     using namespace Temp::Render;
 
     OpenGLWrapper::Set4x4MatrixShaderProperty(drawable.shaderProgram, "model", &drawable.model.rows[0][0]);
+  }
+
+  constexpr void Scale(Data &drawable, const Math::Vec3f &scale)
+  {
+    drawable.model = drawable.model.scale(scale);
+    drawable.updateModel = true;
+  }
+
+  constexpr void Translate(Data &drawable, const Math::Vec3f &translate)
+  {
+    drawable.model = drawable.model.translate(translate);
+    drawable.updateModel = true;
+  }
+
+  constexpr void SetTranslate(Data &drawable, const Math::Vec3f &translate)
+  {
+    drawable.model.setTranslation(translate);
+    drawable.updateModel = true;
   }
 
   inline void Construct(Data &drawable, int shaderIdx, int bufferDraw, int vertexStride, int UBO, const char *UBOMatrices, int UBOMatricesIdx)
@@ -106,6 +120,12 @@ namespace Temp::Component::Drawable
   {
     using namespace Temp::Render;
 
+    if (drawable.updateModel)
+    {
+      Update(drawable);
+      drawable.updateModel = false;
+    }
+
     if (!drawable.visible || drawable.blockDraw)
     {
       return;
@@ -148,8 +168,8 @@ namespace Temp::Component::Drawable
     FreeContainer(drawable.indices);
   }
 
-  template<typename T>
-  inline void CreateBuffer(Data &drawable, std::vector<T>& data)
+  template <typename T>
+  inline void CreateBuffer(Data &drawable, std::vector<T> &data)
   {
     using namespace Temp::Render::OpenGLWrapper;
     drawable.buffers.push_back(CreateVBO(data.data(), sizeof(T), data.size(), GL_STATIC_DRAW));
@@ -169,7 +189,7 @@ namespace Temp::Component::Drawable
     FreeContainer(data);
   }
 
-  inline GLuint CreateFloatBuffer(Data &drawable, std::vector<float>& data, int arrayIndex, int numOfElements, int stride, int position = 0)
+  inline GLuint CreateFloatBuffer(Data &drawable, std::vector<float> &data, int arrayIndex, int numOfElements, int stride, int position = 0)
   {
     using namespace Temp::Render::OpenGLWrapper;
     CreateBuffer(drawable, data);
@@ -177,7 +197,7 @@ namespace Temp::Component::Drawable
     return drawable.buffers.back();
   }
 
-  inline GLuint CreateIntBuffer(Data &drawable, std::vector<int>& data, int arrayIndex, int numOfElements, int stride, int position = 0)
+  inline GLuint CreateIntBuffer(Data &drawable, std::vector<int> &data, int arrayIndex, int numOfElements, int stride, int position = 0)
   {
     using namespace Temp::Render::OpenGLWrapper;
     CreateBuffer(drawable, data);
@@ -185,7 +205,7 @@ namespace Temp::Component::Drawable
     return drawable.buffers.back();
   }
 
-  inline GLuint CreateFloatInstancedBuffer(Data &drawable, std::vector<float>& data, int arrayIndex, int numOfElements, int stride, int position = 0)
+  inline GLuint CreateFloatInstancedBuffer(Data &drawable, std::vector<float> &data, int arrayIndex, int numOfElements, int stride, int position = 0)
   {
     using namespace Temp::Render::OpenGLWrapper;
     CreateBuffer(drawable, data);
@@ -193,7 +213,7 @@ namespace Temp::Component::Drawable
     return drawable.buffers.back();
   }
 
-  inline GLuint CreateIntInstancedBuffer(Data &drawable, std::vector<int>& data, int arrayIndex, int numOfElements, int stride, int position = 0)
+  inline GLuint CreateIntInstancedBuffer(Data &drawable, std::vector<int> &data, int arrayIndex, int numOfElements, int stride, int position = 0)
   {
     using namespace Temp::Render::OpenGLWrapper;
     CreateBuffer(drawable, data);

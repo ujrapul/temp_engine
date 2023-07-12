@@ -41,5 +41,5 @@ namespace Temp::Component
   template <> inline float GetTestValue<Type::SCALE>() { return 10457349.f; }
   template <> inline std::string GetTestValue<Type::TEXT>() { return "gerbvrear"; }
   template <> inline Hoverable::Data GetTestValue<Type::HOVERABLE>()
-  { return {nullptr, nullptr, nullptr, nullptr, 234, 1523, 782, 981241}; }
+  { return {nullptr, nullptr, nullptr, nullptr, nullptr, 234, 1523, 782, 981241}; }
 }

@@ -280,13 +280,22 @@ namespace Temp::Render
         int mouseY = xev.xbutton.y - windowAttributes.y;
         int button = xev.xbutton.button;
 
+        Temp::Event::ButtonPressed(button, mouseX, mouseY);
+
         // std::cout << button << std::endl;
-        if (button == 1)
-        {
-          Event::Click(mouseX, mouseY);
-        }
       }
       break;
+      case ButtonRelease:
+      {
+        XWindowAttributes windowAttributes;
+        XGetWindowAttributes(display, window, &windowAttributes);
+
+        int mouseX = xev.xbutton.x - windowAttributes.x;
+        int mouseY = xev.xbutton.y - windowAttributes.y;
+        int button = xev.xbutton.button;
+
+        Temp::Event::ButtonReleased(mouseX, mouseY, button);
+      }
       default:
         break;
       }

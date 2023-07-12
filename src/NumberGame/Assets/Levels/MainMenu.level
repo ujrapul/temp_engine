@@ -3,8 +3,8 @@
 TextBox
 {
   Name: NumberGameTextBox
-  Position: -20 10
-  Scale: 0.04
+  Position: -200 100
+  Scale: 0.4
   Text: NUMBER GAME
 }
 
@@ -14,8 +14,8 @@ TextButton
   TextBox
   {
     Name: PlayTextBox
-    Position: -20 0
-    Scale: 0.04
+    Position: -200 0
+    Scale: 0.4
     Text: Play
   }
 
@@ -25,8 +25,8 @@ TextButton
     // ClickFn: Click
     // HoverEnterFn: HoverEnter
     // HoverLeaveFn: HoverLeave
-    Position: -20 0
-    Size: 9 4
+    Position: -200 0
+    Size: 90 40
   }
 }
 
@@ -36,14 +36,14 @@ TextButton
   TextBox
   {
     Name: QuitTextBox
-    Position: -20 -7
-    Scale: 0.04
+    Position: -200 -70
+    Scale: 0.4
     Text: Quit
   }
   
   Hoverable
   {
-    Position: -20 -7
-    Size: 9 4
+    Position: -200 -70
+    Size: 90 40
   }
 }

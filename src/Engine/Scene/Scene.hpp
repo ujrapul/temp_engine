@@ -58,6 +58,7 @@ namespace Temp::Scene
   {
     std::vector<SceneObject::Data> objects{};
     std::unordered_map<std::string, int> objectsNameIdxTable{};
+    std::queue<int> emptyIndexes{};
     Coordinator::Data coordinator{};
     std::queue<RenderData> renderQueue{};
     State state{State::ENTER};
@@ -66,7 +67,6 @@ namespace Temp::Scene
     std::mutex queueMtx{};
     std::condition_variable cv{};
 #ifdef DEBUG
-    std::mutex reloadMtx{};
     std::unordered_set<int> shadersToReload{};
 #endif
     SceneFns sceneFns{};
@@ -126,4 +126,6 @@ namespace Temp::Scene
   void EnqueueRender(Scene::Data &scene, RenderFunction func, void *data);
   void ClearRender(Scene::Data &scene);
   SceneObject::Data& GetObject(Scene::Data &scene, const std::string& name);
+  void AddObject(Scene::Data &scene, const SceneObject::Data& object);
+  void RemoveObject(Scene::Data &scene, const SceneObject::Data& object);
 }

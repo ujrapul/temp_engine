@@ -45,7 +45,7 @@ namespace Temp::Engine
       while (currentScene && !engine.quit)
       {
         {
-          std::lock_guard<std::mutex> sceneLock(currentScene->mtx);
+          std::lock_guard<std::mutex> lock(currentScene->mtx);
           if (currentScene->state == Scene::State::RUN)
           {
             auto &luableArray = Scene::GetComponentArray<Component::Type::LUABLE>(*currentScene);
@@ -59,13 +59,7 @@ namespace Temp::Engine
                 hotReloadLuables.push_back(&luable);
               }
             }
-          }
-        }
 
-        {
-          std::lock_guard<std::mutex> lock(currentScene->reloadMtx);
-          if (currentScene->renderState == Scene::State::RUN)
-          {
             const auto& globals = Render::OpenGLWrapper::GlobalShaderFiles();
             for (size_t i = 0; i < globals.size(); ++i)
             {
