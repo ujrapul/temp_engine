@@ -13,6 +13,7 @@
 #include "glx.h"
 
 #ifdef EDITOR
+#include "Editor.hpp"
 #include "imgui.h"
 #include "imgui_impl_x11.hpp"
 #include "imgui_impl_opengl3.h"
@@ -51,16 +52,7 @@ namespace Temp::Render
       ImGui_ImplX11_NewFrame();
       ImGui::NewFrame();
 
-      // Add your ImGui UI code here
-      bool show_demo_window;
-      ImGui::ShowDemoWindow(&show_demo_window);
-      ImGui::Begin("Create Entity");
-      if (ImGui::Button("TextBox"))
-      {
-        std::cout << "GOT HERE!" << std::endl;
-      }
-      ImGui::Button("TextButton");
-      ImGui::End();
+      Editor::RunImGUI();
 
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

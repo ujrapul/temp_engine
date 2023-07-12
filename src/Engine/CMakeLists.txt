@@ -40,6 +40,7 @@ elseif (LINUX)
     Render/glad/glx.c
   )
   set (EDITOR_SRC
+    Editor.cpp
     Render/OpenGL/imgui_impl_x11.cpp
   )
 elseif (APPLE)
@@ -51,20 +52,6 @@ elseif (APPLE)
   #set_source_files_properties(${ENGINE_SRC} PROPERTIES
   #  COMPILE_FLAGS "-x objective-c++"
 endif()
-
-include_directories(
-  ${OPENGL_INCLUDE_DIRS}
-  Components
-  Dependencies
-  Dependencies/LuaJIT/src
-  Dependencies/stbimage
-  Entity
-  Render
-  Render/OpenGL
-  Render/OpenGL/Shaders
-  Render/glad
-  Scene
-)
 
 function(make_library TARGET)
   target_include_directories(${TARGET} PUBLIC ${ENGINE_INCLUDE_DIRS})
@@ -168,4 +155,3 @@ target_link_libraries(${TARGET_ENGINE_EDITOR} PRIVATE imgui)
 
 make_library(${TARGET_ENGINE})
 make_library(${TARGET_ENGINE_EDITOR})
-

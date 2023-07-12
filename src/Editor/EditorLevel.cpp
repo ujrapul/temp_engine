@@ -4,32 +4,32 @@ namespace Temp::Scene::EditorLevel
 {
   namespace
   {
-    void Construct(Scene::Data&)
+    void Construct(Scene::Data& /*unused*/)
     {
     }
 
-    void Update(Scene::Data&, float)
+    void Update(Scene::Data& /*unused*/, float /*unused*/)
     {
     }
 
-    void DrawConstruct(Scene::Data&)
+    void DrawConstruct(Scene::Data& /*unused*/)
     {
     }
 
-    void DrawUpdate(Scene::Data&)
+    void DrawUpdate(Scene::Data& /*unused*/)
     {
     }
 
-    void Destruct(Scene::Data&)
+    void Destruct(Scene::Data& /*unused*/)
     {
     }
 
-    void DrawDestruct(Scene::Data&)
+    void DrawDestruct(Scene::Data& /*unused*/)
     {
 
     }
 
-    void DrawReload(Scene::Data&, int)
+    void DrawReload(Scene::Data& /*unused*/, int /*unused*/)
     {
     }
   }

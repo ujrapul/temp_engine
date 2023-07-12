@@ -19,6 +19,8 @@ if (APPLE)
   enable_language(OBJCXX)
 endif()
 
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -31,8 +33,6 @@ if (USE_CLANG_TIDY STREQUAL "ON")
     -checks='-*,performance-*,modernize-*,-modernize-use-trailing-return-type,-modernize-avoid-c-arrays,-clang-analyzer-cplusplus.NewDeleteLeaks,';
     -fix;)
 endif()
-
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(TARGET_ENGINE TempEngine)
 set(TARGET_ENGINE_EDITOR TempEngineEditor)
