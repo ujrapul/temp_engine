@@ -126,7 +126,7 @@ build_project_mac() {
       build_project_mac
     fi
     xcodebuild -scheme NumberGame build -configuration $build_folder
-    xcodebuild -scheme TempEngineUT build -configuration $build_folder
+    xcodebuild -scheme UT_Engine build -configuration $build_folder
     ;;
   CYGWIN*)
     cmake ..
