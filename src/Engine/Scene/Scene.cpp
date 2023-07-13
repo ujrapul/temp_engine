@@ -129,7 +129,7 @@ namespace Temp::Scene
     else
     {
       scene.objects.push_back(object);
-      scene.objectsNameIdxTable[object.name] = scene.objects.size() - 1;
+      scene.objectsNameIdxTable[object.name] = static_cast<int>(scene.objects.size() - 1);
     }
   }
 
@@ -143,7 +143,7 @@ namespace Temp::Scene
       if (it->name == object.name)
       {
         scene.objects.erase(it);
-        scene.emptyIndexes.push(i);
+        scene.emptyIndexes.push(static_cast<int>(i));
         break;
       }
     }

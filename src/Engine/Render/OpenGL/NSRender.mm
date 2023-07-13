@@ -7,6 +7,13 @@
 #include "Scene.hpp"
 #include "Event.hpp"
 
+#ifdef EDITOR
+#include "Editor.hpp"
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_osx.h"
+#endif
+
 #import <Foundation/Foundation.h>
 #import <OpenGL/gl3.h>
 #import <OpenGL/OpenGL.h>
@@ -28,6 +35,18 @@ namespace
 //    // transformations for us.
 //    //    glViewport(windowWidth / 2.f, windowHeight / 2.f, windowWidth, windowHeight);
 //  }
+#ifdef EDITOR
+    void RenderImGui()
+    {
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui::NewFrame();
+
+      Temp::Editor::RunImGUI();
+
+      ImGui::Render();
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+#endif
 }
 
 @interface TempOpenGLView : NSOpenGLView
@@ -50,11 +69,18 @@ void RenderThread()
   [openGLContext makeCurrentContext];
   
   Temp::Event::RenderSetup();
+  
+#ifdef EDITOR
+  ImGui_ImplOpenGL3_Init();
+#endif
 
   // Main rendering loop
   while (!Temp::Event::EventData.renderQuit)
   {
     Temp::Event::RenderRun();
+#ifdef EDITOR
+    RenderImGui();
+#endif
     // Swap buffers
     [openGLContext flushBuffer];
   }
@@ -154,10 +180,30 @@ void RenderThread()
     //  [NSApp run];
     
     Temp::Engine::Start(*self.engine, self.windowName, Temp::Event::EventData.windowWidth, Temp::Event::EventData.windowHeight);
-    
+
+#ifdef EDITOR
+    // Setup Dear ImGui context
+    // FIXME: This example doesn't have proper cleanup...
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplOSX_Init(nsOpenGLView);
+#endif
+
     // Run the custom event loop
     while (Temp::Engine::IsActive(*self.engine)) {
       Temp::Engine::Process(*self.engine);
+#ifdef EDITOR
+      ImGui_ImplOSX_NewFrame(nsOpenGLView);
+#endif
       @autoreleasepool {
         NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
         if (event) {
@@ -166,6 +212,9 @@ void RenderThread()
       }
     }
   }
+#ifdef EDITOR
+  ImGui_ImplOSX_Shutdown();
+#endif
   Temp::Engine::Destroy(*self.engine);
   [application terminate:nil];
 }
@@ -175,6 +224,10 @@ void RenderThread()
     Temp::Event::EventData.isInFullScreen = false;
     return;
   }
+
+#ifdef EDITOR
+  ImGui_ImplOSX_Shutdown();
+#endif
 
   // Terminate the application
   Temp::Engine::Destroy(*engine);

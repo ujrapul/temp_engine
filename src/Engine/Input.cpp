@@ -142,6 +142,7 @@ namespace Temp::Input
         break;
       case kCGEventMouseMoved:
       case kCGEventLeftMouseDown:
+      case kCGEventLeftMouseUp:
       {
         CGPoint currentMousePosition = CGEventGetLocation(event);
 
@@ -165,7 +166,10 @@ namespace Temp::Input
             Event::Hover(mouseX, mouseY);
             break;
           case kCGEventLeftMouseDown:
-            Event::Click(mouseX, mouseY);
+            Event::ButtonPressed(mouseX, mouseY, 1);
+            break;
+          case kCGEventLeftMouseUp:
+            Event::ButtonReleased(mouseX, mouseY, 1);
             break;
           default:
             break;

@@ -21,13 +21,16 @@ namespace Temp::Editor
       static float y = 0;
       auto& engine = Engine::engine;
 
-      std::lock_guard<std::mutex> lock(engine.mtx);
-      
+      std::lock_guard<std::mutex> lock1(engine.mtx);
       auto textBox = new TextBox::Data{"Default Text", {}, x, y, 0.5f};
-      TextBox::Construct(*engine.currentScene, *textBox);
-      TextBox::DrawConstruct(*engine.currentScene, *textBox);
+      {
+        std::lock_guard<std::mutex> lock2(engine.currentScene->mtx);
+        
+        TextBox::Construct(*engine.currentScene, *textBox);
+        TextBox::DrawConstruct(*engine.currentScene, *textBox);
+      }
       
-      SceneObject::Data object{textBox, {nullptr}, "TextObject" + count, SceneObject::Type::TEXTBOX};
+      SceneObject::Data object{textBox, nullptr, "TextObject" + std::to_string(count), SceneObject::Type::TEXTBOX};
       Scene::AddObject(*engine.currentScene, object);
 
       x += 10;

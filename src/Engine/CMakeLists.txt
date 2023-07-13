@@ -30,6 +30,9 @@ set ( ENGINE_SRC
   Scene/Scene.cpp
   Scene/SceneObject.cpp
 )
+set (EDITOR_SRC
+  Editor.cpp
+)
 if (WIN32)
   list (APPEND ENGINE_SRC
     Render/glad/wgl.c
@@ -39,8 +42,7 @@ elseif (LINUX)
     Render/OpenGL/X11Render.cpp
     Render/glad/glx.c
   )
-  set (EDITOR_SRC
-    Editor.cpp
+  list (APPEND EDITOR_SRC
     Render/OpenGL/imgui_impl_x11.cpp
   )
 elseif (APPLE)
@@ -130,9 +132,7 @@ set_target_properties(LuaJIT PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<T
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/freetype)
 set_target_properties(freetype PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:freetype,INTERFACE_INCLUDE_DIRECTORIES>)
 
-# Add the ImGui library
-add_library(imgui
-  OBJECT
+set ( IMGUI_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_demo.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_draw.cpp
@@ -140,11 +140,25 @@ add_library(imgui
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/imgui_widgets.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends/imgui_impl_opengl3.cpp
 )
+
+if (APPLE)
+  list (APPEND IMGUI_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends/imgui_impl_osx.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui/backends/imgui_impl_opengl2.cpp
+  )
+endif()
+  
+# Add the ImGui library
+add_library(imgui
+  OBJECT
+  ${IMGUI_SRC}
+)
 set_target_properties(
   imgui
   PROPERTIES
     CXX_CLANG_TIDY ""
 )
+target_compile_definitions(imgui PUBLIC GL_SILENCE_DEPRECATION)
 
 target_include_directories(imgui
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/imgui
@@ -153,5 +167,9 @@ target_include_directories(imgui
 
 target_link_libraries(${TARGET_ENGINE_EDITOR} PRIVATE imgui)
 
+target_link_libraries(${TARGET_ENGINE_EDITOR} PRIVATE
+  "-framework GameController"
+)
+    
 make_library(${TARGET_ENGINE})
 make_library(${TARGET_ENGINE_EDITOR})
