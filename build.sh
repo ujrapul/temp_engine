@@ -20,9 +20,18 @@ use_clang_tidy="OFF"
 asset_folder="."
 build_path="$build_folder/$project_name/Assets"
 is_copy_asset=true
+use_sanitize_thread="OFF"
+run_args=""
 
 if [[ "$*" == *"clang-tidy"* ]]; then
   use_clang_tidy="ON"
+fi
+
+if [[ "$*" == *"sanitize-thread"* ]]; then
+  use_sanitize_thread="ON"
+  export TSAN_OPTIONS="suppressions=$PWD/sanitizer-thread-suppressions.supp second_deadlock_stack=1"
+elif [[ "$*" == *"mangohud"* ]]; then
+  run_args="mangohud --dlsym"
 fi
 
 mk_dir() {
@@ -73,7 +82,7 @@ build_project_linux() {
   done
   (
     cd $build_folder
-    cmake -DCMAKE_BUILD_TYPE=$build_folder -DUSE_CLANG_TIDY=$use_clang_tidy -G Ninja ../..
+    cmake -DCMAKE_BUILD_TYPE=$build_folder -DUSE_CLANG_TIDY=$use_clang_tidy -DSANITIZE_THREAD=$use_sanitize_thread -G Ninja ../..
     ninja
   )
 }
@@ -90,7 +99,7 @@ build_project_mac() {
       fi
     fi
   done
-  cmake -DCMAKE_BUILD_TYPE=$build_folder -DUSE_CLANG_TIDY=$use_clang_tidy -G Xcode ..
+  cmake -DCMAKE_BUILD_TYPE=$build_folder -DUSE_CLANG_TIDY=$use_clang_tidy -DSANITIZE_THREAD=$use_sanitize_thread -G Xcode ..
 }
 
 (
@@ -136,4 +145,19 @@ build_project_mac() {
     ;;
   *) cmake .. ;;
   esac
+
+  if [[ "$*" == *"run"* ]]; then
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+    Linux*)
+      $run_args ./$build_folder/${@: -1}/${@: -1}
+      ;;
+    Darwin*)
+      $run_args ./$build_folder/${@: -1}/${@: -1}
+      ;;
+    CYGWIN*) ;;
+    MINGW*) ;;
+    *) ;;
+    esac
+  fi
 )

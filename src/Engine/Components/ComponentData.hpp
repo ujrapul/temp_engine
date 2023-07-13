@@ -1,3 +1,7 @@
+// Built with reference from Austin Morlan's ECS
+// https://austinmorlan.com/posts/entity_component_system/
+// https://code.austinmorlan.com/austin/2019-ecs
+
 #pragma once
 
 #include "Entity.hpp"

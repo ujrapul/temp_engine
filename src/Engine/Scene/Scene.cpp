@@ -7,7 +7,7 @@ namespace Temp::Scene
   {
     void DequeueRender(Scene::Data &scene)
     {
-      std::unique_lock<std::mutex> lock(scene.queueMtx);
+      std::lock_guard<std::mutex> lock(scene.queueMtx);
       while (!scene.renderQueue.empty())
       {
         auto render = scene.renderQueue.front();
@@ -52,18 +52,23 @@ namespace Temp::Scene
 
   void EnqueueRender(Data &scene, RenderFunction func, void *data)
   {
-    std::unique_lock<std::mutex> lock(scene.queueMtx);
+    std::lock_guard<std::mutex> lock(scene.queueMtx);
     scene.renderQueue.push({func, data});
   }
 
   void Draw(Data &scene)
   {
     DequeueRender(scene);
-    switch (scene.renderState)
+    State renderState;
+    {
+      std::lock_guard<std::mutex> sceneLock(scene.mtx);
+      renderState = scene.renderState;
+    }
+    switch (renderState)
     {
     case State::ENTER:
     {
-      std::unique_lock<std::mutex> lock(scene.mtx);
+      std::lock_guard<std::mutex> lock(scene.mtx);
       scene.sceneFns.DrawConstructFunc(scene);
       scene.renderState = State::RUN;
       scene.state = Scene::State::RUN;
@@ -119,7 +124,7 @@ namespace Temp::Scene
   void AddObject(Scene::Data &scene, const SceneObject::Data &object)
   {
     std::lock_guard<std::mutex> lock(scene.mtx);
-    
+
     if (!scene.emptyIndexes.empty())
     {
       scene.objects[scene.emptyIndexes.front()] = object;
@@ -136,7 +141,7 @@ namespace Temp::Scene
   void RemoveObject(Scene::Data &scene, const SceneObject::Data &object)
   {
     std::lock_guard<std::mutex> lock(scene.mtx);
-    
+
     size_t i = 0;
     for (auto it = scene.objects.begin(); it != scene.objects.end(); ++it, ++i)
     {

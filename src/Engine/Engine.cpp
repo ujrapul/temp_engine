@@ -22,9 +22,10 @@ namespace Temp::Engine
     std::thread inputThread{};
 #ifdef DEBUG
     std::thread hotReloadThread{};
-    std::vector<Component::Luable::Data*> hotReloadLuables;
+    std::vector<Component::Luable::Data *> hotReloadLuables;
+    std::mutex hotReloadLuableMtx{};
 #endif
-    
+
 #ifdef __linux
     void RunLinux(Data &engine, const char *windowName, int windowX, int windowY)
     {
@@ -38,11 +39,13 @@ namespace Temp::Engine
       while (currentScene)
       {
         {
-          if (engine.quit)
           {
-            break;
+            std::lock_guard<std::mutex> lock(engine.mtx);
+            if (engine.quit)
+            {
+              break;
+            }
           }
-          std::lock_guard<std::mutex> lock(engine.mtx);
           Process(engine);
         }
       }
@@ -50,13 +53,13 @@ namespace Temp::Engine
       Destroy(engine);
     }
 #endif
-    
+
 #ifdef DEBUG
-    void HotReloadThread(Data& engine)
+    void HotReloadThread(Data &engine)
     {
-      const auto& globals = Render::OpenGLWrapper::GlobalShaderFiles();
-      auto& globalShaderFilesTimes = Render::OpenGLWrapper::GlobalShaderFilesTimes();
-      
+      const auto &globals = Render::OpenGLWrapper::GlobalShaderFiles();
+      auto &globalShaderFilesTimes = Render::OpenGLWrapper::GlobalShaderFilesTimes();
+
       while (currentScene)
       {
         {
@@ -68,18 +71,21 @@ namespace Temp::Engine
         }
 
         {
-          std::lock_guard<std::mutex> lock(currentScene->mtx);
+          std::lock_guard<std::mutex> sceneLock(currentScene->mtx);
           if (currentScene->state == Scene::State::RUN)
           {
-            auto &luableArray = Scene::GetComponentArray<Component::Type::LUABLE>(*currentScene);
-            for (size_t i = 0; i < luableArray.mapping.size; ++i)
             {
-              auto &luable = luableArray.array[i];
-              auto time = std::filesystem::last_write_time(AssetsDirectory() / "LuaScripts" / luable.path);
-              if (time != luable.time)
+              std::lock_guard<std::mutex> hotReloadLuableLock(hotReloadLuableMtx);
+              auto &luableArray = Scene::GetComponentArray<Component::Type::LUABLE>(*currentScene);
+              for (size_t i = 0; i < luableArray.mapping.size; ++i)
               {
-                luable.time = time;
-                hotReloadLuables.push_back(&luable);
+                auto &luable = luableArray.array[i];
+                auto time = std::filesystem::last_write_time(AssetsDirectory() / "LuaScripts" / luable.path);
+                if (time != luable.time)
+                {
+                  luable.time = time;
+                  hotReloadLuables.push_back(&luable);
+                }
               }
             }
 
@@ -117,29 +123,31 @@ namespace Temp::Engine
     }
 #endif
   }
-  
+
   void Start(Data &engine, const char *windowName, int windowX, int windowY)
   {
     SceneObject::Init();
     currentScene = new Scene::Data();
+    engine.currentScene = currentScene;
     currentScene->sceneFns = engine.sceneFns.front();
-//    Scene::Construct(*currentScene);
+    //    Scene::Construct(*currentScene);
     engine.coordinatorFns.Init(currentScene->coordinator);
     // Start Render Thread
     Render::Initialize(windowName, windowX, windowY, engine);
 
+    std::lock_guard<std::mutex> lock(engine.mtx);
 #ifndef __linux__
     inputThread = std::thread(Input::HandleThread, std::ref(engine.keyEventData));
 #endif
-    
+
     engine.lua = luaL_newstate();
     luaL_openlibs(engine.lua);
-    
+
 #ifdef DEBUG
     hotReloadThread = std::thread(HotReloadThread, std::ref(engine));
 #endif
   }
-  
+
   void Process(Data &engine)
   {
     static float deltaTime{};
@@ -158,9 +166,10 @@ namespace Temp::Engine
     case Scene::State::ENTER:
     {
       Temp::Scene::ClearRender(*currentScene);
-      std::unique_lock<std::mutex> lock(currentScene->mtx);
+      // This should always run before DrawConstruct
       currentScene->sceneFns.ConstructFunc(*currentScene);
-      engine.currentScene = currentScene;
+      
+      std::lock_guard<std::mutex> lock(currentScene->mtx);
       currentScene->state = Scene::State::MAX;
       currentScene->renderState = Scene::State::ENTER;
     }
@@ -177,21 +186,24 @@ namespace Temp::Engine
                             { return currentScene->renderState == Scene::State::MAX; });
       currentScene->sceneFns.DestructFunc(*currentScene);
       currentScene->sceneFns = *currentScene->sceneFns.nextScene;
-      engine.coordinatorFns.Reset(currentScene->coordinator);
+      {
+        std::lock_guard<std::mutex> lock(engine.mtx);
+        engine.coordinatorFns.Reset(currentScene->coordinator);
+      }
       currentScene->state = Scene::State::ENTER;
     }
     break;
     default:
       break;
     }
-    
+
 #ifdef DEBUG
     // Hot Reload Lua Scripts
     {
-      std::lock_guard<std::mutex> lock(engine.mtx);
+      std::lock_guard<std::mutex> hotReloadLuableLock(hotReloadLuableMtx);
       if (hotReloadLuables.size() > 0)
       {
-        for (const auto* luable : hotReloadLuables)
+        for (const auto *luable : hotReloadLuables)
         {
           Component::Luable::LoadScript(*luable);
         }
@@ -204,7 +216,7 @@ namespace Temp::Engine
     Render::Run(engine);
     Input::Process(engine.keyEventData);
   }
-  
+
   void Run(Data &engine, const char *windowName, int windowX, int windowY)
   {
 #ifdef __linux__
@@ -216,7 +228,6 @@ namespace Temp::Engine
 
   void Destroy(Data &engine)
   {
-    engine.quit = true;
 #ifndef __linux__
     // TODO: Add a mutex here
     Input::EndInput();
@@ -241,10 +252,11 @@ namespace Temp::Engine
 
   void Quit(Data &engine)
   {
+    std::lock_guard<std::mutex> lock(engine.mtx);
     engine.quit = true;
   }
 
-  void EnqueueGlobalRender(Data &engine, void (*func)(void*), void *data)
+  void EnqueueGlobalRender(Data &engine, void (*func)(void *), void *data)
   {
     std::unique_lock<std::mutex> lock(engine.mtx);
     engine.renderQueue.push({func, data});
@@ -262,7 +274,7 @@ namespace Temp::Engine
     render.func(render.data);
     engine.renderQueue.pop();
   }
-  
+
   bool IsActive(const Data &engine)
   {
     return !engine.quit && currentScene;

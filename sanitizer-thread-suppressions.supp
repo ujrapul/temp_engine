@@ -1,0 +1,2 @@
+# sanitizer-thread-suppressions.txt
+race:/usr/lib/dri/radeonsi_dri.so

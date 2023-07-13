@@ -44,10 +44,12 @@ namespace Temp::Render
     GLXContext context{};
     XVisualInfo *visualInfo{};
     Colormap colormap{};
+    std::mutex imguiMtx{};
 
 #ifdef EDITOR
     void RenderImGui()
     {
+      std::lock_guard<std::mutex> lock(imguiMtx);
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplX11_NewFrame();
       ImGui::NewFrame();
@@ -69,8 +71,16 @@ namespace Temp::Render
 
       Event::RenderSetup();
       // Main rendering loop
-      while (!Event::EventData.renderQuit)
+      while (true)
       {
+        {
+          std::lock_guard<std::mutex> lock(Event::EventData.mtx);
+          if (Event::EventData.renderQuit)
+          {
+            break;
+          }
+        }
+
         Event::RenderRun();
 #ifdef EDITOR
         RenderImGui();
@@ -85,8 +95,11 @@ namespace Temp::Render
 
     void CreateDisplay(const char *windowName, int windowX, int windowY)
     {
-      Event::EventData.windowWidth = windowX;
-      Event::EventData.windowHeight = windowY;
+      {
+        std::lock_guard<std::mutex> lock(Event::EventData.mtx);
+        Event::EventData.windowWidth = windowX;
+        Event::EventData.windowHeight = windowY;
+      }
 
       // Open the X11 display
       display = XOpenDisplay(nullptr);
@@ -173,6 +186,7 @@ namespace Temp::Render
       }
 
 #ifdef EDITOR
+      std::lock_guard<std::mutex> lock(imguiMtx);
       // Setup Dear ImGui context
       IMGUI_CHECKVERSION();
       ImGui::CreateContext();
@@ -196,6 +210,8 @@ namespace Temp::Render
   {
     CreateDisplay(windowName, windowX, windowY);
     Camera::UpdateCameraAspect(engine, windowX, windowY);
+
+    std::lock_guard<std::mutex> lock(Event::EventData.mtx);
     Event::EventData.renderThread = std::thread(RenderThread);
   }
 
@@ -207,7 +223,10 @@ namespace Temp::Render
       XEvent xev;
       XNextEvent(display, &xev);
 #ifdef EDITOR
-      ImGui_ImplX11_EventHandler(xev);
+      {
+        std::lock_guard<std::mutex> lock(imguiMtx);
+        ImGui_ImplX11_EventHandler(xev);
+      }
 #endif
 
       switch (xev.type)
@@ -247,16 +266,20 @@ namespace Temp::Render
 
         int currentWidth = windowAttributes.width;
         int currentHeight = windowAttributes.height;
-        int &windowWidth = Event::EventData.windowWidth;
-        int &windowHeight = Event::EventData.windowHeight;
 
-        if (currentWidth != windowWidth || currentHeight != windowHeight)
         {
-          Camera::UpdateCameraAspect(engine, currentWidth, currentHeight);
-          windowWidth = currentWidth;
-          windowHeight = currentHeight;
+          std::lock_guard<std::mutex> lock(Event::EventData.mtx);
+          int &windowWidth = Event::EventData.windowWidth;
+          int &windowHeight = Event::EventData.windowHeight;
 
-          Engine::EnqueueGlobalRender(engine, Event::Resize, nullptr);
+          if (currentWidth != windowWidth || currentHeight != windowHeight)
+          {
+            Camera::UpdateCameraAspect(engine, currentWidth, currentHeight);
+            windowWidth = currentWidth;
+            windowHeight = currentHeight;
+
+            Engine::EnqueueGlobalRender(engine, Event::Resize, nullptr);
+          }
         }
       }
       break;
@@ -304,16 +327,22 @@ namespace Temp::Render
 
   void Destroy()
   {
-    Event::EventData.renderQuit = true;
+    {
+      std::lock_guard<std::mutex> lock(Event::EventData.mtx);
+      Event::EventData.renderQuit = true;
+    }
     Event::EventData.renderThread.join();
 
     gladLoaderUnloadGL();
     gladLoaderUnloadGLX();
 
 #ifdef EDITOR
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplX11_Shutdown();
-    ImGui::DestroyContext();
+    {
+      std::lock_guard<std::mutex> lock(imguiMtx);
+      ImGui_ImplOpenGL3_Shutdown();
+      ImGui_ImplX11_Shutdown();
+      ImGui::DestroyContext();
+    }
 #endif
 
     // Cleanup

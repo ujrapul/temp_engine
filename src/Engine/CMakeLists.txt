@@ -72,6 +72,9 @@ function(make_library TARGET)
     target_compile_definitions(${TARGET} PUBLIC GL_SILENCE_DEPRECATION)
   endif()
 
+  # target_compile_options(${TARGET} PRIVATE -fsanitize=address)
+  # target_link_options(${TARGET} PRIVATE -fsanitize=address)
+
   # Link with LuaJIT library
   add_dependencies(${TARGET} LuaJIT)
   if(UNIX)
@@ -167,9 +170,11 @@ target_include_directories(imgui
 
 target_link_libraries(${TARGET_ENGINE_EDITOR} PRIVATE imgui)
 
-target_link_libraries(${TARGET_ENGINE_EDITOR} PRIVATE
-  "-framework GameController"
-)
+if (APPLE)
+  target_link_libraries(${TARGET_ENGINE_EDITOR} PRIVATE
+    "-framework GameController"
+  )
+endif()
     
 make_library(${TARGET_ENGINE})
 make_library(${TARGET_ENGINE_EDITOR})

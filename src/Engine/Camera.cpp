@@ -12,6 +12,7 @@ namespace Temp::Camera
     float width{1280};
     float height{720};
     float fov{45.f};
+    std::mutex cameraMtx{};
 
     Math::Mat4 FontOrthoProjection()
     {
@@ -66,6 +67,7 @@ namespace Temp::Camera
 
       // std::cout << sizeof(Math::Mat4) << std::endl;
 
+      std::lock_guard<std::mutex> lock(cameraMtx);
       // Matrices need to be transposed since OpenGL uses column major matrices
       OpenGLWrapper::UpdateUBO(UBO(), &GetProjection().transpose().rows[0][0], sizeof(Math::Mat4), 0);
       OpenGLWrapper::UpdateUBO(UBO(), &view.transpose().rows[0][0], sizeof(Math::Mat4), sizeof(Math::Mat4));
@@ -78,6 +80,7 @@ namespace Temp::Camera
 
       // std::cout << sizeof(Math::Mat4) << std::endl;
 
+      std::lock_guard<std::mutex> lock(cameraMtx);
       // Matrices need to be transposed since OpenGL uses column major matrices
       OpenGLWrapper::UpdateUBO(UBO(), &GetProjection().transpose().rows[0][0], sizeof(Math::Mat4), 0);
       OpenGLWrapper::UpdateUBO(UBO(), &view.transpose().rows[0][0], sizeof(Math::Mat4), sizeof(Math::Mat4));
@@ -160,6 +163,7 @@ namespace Temp::Camera
 
   void TranslateView(const Math::Vec3f &translate)
   {
+    std::lock_guard<std::mutex> lock(cameraMtx);
     view = view.translate(translate);
   }
 

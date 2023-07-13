@@ -187,10 +187,11 @@ namespace Temp::Event
 
     // Avoid using the Render Queue for real-time updates to avoid flickering!
     Temp::Engine::DequeueGlobalRender(engine);
-    if (engine.currentScene) [[likely]]
-    {
-      Temp::Scene::Draw(*engine.currentScene);
-    }
+    
+    // std::lock_guard<std::mutex> engineLock(engine.mtx);
+    
+    // Based on current design engine.currentScene should never be null
+    Temp::Scene::Draw(*engine.currentScene);
   }
 
   inline void RenderClean()
