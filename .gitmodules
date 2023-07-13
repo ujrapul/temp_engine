@@ -7,4 +7,4 @@
 	ignore = untracked
 [submodule "src/Engine/Dependencies/imgui"]
 	path = src/Engine/Dependencies/imgui
-	url = https://github.com/ocornut/imgui.git
+	url = https://github.com/ujrapul/imgui
