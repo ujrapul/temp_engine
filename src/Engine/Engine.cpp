@@ -30,9 +30,21 @@ namespace Temp::Engine
     {
       Start(engine, windowName, windowX, windowY);
 
-      while (currentScene && !engine.quit)
+      while (!Event::RenderInitialized())
       {
-        Process(engine);
+        continue;
+      }
+
+      while (currentScene)
+      {
+        {
+          if (engine.quit)
+          {
+            break;
+          }
+          std::lock_guard<std::mutex> lock(engine.mtx);
+          Process(engine);
+        }
       }
 
       Destroy(engine);
@@ -42,8 +54,19 @@ namespace Temp::Engine
 #ifdef DEBUG
     void HotReloadThread(Data& engine)
     {
-      while (currentScene && !engine.quit)
+      const auto& globals = Render::OpenGLWrapper::GlobalShaderFiles();
+      auto& globalShaderFilesTimes = Render::OpenGLWrapper::GlobalShaderFilesTimes();
+      
+      while (currentScene)
       {
+        {
+          std::lock_guard<std::mutex> lock(engine.mtx);
+          if (engine.quit)
+          {
+            return;
+          }
+        }
+
         {
           std::lock_guard<std::mutex> lock(currentScene->mtx);
           if (currentScene->state == Scene::State::RUN)
@@ -60,14 +83,13 @@ namespace Temp::Engine
               }
             }
 
-            const auto& globals = Render::OpenGLWrapper::GlobalShaderFiles();
             for (size_t i = 0; i < globals.size(); ++i)
             {
               auto &drawableArray = Scene::GetComponentArray<Component::Type::DRAWABLE>(*currentScene);
               auto time = std::filesystem::last_write_time(globals[i].c_str());
-              if (time != Render::OpenGLWrapper::GlobalShaderFilesTimes()[i])
+              if (time != globalShaderFilesTimes[i])
               {
-                Render::OpenGLWrapper::GlobalShaderFilesTimes()[i] = time;
+                globalShaderFilesTimes[i] = time;
                 for (size_t i = 0; i < drawableArray.mapping.size; ++i)
                 {
                   auto &drawable = drawableArray.array[i];
@@ -126,12 +148,12 @@ namespace Temp::Engine
     deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(stop - start).count();
     start = stop;
 
-    if (!Event::EventData.renderInitialized)
+    Scene::State sceneState;
     {
-      return;
+      std::lock_guard<std::mutex> lock(currentScene->mtx);
+      sceneState = currentScene->state;
     }
-
-    switch (currentScene->state)
+    switch (sceneState)
     {
     case Scene::State::ENTER:
     {

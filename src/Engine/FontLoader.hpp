@@ -26,7 +26,6 @@ namespace Temp::Font
     uint32_t atlasHeight{};
   };
 
-  // TODO: Turn into an accessor function
   inline std::unordered_map<char, Character> Characters{};
 
   void LoadFont();

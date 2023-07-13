@@ -21,9 +21,9 @@ namespace Temp::Scene::EditorLevel
       Temp::Camera::UpdateFontOrthoScale(scene, (1080.f / Temp::Camera::GetHeight()));
     }
 
-    void Destruct(Scene::Data& /*unused*/)
-    {
-    }
+//    void Destruct(Scene::Data& /*unused*/)
+//    {
+//    }
 
     void DrawDestruct(Scene::Data& /*unused*/)
     {
@@ -42,7 +42,7 @@ namespace Temp::Scene::EditorLevel
     scene.Update = Update;
     scene.DrawConstructFunc = DrawConstruct;
     scene.DrawUpdateFunc = DrawUpdate;
-    scene.DestructFunc = Destruct;
+    //scene.DestructFunc = Destruct;
     scene.DrawDestructFunc = DrawDestruct;
     scene.DrawReloadFunc = DrawReload;
     return scene;

@@ -27,26 +27,83 @@ namespace
   NSApplication *application{nullptr};
   NSWindow *window{nullptr};
   Temp::Engine::Data* engine{nullptr};
-//
-//  void Resize(void *)
-//  {
-//    // TODO: Look into why glViewport here is causing the view to become larger
-//    // Might be something to do with the NSOpenGLView that's taking care of the
-//    // transformations for us.
-//    //    glViewport(windowWidth / 2.f, windowHeight / 2.f, windowWidth, windowHeight);
-//  }
+  std::mutex imguiMtx{};
+  //
+  //  void Resize(void *)
+  //  {
+  //    // TODO: Look into why glViewport here is causing the view to become larger
+  //    // Might be something to do with the NSOpenGLView that's taking care of the
+  //    // transformations for us.
+  //    //    glViewport(windowWidth / 2.f, windowHeight / 2.f, windowWidth, windowHeight);
+  //  }
 #ifdef EDITOR
-    void RenderImGui()
-    {
-      ImGui_ImplOpenGL3_NewFrame();
-      ImGui::NewFrame();
-
-      Temp::Editor::RunImGUI();
-
-      ImGui::Render();
-      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    }
+  void RenderImGui()
+  {
+    std::lock_guard<std::mutex> lock(imguiMtx);
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui::NewFrame();
+    
+    Temp::Editor::RunImGUI();
+    
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  }
 #endif
+  
+  void RunMainLoop(const char* windowName) {
+    @autoreleasepool {
+      [application stop:nil];
+
+      // Set the OpenGL context for the window
+      engine = &Temp::Engine::engine;
+      
+      {
+        std::lock_guard<std::mutex> eventLock(Temp::Event::EventData.mtx);
+        Temp::Engine::Start(*engine, windowName, Temp::Event::EventData.windowWidth, Temp::Event::EventData.windowHeight);
+      }
+
+  #ifdef EDITOR
+      {
+        std::lock_guard<std::mutex> lock(imguiMtx);
+        // Setup Dear ImGui context
+        // FIXME: This example doesn't have proper cleanup...
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsLight();
+        
+        // Setup Platform/Renderer backends
+        ImGui_ImplOSX_Init(nsOpenGLView);
+      }
+  #endif
+      
+      // Run the custom event loop
+      while (Temp::Engine::IsActive(*engine)) {
+        Temp::Engine::Process(*engine);
+  #ifdef EDITOR
+        {
+          std::lock_guard<std::mutex> lock(imguiMtx);
+          ImGui_ImplOSX_NewFrame(nsOpenGLView);
+        }
+  #endif
+        @autoreleasepool {
+          NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
+          if (event) {
+            [NSApp sendEvent:event];
+          }
+        }
+      }
+    }
+  #ifdef EDITOR
+    ImGui_ImplOSX_Shutdown();
+  #endif
+    Temp::Engine::Destroy(*engine);
+  }
 }
 
 @interface TempOpenGLView : NSOpenGLView
@@ -57,7 +114,7 @@ namespace
 }
 // Needed to remove 'ding'/'beep' sound when pressing key
 - (BOOL)acceptsFirstResponder {
-    return YES;
+  return YES;
 }
 @end
 
@@ -71,9 +128,12 @@ void RenderThread()
   Temp::Event::RenderSetup();
   
 #ifdef EDITOR
-  ImGui_ImplOpenGL3_Init();
+  {
+    std::lock_guard<std::mutex> lock(imguiMtx);
+    ImGui_ImplOpenGL3_Init();
+  }
 #endif
-
+  
   // Main rendering loop
   while (!Temp::Event::EventData.renderQuit)
   {
@@ -98,14 +158,16 @@ void RenderThread()
   // Perform custom handling for resize event
   NSRect contentRect = [window contentRectForFrameRect:window.frame];
   NSSize contentSize = contentRect.size;
+  std::lock_guard<std::mutex> eventLock(Temp::Event::EventData.mtx);
   Temp::Event::EventData.windowWidth = contentSize.width;
   Temp::Event::EventData.windowHeight = contentSize.height;
   
   Temp::Camera::UpdateCameraAspect(*engine, Temp::Event::EventData.windowWidth, Temp::Event::EventData.windowHeight);
-//  Temp::Engine::EnqueueGlobalRender(*engine, Resize, nullptr);
+  //  Temp::Engine::EnqueueGlobalRender(*engine, Resize, nullptr);
 }
 
 - (void)windowDidEnterFullScreen:(NSNotification *)notification {
+  std::lock_guard<std::mutex> eventLock(Temp::Event::EventData.mtx);
   Temp::Event::EventData.isInFullScreen = true;
 }
 
@@ -172,71 +234,27 @@ void RenderThread()
     
     // Set the window's frame to be centered on the screen
     [window setFrame:centeredFrame display:YES];
-    
-    // Set the OpenGL context for the NSOpenGLView
-    //  [self.openGLView setOpenGLContext:self.openGLView.openGLContext];
-    
-    // Run the main event loop
-    //  [NSApp run];
-    
-    Temp::Engine::Start(*self.engine, self.windowName, Temp::Event::EventData.windowWidth, Temp::Event::EventData.windowHeight);
-
-#ifdef EDITOR
-    // Setup Dear ImGui context
-    // FIXME: This example doesn't have proper cleanup...
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplOSX_Init(nsOpenGLView);
-#endif
-
-    // Run the custom event loop
-    while (Temp::Engine::IsActive(*self.engine)) {
-      Temp::Engine::Process(*self.engine);
-#ifdef EDITOR
-      ImGui_ImplOSX_NewFrame(nsOpenGLView);
-#endif
-      @autoreleasepool {
-        NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
-        if (event) {
-          [NSApp sendEvent:event];
-        }
-      }
-    }
   }
-#ifdef EDITOR
-  ImGui_ImplOSX_Shutdown();
-#endif
-  Temp::Engine::Destroy(*self.engine);
-  [application terminate:nil];
+  [application stop:nil];
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
+  std::lock_guard<std::mutex> eventLock(Temp::Event::EventData.mtx);
   if (Temp::Event::EventData.isInFullScreen) {
     Temp::Event::EventData.isInFullScreen = false;
     return;
   }
-
-#ifdef EDITOR
-  ImGui_ImplOSX_Shutdown();
-#endif
-
-  // Terminate the application
-  Temp::Engine::Destroy(*engine);
-  [application terminate:nil];
+  
+  Temp::Engine::Quit(*self.engine);
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
   // Remove the observer
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication {
+  return YES;
 }
 
 @end
@@ -245,8 +263,11 @@ void CreateDisplay(const char *windowName, int windowX, int windowY, Temp::Engin
   @autoreleasepool {
     // Create the application instance
     application = [[NSApplication sharedApplication] autorelease];
-    Temp::Event::EventData.windowWidth = windowX;
-    Temp::Event::EventData.windowHeight = windowY;
+    {
+      std::lock_guard<std::mutex> eventLock(Temp::Event::EventData.mtx);
+      Temp::Event::EventData.windowWidth = windowX;
+      Temp::Event::EventData.windowHeight = windowY;
+    }
     
     // Create the application delegate
     AppDelegate *appDelegate = [[[AppDelegate alloc] init] autorelease];
@@ -255,7 +276,10 @@ void CreateDisplay(const char *windowName, int windowX, int windowY, Temp::Engin
     [application setDelegate:appDelegate];
     
     // Run the application
-    [application run];
+    if (![[NSRunningApplication currentApplication] isFinishedLaunching])
+      [application run];
+    
+    RunMainLoop(windowName);
   }
 }
 
@@ -269,7 +293,7 @@ namespace Temp::Render
   
   bool IsInitialized()
   {
-    return Temp::Event::EventData.renderInitialized;
+    return Temp::Event::RenderInitialized();
   }
   
   void Run(Temp::Engine::Data &engine, const char *windowName, int windowX, int windowY)
@@ -285,6 +309,7 @@ namespace Temp::Render
   
   void Destroy()
   {
+    std::lock_guard<std::mutex> eventLock(Temp::Event::EventData.mtx);
     Temp::Event::EventData.renderQuit = true;
     Temp::Event::EventData.renderThread.join();
   }

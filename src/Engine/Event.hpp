@@ -27,6 +27,7 @@ namespace Temp::Event
     bool limitFps{false};
     bool isInFullScreen{false};
     std::array<bool, 3> buttonPressed;
+    std::mutex mtx{};
   };
 
   inline Data EventData{};
@@ -39,6 +40,7 @@ namespace Temp::Event
       return;
     }
 
+    std::lock_guard<std::mutex> eventLock(EventData.mtx);
     std::lock_guard<std::mutex> sceneLock(scene->mtx);
     if (scene->state == Scene::State::RUN)
     {
@@ -68,6 +70,12 @@ namespace Temp::Event
 
   inline void ButtonPressed(int button, float mouseX, float mouseY)
   {
+    std::lock_guard<std::mutex> eventLock(EventData.mtx);
+    if (button > (int)EventData.buttonPressed.size())
+    {
+      return;
+    }
+
     EventData.buttonPressed[button] = true;
     auto *scene = Temp::Engine::engine.currentScene;
     if (!scene)
@@ -93,6 +101,7 @@ namespace Temp::Event
 
   inline void ButtonReleased(float mouseX, float mouseY, int button)
   {
+    std::lock_guard<std::mutex> eventLock(EventData.mtx);
     EventData.buttonPressed[button] = false;
     if (!EventData.buttonPressed[1])
     {
@@ -133,6 +142,12 @@ namespace Temp::Event
 #endif
   }
 
+  inline bool RenderInitialized()
+  {
+    std::lock_guard<std::mutex> eventLock(EventData.mtx);
+    return EventData.renderInitialized;
+  }
+
   inline void RenderSetup()
   {
     Logger::Log(glGetString(GL_VERSION));
@@ -145,6 +160,7 @@ namespace Temp::Event
     Temp::Font::LoadFont();
     Temp::Render::OpenGLWrapper::LoadShaders();
 
+    std::lock_guard<std::mutex> eventLock(EventData.mtx);
     EventData.renderInitialized = true;
 
     Resize(nullptr);
@@ -157,11 +173,14 @@ namespace Temp::Event
     auto &engine = Temp::Engine::engine;
 
     clock_t end{clock()};
-    if (EventData.limitFps && ((float)(end - EventData.renderBegin) / CLOCKS_PER_SEC) < EventData.fps60)
     {
-      return;
+      std::lock_guard<std::mutex> eventLock(EventData.mtx);
+      if (EventData.limitFps && ((float)(end - EventData.renderBegin) / CLOCKS_PER_SEC) < EventData.fps60)
+      {
+        return;
+      }
+      EventData.renderBegin = clock();
     }
-    EventData.renderBegin = clock();
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

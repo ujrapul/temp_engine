@@ -61,7 +61,12 @@ namespace Temp::Render::OpenGLWrapper
   inline std::vector<std::filesystem::file_time_type>& GlobalShaderFilesTimes()
   {
     static std::vector<std::filesystem::file_time_type> out;
-    out.resize(GlobalShaderFiles().size());
+    static bool first = true;
+    if (first)
+    {
+      out.resize(GlobalShaderFiles().size());
+      first = false;
+    }
     return out;
   }
 
